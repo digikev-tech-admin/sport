@@ -17,7 +17,6 @@ import EventCard from "@/components/ModuleCard";
 import { deleteEvent, getAllEvents } from "@/api/event";
 import toast from "react-hot-toast";
 
-
 export interface Event {
   id: string;
   title: string;
@@ -26,9 +25,8 @@ export interface Event {
   location: string;
   interested: number;
   sport: string;
-  ageGroup: string;   
+  ageGroup: string;
 }
-
 
 const Page = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -37,70 +35,44 @@ const Page = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("date");
 
-
   const handleDelete = async (id: string) => {
-
     try {
       await deleteEvent(id);
       setEvents(events.filter((event) => event.id !== id));
       toast.success("Event deleted successfully");
     } catch (error) {
       console.error("Error deleting event:", error);
-      toast.error(error as string || "Error deleting event");
+      toast.error((error as string) || "Error deleting event");
     }
   };
-    const route = useRouter()
-  
-
+  const route = useRouter();
 
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       try {
         const eventsData = await getAllEvents();
-        console.log({eventsData});
+        console.log({ eventsData });
         const formattedEvents = eventsData?.map((event: any) => ({
           id: event?._id,
           title: event?.title,
           imageUrl: event?.image,
           date: event?.eventDate,
-          location: event?.locationId?.address + ", " + event?.locationId?.city + ", " + event?.locationId?.state,
+          location:
+            event?.locationId?.address +
+            ", " +
+            event?.locationId?.city +
+            ", " +
+            event?.locationId?.state,
           sport: event?.sport,
           ageGroup: event?.ageGroup,
           interested: event?.enrolledCount,
         }));
         setEvents(formattedEvents);
-      //   {
-      //     "_id": "684be9f9d81880b8ba4224b7",
-      //     "title": "Junior Squash Championship",
-      //     "eventDate": "2024-04-01T10:00:00.000Z",
-      //     "image": "http://res.cloudinary.com/dckknfjy4/image/upload/v1749486932/pq8gadkjxdysaha6dmnd.jpg",
-      //     "locationId": {
-      //         "_id": "684708f96123077781b7747b",
-      //         "address": "654 Energy Lane",
-      //         "city": "Miami",
-      //         "state": "FL",
-      //         "id": "684708f96123077781b7747b"
-      //     },
-      //     "description": "Annual squash tournament for intermediate players",
-      //     "duration": 120,
-      //     "sport": "squash",
-      //     "ageGroup": "kids",
-      //     "level": "beginner",
-      //     "ticketCost": 50,
-      //     "capacity": 20,
-      //     "enrolledCount": 0,
-      //     "createdAt": "2025-06-13T09:06:01.493Z",
-      //     "updatedAt": "2025-06-13T09:06:01.493Z",
-      //     "__v": 0,
-      //     "id": "684be9f9d81880b8ba4224b7"
-      // }
-        // setEvents(formattedEvents);
       } catch (error) {
-        console.error("err",error)
-        
-      }finally{
-        setLoading(false)
+        console.error("err", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEvents();
@@ -110,16 +82,14 @@ const Page = () => {
     // console.log("Add Module button clicked!");
     // Add your logic here (e.g., open a modal or navigate to a form)
     route.push(`/events/addEvent`);
-
   };
-
 
   const filteredEvents = useMemo(() => {
     return events
       .filter(
         (event) =>
           (event.title.toLowerCase().includes(search.toLowerCase()) ||
-           event.sport.toLowerCase().includes(search.toLowerCase())) &&
+            event.sport.toLowerCase().includes(search.toLowerCase())) &&
           (selectedCategory === "all" || event.ageGroup === selectedCategory)
       )
       .sort((a, b) => {
@@ -137,16 +107,16 @@ const Page = () => {
 
   const sortOptions = [
     { value: "date", label: "Date" },
-    { value: "interested", label: "Interested" }
+    { value: "interested", label: "Interested" },
   ];
 
-  if(loading){
-    return <div>Loading...</div>
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <>
-      <section className="h-auto   p-7">
+      <section className="h-auto   p-2 sm:p-4 xl:p-8">
         <div className="">
           <div>
             <Breadcrumb>
@@ -162,14 +132,13 @@ const Page = () => {
             </Breadcrumb>
           </div>
 
-
-           <SectionHeader
-          title="Events"
-          buttonText="Add Event"
-          onButtonClick={handleAddEvent} 
-          icon={<Plus />}
-          className="mb-4" 
-        />
+          <SectionHeader
+            title="Events"
+            buttonText="Add Event"
+            onButtonClick={handleAddEvent}
+            icon={<Plus />}
+            className="mb-4"
+          />
 
           <div className=" h-12 mt-4">
             <div className="min-w-xl mx-auto">
@@ -188,27 +157,26 @@ const Page = () => {
               </div>
               <div>
                 <h3 className="text-[#742193] font-semibold  "> All Events</h3>
-             {filteredEvents.length === 0 ? (
-              <>
-              <div className="flex justify-center items-center gap-2">
-              <Frown className="darkText"/>
-              <p className="text-gray-500 text-center">
-                 No events match your search criteria.
-              </p>
-              </div>
-              </>
-             
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2  gap-5 mb-5">
-                  {/* lg:grid-cols-3 */}
-                  {filteredEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      module={event}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </div>
+                {filteredEvents.length === 0 ? (
+                  <>
+                    <div className="flex justify-center items-center gap-2">
+                      <Frown className="darkText" />
+                      <p className="text-gray-500 text-center">
+                        No events match your search criteria.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2  gap-5 mb-5">
+                    {/* lg:grid-cols-3 */}
+                    {filteredEvents.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        module={event}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

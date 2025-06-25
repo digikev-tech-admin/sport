@@ -70,7 +70,7 @@ const UpdateCouponForm = ({ initialData }: UpdateCouponFormProps) => {
     dispatch(modifyCoupon({ id: _id!, data: dataWithoutId }))
       .unwrap()
       .then(() => {
-        toast.success("Coupon updated successfully!");
+        // toast.success("Coupon updated successfully!");
         router.back();
       })
       .catch((error) => {

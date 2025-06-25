@@ -103,7 +103,7 @@ const CouponForm = () => {
     dispatch(registerCoupon(formData))
       .unwrap()
       .then(() => {
-        toast.success("Coupon added successfully!");
+        // toast.success("Coupon added successfully!");
         handleCancel();
       })
       .catch((err) => {

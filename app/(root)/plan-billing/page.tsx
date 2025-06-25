@@ -84,7 +84,7 @@ const PlanBillingPage = () => {
   };
 
   return (
-    <section className="bg-[#f9f9f9] h-50 p-7">
+    <section className="bg-[#f9f9f9] h-50 p-2 sm:p-4 xl:p-8">
       <div>
         <Breadcrumb>
           <BreadcrumbList>
@@ -158,8 +158,8 @@ const PlanBillingPage = () => {
 
       {activeTab === "coupons" && (
         <div className="min-w-xl mx-auto ">
-          <h2 className="darkText font-semibold -mb-1">All Coupons</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2  gap-4">
+          <h2 className="darkText font-semibold mb-5">All Coupons</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2  gap-4">
           {coupons?.length > 0 ? (
             coupons.map((coupon) => (
               <CouponCard

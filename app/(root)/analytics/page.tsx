@@ -3,7 +3,7 @@
 import { Users, ClockArrowUp, Landmark } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { MetricCardProps } from "@/types/types"; 
+import { MetricCardProps } from "@/types/types";
 import UserPieChart from "@/components/dashboard/UserPieChart";
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import SubscribersChart from "@/components/dashboard/SubscribersChart";
@@ -56,7 +56,7 @@ const MotionCard = motion(Card);
 
 export default function Page() {
   return (
-    <div className="hidden lg:block min-h-screen bg-gray-50 p-8">
+    <div className="hidden sm:block min-h-screen bg-gray-50 p-2 sm:p-4 xl:p-8">
       <div>
         <Breadcrumb>
           <BreadcrumbList>
@@ -64,7 +64,7 @@ export default function Page() {
               <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            
+
             <BreadcrumbItem>
               <BreadcrumbPage>Analytics</BreadcrumbPage>
             </BreadcrumbItem>
@@ -83,7 +83,7 @@ export default function Page() {
 
       {/* Metrics Cards */}
       <motion.div
-        className="grid grid-cols-3 gap-10 mb-6"
+        className="grid grid-cols-3 gap-3 xl:gap-10 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -111,7 +111,7 @@ export default function Page() {
 
       {/* Middle Section */}
       <motion.div
-        className="grid grid-cols-2 gap-6 mb-6"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -133,14 +133,13 @@ export default function Page() {
 
       {/* Bottom Section */}
       <motion.div
-        className="grid grid-cols-2 gap-6 mb-6"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         <MotionCard className="p-6 " variants={cardVariants} whileHover="hover">
-         
-          <TopCountriesChart/>
+          <TopCountriesChart />
           <motion.div
             className="relative w-48 h-4 mx-auto"
             initial={{ rotate: -90 }}
@@ -150,8 +149,7 @@ export default function Page() {
         </MotionCard>
 
         <MotionCard className=" p-4" variants={cardVariants} whileHover="hover">
-         
-          <SubscribersChart/>
+          <SubscribersChart />
         </MotionCard>
       </motion.div>
     </div>

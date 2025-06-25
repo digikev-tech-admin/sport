@@ -39,13 +39,12 @@ const Navbar = () => {
             {/* <Settings /> */}
             {token && (
               <Button
-             
               variant='outline'
               type="button"
-            onClick={logoutHandler}
-            className='flex items-center gap-2 border-none bg-red-500 text-[#742193] hover:bg-red-600 hover:text-[#742193]  '
+              onClick={logoutHandler}
+              className='flex items-center gap-2 border-none bg-[#742193] text-white hover:bg-[#5e176e] hover:text-white'
           >
-            <LogOut size={20} className="text-[#742193]" />
+            <LogOut size={20} className="text-white" />
             <span className="font-sm font-semibold">Logout</span>
           </Button>
             )}

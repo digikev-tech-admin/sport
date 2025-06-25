@@ -1,6 +1,19 @@
 "use client";
 
-import { Heart, BookOpen, Users, Activity, Eye, UserRoundPlus, Calendar, Package, UsersRound, Trophy, MapPin, DollarSign } from "lucide-react";
+import {
+  Heart,
+  BookOpen,
+  Users,
+  Activity,
+  Eye,
+  UserRoundPlus,
+  Calendar,
+  Package,
+  UsersRound,
+  Trophy,
+  MapPin,
+  DollarSign,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
@@ -32,9 +45,6 @@ interface Package {
   price: number;
   clubs: string;
 }
-
-
-
 
 // Dummy data
 const topViewedCategories = [
@@ -100,8 +110,9 @@ const cardVariants = {
 const MotionCard = motion(Card);
 
 export default function Dashboard() {
-
-  const { users: allUsers, status } = useAppSelector((state: RootState) => state.user);
+  const { users: allUsers, status } = useAppSelector(
+    (state: RootState) => state.user
+  );
   const dispatch = useAppDispatch();
   const totalUsers = allUsers?.length || 0;
   const [events, setEvents] = useState<Event[]>([]);
@@ -115,7 +126,6 @@ export default function Dashboard() {
     }
   }, [dispatch, allUsers, status]);
 
-
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -124,15 +134,23 @@ export default function Dashboard() {
           .map((event: any) => ({
             id: event._id,
             title: event.title,
-            location: event.locationId.address + ", " + event.locationId.city + ", " + event.locationId.state,
+            location:
+              event.locationId.address +
+              ", " +
+              event.locationId.city +
+              ", " +
+              event.locationId.state,
             sport: event.sport,
             interested: event.enrolledCount,
           }))
-          .sort((a: { interested: number }, b: { interested: number }) => b.interested - a.interested) // Sort by enrolledCount in descending order
+          .sort(
+            (a: { interested: number }, b: { interested: number }) =>
+              b.interested - a.interested
+          ) // Sort by enrolledCount in descending order
           .slice(0, 5); // Take only top 5 events
         setEvents(formattedEvents);
       } catch (error) {
-        console.error("err",error)
+        console.error("err", error);
       }
     };
     fetchEvents();
@@ -146,7 +164,7 @@ export default function Dashboard() {
         setTotalPackages(totalPackages);
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Set to start of today
-        
+
         const formattedPackages = response
           .map((item: any) => ({
             id: item._id,
@@ -154,10 +172,15 @@ export default function Dashboard() {
             startDate: item.sessionDates?.[0],
             duration: item.duration,
             price: item.price?.base,
-            clubs: item.locationId.address + ", " + item.locationId.city, 
+            clubs: item.locationId.address + ", " + item.locationId.city,
           }))
-          .filter((pkg: { startDate: string }) => new Date(pkg.startDate) >= today) // Filter out past dates
-          .sort((a: { startDate: string }, b: { startDate: string }) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) // Sort by startDate ascending (today to future)
+          .filter(
+            (pkg: { startDate: string }) => new Date(pkg.startDate) >= today
+          ) // Filter out past dates
+          .sort(
+            (a: { startDate: string }, b: { startDate: string }) =>
+              new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          ) // Sort by startDate ascending (today to future)
           .slice(0, 5); // Take only top 5 packages
         setPackages(formattedPackages);
       } catch (error) {
@@ -166,8 +189,6 @@ export default function Dashboard() {
     };
     fetchPackages();
   }, []);
-
-
 
   useEffect(() => {
     const fetchCoaches = async () => {
@@ -179,12 +200,17 @@ export default function Dashboard() {
             name: coach.name,
             imageUrl: coach.image,
             sports: coach.sports,
-            clubs: coach.locationIds?.map((location: any) => location?.address+ " , " + location?.city ),
+            clubs: coach.locationIds?.map(
+              (location: any) => location?.address + " , " + location?.city
+            ),
             rating: 3,
             // averageRating: coach.averageRating,
             reviews: 20,
           }))
-          .sort((a: { rating: number }, b: { rating: number }) => b.rating - a.rating) // Sort by rating in descending order
+          .sort(
+            (a: { rating: number }, b: { rating: number }) =>
+              b.rating - a.rating
+          ) // Sort by rating in descending order
           .slice(0, 5); // Take only top 3 coaches
         // console.log(formattedCoaches);
         setCoaches(formattedCoaches);
@@ -195,16 +221,8 @@ export default function Dashboard() {
     fetchCoaches();
   }, []);
 
-
-
-
-
-
-
-
-
   return (
-    <div className="hidden lg:block min-h-screen bg-gray-50 p-8">
+    <div className="hidden sm:block min-h-screen bg-gray-50 p-2 sm:p-4 xl:p-8">
       <motion.h1
         className="text-2xl font-bold mb-6"
         initial={{ opacity: 0, x: -20 }}
@@ -216,7 +234,7 @@ export default function Dashboard() {
 
       {/* Metrics Cards */}
       <motion.div
-        className="grid grid-cols-4 gap-4 mb-6"
+        className="grid  grid-cols-2 xl:grid-cols-4 gap-4 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -249,7 +267,7 @@ export default function Dashboard() {
 
       {/* Middle Section */}
       <motion.div
-        className="grid grid-cols-2 gap-6 mb-6"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -257,7 +275,9 @@ export default function Dashboard() {
         <MotionCard className="p-6" variants={cardVariants} whileHover="hover">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-bold text-xl">Top Interested Events</h2>
-            <Link href="/events" className="text-sm text-[#742193]">See all</Link>
+            <Link href="/events" className="text-sm text-[#742193]">
+              See all
+            </Link>
           </div>
           <motion.div className="space-y-4">
             {events.map((event, index) => (
@@ -273,12 +293,25 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between">
-                  <h3 className="font-medium">{event.title}</h3>
-                  <span className="flex items-center gap-1 font-semibold"> <span className="text-[#742193]"><Trophy className="w-4 h-4" /></span>{event.sport}</span>
+                    <h3 className="font-medium">{event.title}</h3>
+                    <span className="flex items-center gap-1 font-semibold">
+                      {" "}
+                      <span className="text-[#742193]">
+                        <Trophy className="w-4 h-4" />
+                      </span>
+                      {event.sport}
+                    </span>
                   </div>
                   <div className="flex space-x-4  mt-2 text-sm text-gray-500">
-                    <span className="flex items-center gap-1"> <MapPin className="w-4 h-4" /> {event.location}</span>
-                    <span className="flex items-center gap-1"> <Heart className="w-4 h-4 text-red-500" /> {event.interested} Interested</span>
+                    <span className="flex items-center gap-1">
+                      {" "}
+                      <MapPin className="w-4 h-4" /> {event.location}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      {" "}
+                      <Heart className="w-4 h-4 text-red-500" />{" "}
+                      {event.interested} Interested
+                    </span>
                   </div>
                 </div>
               </motion.div>
@@ -289,7 +322,9 @@ export default function Dashboard() {
         <MotionCard className="p-6" variants={cardVariants} whileHover="hover">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-bold  text-xl">Top New Packages</h2>
-            <Link href="/packages" className="text-sm text-[#742193]">See all</Link>
+            <Link href="/packages" className="text-sm text-[#742193]">
+              See all
+            </Link>
           </div>
           <div className="space-y-4">
             {packages.map((pack, index) => (
@@ -303,12 +338,17 @@ export default function Dashboard() {
 
                     <div className="flex items-center">
                       <DollarSign className="h-4 w-4 text-green-500 fill-current" />
-                      <span className="ml-1 text-sm font-semibold">{pack.price}</span>
+                      <span className="ml-1 text-sm font-semibold">
+                        {pack.price}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500  mt-2">
-                     <span className="font-bold">Start Date:</span> {formatDateTime(pack.startDate)} • <span className="font-bold">Duration:</span> {pack.duration} months
+                      <span className="font-bold">Start Date:</span>{" "}
+                      {formatDateTime(pack.startDate)} •{" "}
+                      <span className="font-bold">Duration:</span>{" "}
+                      {pack.duration} months
                     </span>
                   </div>
                 </div>
@@ -320,7 +360,7 @@ export default function Dashboard() {
 
       {/* Bottom Section */}
       <motion.div
-        className="grid grid-cols-2 gap-6 mb-6"
+        className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -345,27 +385,26 @@ export default function Dashboard() {
                 </div> 
         </MotionCard>{" "} */}
 
-
         <MotionCard className="p-6" variants={cardVariants} whileHover="hover">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-xl">Coach Performance</h2> 
-            <h2 className="font-bold text-xl">Total Coaches : {coaches.length}</h2>
+            <h2 className="font-bold text-xl">Coach Performance</h2>
+            <h2 className="font-bold text-xl">
+              Total Coaches : {coaches.length}
+            </h2>
           </div>
           <motion.div className="flex justify-center items-center -mt-7 ">
-          {/* <div className="flex justify-center items-center  bg-gray-100"> */}
-      <AdminPieChart  />
-    {/* </div> */}
+            {/* <div className="flex justify-center items-center  bg-gray-100"> */}
+            <AdminPieChart />
+            {/* </div> */}
           </motion.div>
         </MotionCard>
-
-      
-
-
 
         <MotionCard className="p-6" variants={cardVariants} whileHover="hover">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-bold text-lg">Top Rated Coaches</h2>
-            <Link href="/coaches" className="text-sm text-[#742193]">See all</Link>
+            <Link href="/coaches" className="text-sm text-[#742193]">
+              See all
+            </Link>
           </div>
           <div className="space-y-4">
             {coaches.map((coach, index) => (
@@ -380,7 +419,7 @@ export default function Dashboard() {
                   {index + 1}
                 </div>
                 <Image
-                  src={coach.imageUrl || "/images/Heart.png"} 
+                  src={coach.imageUrl || "/images/Heart.png"}
                   alt={coach.name}
                   width={48}
                   height={48}
@@ -388,14 +427,15 @@ export default function Dashboard() {
                 />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{coach.name}</h3>  
+                    <h3 className="font-medium">{coach.name}</h3>
                     <div className="flex items-center">
                       <Star className="h-4 w-4 text-yellow-400 fill-current" />
                       <span className="ml-1 text-sm">{coach.rating}</span>
                     </div>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      <span className="font-bold">Clubs:</span> {coach.clubs} • <span className="font-bold">Reviews:</span> {coach.reviews}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    <span className="font-bold">Clubs:</span> {coach.clubs} •{" "}
+                    <span className="font-bold">Reviews:</span> {coach.reviews}
                   </div>
                 </div>
               </motion.div>

@@ -107,7 +107,7 @@ const Page = () => {
 
   return (
     <>
-      <section className="h-auto   p-7">
+      <section className="h-auto   p-2 sm:p-4 xl:p-8">
         <div className="">
           <div>
             <Breadcrumb>
@@ -160,7 +160,7 @@ const Page = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2  gap-5 mb-5">
+                  <div className="grid grid-cols-1 lg:grid-cols-2  gap-5 mb-5">
                     {/* lg:grid-cols-3 */}
                     {filteredLocations.map((location) => (
                       <LocationCard
