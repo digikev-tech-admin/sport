@@ -122,6 +122,7 @@ const PackageForm = ({ id }: { id?: string }) => {
     setSessionDates(["", ""]);
     setWeeklySchedule({});
     setTotalSeats("");
+    router.back();
   };
 
   return (

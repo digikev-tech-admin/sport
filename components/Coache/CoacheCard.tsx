@@ -61,7 +61,10 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow border border-gray-200 p-4 flex flex-col sm:flex-row gap-4 items-center sm:items-start max-w-xl w-full">
+
+    <div className="bg-white rounded-2xl shadow border border-gray-200 p-4 gap-4  max-w-xl w-full">
+      
+      <div className="flex flex-col w-full sm:flex-row  gap-4 items-center sm:items-start">
       <div className="w-full sm:w-[120px] h-[120px] rounded-xl overflow-hidden flex-shrink-0">
         <Image
           src={coach.imageUrl ? coach.imageUrl : "/images/Coache.png"}
@@ -111,7 +114,7 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between gap-2 mt-4 border-t pt-2 border-gray-100">
+        {/* <div className="flex items-center justify-between gap-2 mt-4 border-t pt-2 border-gray-100">
           <div className="flex items-center gap-1">
             {renderStars(coach.rating)}
             <span className="ml-1 text-gray-500 font-semibold text-base">
@@ -121,7 +124,21 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
           <span className="ml-4 text-gray-400 text-base">
             {coach.reviews.toLocaleString()} Reviews
           </span>
-        </div>
+        </div> */}
+      </div>
+      </div>
+      <div className="mt-2 flex items-center gap-2 flex-wrap">
+        <span className="text-[#742193] font-bold text-sm flex items-center">
+          <span className="mr-1">⚡</span> Specializations:
+        </span>
+        {coach.specializations.map((specialization) => (
+          <div
+            key={specialization}
+            className="bg-orange-100 rounded-full px-3 py-1 max-w-[140px] overflow-hidden whitespace-nowrap"
+          >
+            <span className="text-gray-800 text-sm font-medium">{specialization}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

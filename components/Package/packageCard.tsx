@@ -16,7 +16,7 @@ interface PackageCardProps {
 
 
 const PackageCard = ({ item, onDelete }: PackageCardProps) => {
-  console.log(item);
+  // console.log(item);
     const router = useRouter();
 
     const handleDelete = () => {
@@ -47,7 +47,7 @@ const PackageCard = ({ item, onDelete }: PackageCardProps) => {
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-[#742193]" />
           <a
-            href="#"
+            href={`/location/${item.locationId}/view`}
             className="underline text-gray-700 hover:text-blue-600"
           >
             {item.clubs}

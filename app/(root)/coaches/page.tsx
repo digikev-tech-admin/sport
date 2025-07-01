@@ -53,6 +53,7 @@ const Page = () => {
             imageUrl: coach.image,
             sports: coach.sports,
             clubs: coach.locationIds?.map((location: any) => location?.address+ " , " + location?.city + " , " + location?.state),
+            specializations: coach.stats?.specializations || [],
             rating: 3,
             // averageRating: coach.averageRating,
             reviews: 20,

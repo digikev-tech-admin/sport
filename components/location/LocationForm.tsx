@@ -9,10 +9,12 @@ import Image from "next/image";
 import { createLocation, getLocationById, updateLocation } from "@/api/location";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Input } from "../ui/input";
 
 const locationSchema = z.object({
   address: z.string().min(1, "Please add an address"),
   image: z.string().min(1, "Please add an image"),
+  facilities: z.array(z.string()).min(1, "Please add at least one facility"),
   about: z.string().min(1, "Please add an about"),
   city: z.string().min(1, "Please add a city"),
   state: z.string().min(1, "Please add a state"),
@@ -27,6 +29,23 @@ interface FormData {
 
 const LocationForm = ({ id }: { id?: string }) => {
   const router = useRouter();
+
+  const [facilities, setFacilities] = useState<string[]>([
+    "Wi-Fi",
+    "Payment Counter", 
+    "Membership Desk",
+    "Gym",
+    "Parking Area",
+    "Restrooms",
+    "Cafeteria",
+    "Changing Rooms",
+    "Locker Rooms",
+    "Auditorium",
+    "Meeting Rooms",
+    "Childcare Room"
+  ]);
+  const [newFacility, setNewFacility] = useState("");
+
   const [formData, setFormData] = useState<FormData>({ photo: "" });
   const {
     register,
@@ -38,6 +57,28 @@ const LocationForm = ({ id }: { id?: string }) => {
     resolver: zodResolver(locationSchema),
   });
 
+
+
+  const handleAddFacility = () => {
+    if (newFacility.trim() && !facilities.includes(newFacility.trim())) {
+      const updatedFacilities = [...facilities, newFacility.trim()];
+      setFacilities(updatedFacilities);
+      setValue("facilities", updatedFacilities); // Update form value
+      setNewFacility("");
+    }
+  };
+
+
+  const handleDeleteFacility = (index: number) => {
+    const updatedFacilities = facilities.filter((_, i) => i !== index);
+    setFacilities(updatedFacilities);
+    setValue("facilities", updatedFacilities); // Update form value
+  };
+
+  useEffect(() => {
+    // Initialize form with default facilities
+    setValue("facilities", facilities);
+  }, []);
 
   useEffect(() => {
     // console.log(id);
@@ -52,6 +93,12 @@ const LocationForm = ({ id }: { id?: string }) => {
         setValue("zipCode", location.zipCode);
         setValue("about", location.about);
         setValue("image", location.image);
+        
+        // Set facilities if they exist
+        if (location.facilities && location.facilities.length > 0) {
+          setFacilities(location.facilities);
+          setValue("facilities", location.facilities);
+        }
       } catch (error) {
         console.error("Error fetching location:", error);
       }
@@ -63,7 +110,8 @@ const LocationForm = ({ id }: { id?: string }) => {
     try {
       const submitData = {
         ...data,
-        image: formData.photo
+        image: formData.photo,
+        facilities: facilities
       };
 
       if (id) {
@@ -96,6 +144,7 @@ const LocationForm = ({ id }: { id?: string }) => {
             type="text"
             {...register("address")}
             className="w-full p-2 border rounded"
+            placeholder="Enter your address"
           />
           {errors.address && (
             <p className="text-red-500 text-sm">{errors.address.message}</p>
@@ -111,6 +160,7 @@ const LocationForm = ({ id }: { id?: string }) => {
             type="text"
             {...register("city")}
             className="w-full p-2 border rounded"
+            placeholder="Enter your city"
           />
           {errors.city && (
             <p className="text-red-500 text-sm">{errors.city.message}</p>
@@ -119,13 +169,14 @@ const LocationForm = ({ id }: { id?: string }) => {
 
         <div>
           <label htmlFor="state" className="block mb-1">
-            State
+            Country
           </label>
           <input
             id="state"
             type="text"
             {...register("state")}
             className="w-full p-2 border rounded"
+            placeholder="Enter your country"
           />
           {errors.state && (
             <p className="text-red-500 text-sm">{errors.state.message}</p>
@@ -134,14 +185,15 @@ const LocationForm = ({ id }: { id?: string }) => {
 
         <div>
           <label htmlFor="zipCode" className="block mb-1">
-            Zip Code
+            Post Code
           </label>
           <input
             id="zipCode"
             type="text"
             {...register("zipCode")}
             className="w-full p-2 border rounded"
-          />
+            placeholder="Enter your post code"
+            />
           {errors.zipCode && (
             <p className="text-red-500 text-sm">{errors.zipCode.message}</p>
           )}
@@ -205,6 +257,54 @@ const LocationForm = ({ id }: { id?: string }) => {
             <p className="text-red-500 text-sm">{errors.image.message}</p>
           )}
         </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2 ">
+            <label className="text-sm font-bold text-gray-700">Facilities</label>
+            <div className="flex flex-wrap gap-2 mb-2 mt-2">
+              {facilities.map((spec, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
+                >
+                  <span>{spec}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteFacility(index)}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={newFacility}
+                onChange={(e) => setNewFacility(e.target.value)}
+                placeholder="Add facility like Wi-Fi, Payment Counter, parking area etc."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddFacility();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                onClick={handleAddFacility} 
+                className="commonDarkBG text-white hover:bg-[#581770]"
+              >
+                Add
+              </Button>
+            </div>
+            {errors.facilities && (
+              <p className="text-red-500 text-sm">{errors.facilities.message}</p>
+            )}
+          </div>
+        </div>
+
+
 
         <div>
           <label htmlFor="about" className="block mb-1">
@@ -215,7 +315,11 @@ const LocationForm = ({ id }: { id?: string }) => {
             {...register("about")}
             className="w-full p-2 border rounded"
             rows={4}
+            placeholder="Enter your description of your location..." 
           />
+          <p className="text-sm text-gray-500 mt-1">
+            You can include web links in your description. They will be automatically detected and made clickable.
+          </p>
           {errors.about && (
             <p className="text-red-500 text-sm">{errors.about.message}</p>
           )}
@@ -243,6 +347,7 @@ const LocationForm = ({ id }: { id?: string }) => {
             onClick={() => {
               setFormData({ photo: "" });
               reset();
+              router.push('/location');
             }}
           >
             Cancel

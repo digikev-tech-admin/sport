@@ -28,7 +28,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Edit Coach</BreadcrumbPage>
+              <BreadcrumbPage>Edit Location</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

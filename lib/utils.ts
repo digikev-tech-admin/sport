@@ -1,6 +1,7 @@
 import { User } from "@/types/types";
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import React from "react"
 import { format } from "date-fns";
 
 
@@ -64,3 +65,26 @@ const formatDate = (dateString: string) => {
     return dateString;
   }
 };
+
+// Function to make web links clickable in text
+export function makeLinksClickable(text: string): React.ReactNode {
+  if (!text) return text;
+  
+  // Regular expression to match URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (urlRegex.test(part)) {
+      return React.createElement('a', {
+        key: index,
+        href: part,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        className: 'text-blue-600 hover:text-blue-800 underline break-all'
+      }, part);
+    }
+    return part;
+  });
+}

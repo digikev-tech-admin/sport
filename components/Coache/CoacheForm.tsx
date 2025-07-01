@@ -13,12 +13,12 @@ import { createCoach, getCoachById, updateCoach } from "@/api/coach";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-const clubOptions = [
-  { id: 1, name: "Elite Ortho Club" },
-  { id: 2, name: "Sunrise Fitness Club" },
-  { id: 3, name: "Downtown Tennis Center" },
-  { id: 4, name: "Ace Sports Club" },
-];
+// const clubOptions = [
+//   { id: 1, name: "Elite Ortho Club" },
+//   { id: 2, name: "Sunrise Fitness Club" },
+//   { id: 3, name: "Downtown Tennis Center" },
+//   { id: 4, name: "Ace Sports Club" },
+// ];
 
 const sportsOptions = [
   "Racket Ball",
@@ -53,6 +53,8 @@ const CoacheForm = ({ id }: { id?: string }) => {
   const [locationData, setLocationData] = useState<LocationOption[]>([]);
   const [specializations, setSpecializations] = useState<string[]>([]);
   const [newSpecialization, setNewSpecialization] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [emergencyContact, setEmergencyContact] = useState("");
 
   
 
@@ -108,7 +110,9 @@ const CoacheForm = ({ id }: { id?: string }) => {
           name: location.address + ", " + location.city + ", " + location.state,
         }));
         setName(response.name);
-        setProfileImage(response.image);
+        setPhoneNumber(response.phoneNumber || "");
+        setEmergencyContact(response.emergencyContact || "");
+        setProfileImage(response.image || null);
         setBio(response.aboutMe);
         setClubs(formattedLocations);
         setSports(response.sports);
@@ -127,16 +131,18 @@ const CoacheForm = ({ id }: { id?: string }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(name === "" || profileImage === null || bio === "" || clubs.length === 0 || sports.length === 0 || experience === "") {
-      toast.error(`Please fill all the ${name === "" ? "name" : profileImage === null ? "profile image" : bio === "" ? "bio" : clubs.length === 0 ? "clubs" : sports.length === 0 ? "sports" : "experience"} fields`);
+    if(name === "" || bio === "" || clubs.length === 0 || sports.length === 0 || experience === "" || phoneNumber === "" || emergencyContact === "") {
+      toast.error(`Please fill all the ${name === "" ? "name" : bio === "" ? "bio" : clubs.length === 0 ? "clubs" : sports.length === 0 ? "sports" : experience === "" ? "experience" : phoneNumber === "" ? "phone number" : "emergency contact"} fields`);
       return;
     }
     const coachData = {
       name,
+      phoneNumber,
+      emergencyContact,
       locationIds: clubs.map(club => club.id),
       sports,
       aboutMe: bio,
-      image: profileImage,
+      image: profileImage || "https://github.com/shadcn.png",
       stats: {
         yearsOfExperience: parseInt(experience) || 0,
         certifications: certificates.map(cert => ({
@@ -158,17 +164,19 @@ const CoacheForm = ({ id }: { id?: string }) => {
         console.log("Coach created:", response);
         toast.success("Coach created successfully");
         router.push("/coaches");
-        setName("");
-        setProfileImage(null);
-        setBio("");
-        setClubs([]);
-        setSports([]);
-        setExperience("");
-        setCertificationText("");
-        setCertificationFile(null);
-        setCertificateName("");
-        setCertificateImage(null);
-        setCertificates([]);
+              setName("");
+              setPhoneNumber("");
+              setEmergencyContact("");
+              setProfileImage(null);
+              setBio("");
+              setClubs([]);
+              setSports([]);
+              setExperience("");
+              setCertificationText("");
+              setCertificationFile(null);
+              setCertificateName("");
+              setCertificateImage(null);
+              setCertificates([]);
         setSpecializations([]);
         setNewSpecialization("");
       }
@@ -211,11 +219,14 @@ const CoacheForm = ({ id }: { id?: string }) => {
                     isImgPreview={false}
                   />
                   <Button
+                    type="button"
                     variant="secondary"
                     size="icon"
                     className="border border-[#c858ba] bg-[#7421931A] text-sm text-[#742193] p-1 rounded-lg"
-                    onClick={() => {
-                      setProfileImage(null);
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setProfileImage(null); 
                     }}
                   >
                     <Trash2 />
@@ -231,6 +242,26 @@ const CoacheForm = ({ id }: { id?: string }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter coach name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700">Phone Number</label>
+              <Input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter phone number"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700">Emergency Contact</label>
+              <Input
+                type="tel"
+                value={emergencyContact}
+                onChange={(e) => setEmergencyContact(e.target.value)}
+                placeholder="Enter emergency contact number"
                 required
               />
             </div>
@@ -383,7 +414,13 @@ const CoacheForm = ({ id }: { id?: string }) => {
                   value={certificateName}
                   onChange={(e) => setCertificateName(e.target.value)}
                   placeholder="Certificate name"
+                  maxLength={30}
                 />
+                {certificateName.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {certificateName.length}/30 characters
+                  </p>
+                )}
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <ReCloudinary
@@ -440,6 +477,7 @@ const CoacheForm = ({ id }: { id?: string }) => {
                   // setInstagram("");
                   // setEmail("");
                   // setPhone("");
+                  router.back();
               }}
           >
             Cancel

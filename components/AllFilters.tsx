@@ -50,13 +50,14 @@ const Filters: React.FC<FiltersProps> = ({
         <Select
           value={selectedCategory}
           onValueChange={setSelectedCategory}
+          
         >
           <SelectTrigger className="border-[#742193] focus:outline-none focus:ring-0">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
             {categories.map((category) => (
-              <SelectItem key={category} value={category}>
+              <SelectItem key={category} value={category} onClick={(e) => e.stopPropagation()}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </SelectItem>
             ))}
@@ -75,7 +76,7 @@ const Filters: React.FC<FiltersProps> = ({
           </SelectTrigger>
           <SelectContent>
             {sortOptions.map(({ value, label }) => (
-              <SelectItem key={value} value={value}>
+              <SelectItem key={value} value={value} onClick={(e) => e.stopPropagation()}>
                 {label}
               </SelectItem>
             ))}

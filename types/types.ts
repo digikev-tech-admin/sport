@@ -16,6 +16,7 @@ export interface Event {
     imageUrl: string;
     clubs: string[]; // List of club or gym names
     sports: string[];
+    specializations: string[]; // List of specializations
     rating: number;   // e.g., 4.5
     reviews: number;  // e.g., 1872
     isFavorite: boolean; // true if the coach is marked as favorite
@@ -32,6 +33,7 @@ export interface Event {
     seats: number;
     enrolled: number;
     duration: number;
+    locationId?: string;
   }
   
   // export interface Package {

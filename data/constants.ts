@@ -57,86 +57,86 @@ export const events: Event[] = [
     }
   ];
 
-export const coaches: Coach[] = [
-  {
-    id: '1',
-    name: 'David Patel',
-    imageUrl: 'images/Coache.png',
-    clubs: [
-      'Elite Ortho Club',
-      'Sunrise Fitness Club'
-    ],
-    sports: ["Racket Ball", "Squash"],
-    rating: 4.5,
-    reviews: 1872,
-    isFavorite: false
-  },
-  {
-    id: '2',
-    name: 'Sophia Lee',
-    imageUrl: 'images/Coache.png',
-    clubs: [
-      'Downtown Tennis Center',
-      'Ace Sports Club'
-    ],
-    sports: ["Tennis", "Badminton"],
-    rating: 4.8,
-    reviews: 2103,
-    isFavorite: true
-  },
-  {
-    id: '3',
-    name: 'Michael Chen',
-    imageUrl: 'images/Coache.png',
-    clubs: [
-      'ProFit Gym',
-      'City Sports Arena'
-    ],
-    sports: ["Basketball", "Volleyball"],
-    rating: 4.2,
-    reviews: 980,
-    isFavorite: false
-  },
-  {
-    id: '4',
-    name: 'Emily Carter',
-    imageUrl: 'images/Coache.png',
-    clubs: [
-      'Wellness Hub',
-      'Greenfield Club'
-    ],
-    sports: ["Yoga", "Pilates"],
-    rating: 4.9,
-    reviews: 3245,
-    isFavorite: true
-  },
-  {
-    id: '5',
-    name: 'Carlos Rivera',
-    imageUrl: 'images/Coache.png',
-    clubs: [
-      'Champion Sports Complex',
-      'Rivera Athletics'
-    ],
-    sports: ["Football", "Baseball"],
-    rating: 4.3,
-    reviews: 1567,
-    isFavorite: false
-  },
-  {
-    id: '6',
-    name: 'Priya Singh',
-    imageUrl: 'images/Coache.png',
-    clubs: [
-      'Sunrise Fitness Club',
-      'Yoga Bliss Center'
-    ],
-    sports: ["Yoga", "Aerobics"],
-    rating: 4.7,
-    reviews: 2011,
-    isFavorite: true
-  }
-];
+// export const coaches: Coach[] = [
+//   {
+//     id: '1',
+//     name: 'David Patel',
+//     imageUrl: 'images/Coache.png',
+//     clubs: [
+//       'Elite Ortho Club',
+//       'Sunrise Fitness Club'
+//     ],
+//     sports: ["Racket Ball", "Squash"],
+//     rating: 4.5,
+//     reviews: 1872,
+//     isFavorite: false
+//   },
+//   {
+//     id: '2',
+//     name: 'Sophia Lee',
+//     imageUrl: 'images/Coache.png',
+//     clubs: [
+//       'Downtown Tennis Center',
+//       'Ace Sports Club'
+//     ],
+//     sports: ["Tennis", "Badminton"],
+//     rating: 4.8,
+//     reviews: 2103,
+//     isFavorite: true
+//   },
+//   {
+//     id: '3',
+//     name: 'Michael Chen',
+//     imageUrl: 'images/Coache.png',
+//     clubs: [
+//       'ProFit Gym',
+//       'City Sports Arena'
+//     ],
+//     sports: ["Basketball", "Volleyball"],
+//     rating: 4.2,
+//     reviews: 980,
+//     isFavorite: false
+//   },
+//   {
+//     id: '4',
+//     name: 'Emily Carter',
+//     imageUrl: 'images/Coache.png',
+//     clubs: [
+//       'Wellness Hub',
+//       'Greenfield Club'
+//     ],
+//     sports: ["Yoga", "Pilates"],
+//     rating: 4.9,
+//     reviews: 3245,
+//     isFavorite: true
+//   },
+//   {
+//     id: '5',
+//     name: 'Carlos Rivera',
+//     imageUrl: 'images/Coache.png',
+//     clubs: [
+//       'Champion Sports Complex',
+//       'Rivera Athletics'
+//     ],
+//     sports: ["Football", "Baseball"],
+//     rating: 4.3,
+//     reviews: 1567,
+//     isFavorite: false
+//   },
+//   {
+//     id: '6',
+//     name: 'Priya Singh',
+//     imageUrl: 'images/Coache.png',
+//     clubs: [
+//       'Sunrise Fitness Club',
+//       'Yoga Bliss Center'
+//     ],
+//     sports: ["Yoga", "Aerobics"],
+//     rating: 4.7,
+//     reviews: 2011,
+//     isFavorite: true
+//   }
+// ];
 
 
 // export const packages: Package[] = [

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from "react";
 import SearchBar from "@/components/SearchBar";
@@ -30,11 +30,19 @@ import toast from "react-hot-toast";
 import { formatUserData } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 5;
-const subscriptionOptions = ["All", "Daily", "Weekly", "Monthly", "Occasionally"];  
+const subscriptionOptions = [
+  "All",
+  "Daily",
+  "Weekly",
+  "Monthly",
+  "Occasionally",
+];
 
 const Page = () => {
-  const dispatch = useAppDispatch()
-  const { users: allUsers, status } = useAppSelector((state: RootState) => state.user);
+  const dispatch = useAppDispatch();
+  const { users: allUsers, status } = useAppSelector(
+    (state: RootState) => state.user
+  );
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("id_asc");
@@ -47,29 +55,37 @@ const Page = () => {
   }, [dispatch, allUsers, status]);
 
   // Filter and sort users
-  const filteredUsers = Array.isArray(allUsers) ? allUsers
-    .filter((user) => {
-      const matchesSearch = user.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const matchesCategory =
-        category === "All" || user.level === category?.toLowerCase();
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "name_asc":
-          return a.name.localeCompare(b.name);
-        case "name_desc":
-          return b.name.localeCompare(a.name);
-        case "date_asc":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case "date_desc":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        default:
-          return 0;
-      }
-    }) : [];
+  const filteredUsers = Array.isArray(allUsers)
+    ? allUsers
+        .filter((user) => {
+          const matchesSearch = user.name
+            .toLowerCase()
+            .includes(search.toLowerCase());
+          const matchesCategory =
+            category === "All" || user.level === category?.toLowerCase();
+          return matchesSearch && matchesCategory;
+        })
+        .sort((a, b) => {
+          switch (sortBy) {
+            case "name_asc":
+              return a.name.localeCompare(b.name);
+            case "name_desc":
+              return b.name.localeCompare(a.name);
+            case "date_asc":
+              return (
+                new Date(a.createdAt).getTime() -
+                new Date(b.createdAt).getTime()
+              );
+            case "date_desc":
+              return (
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+              );
+            default:
+              return 0;
+          }
+        })
+    : [];
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
@@ -80,7 +96,6 @@ const Page = () => {
   );
 
   const handleDelete = async (id: string) => {
-
     try {
       await dispatch(removeUser(id)).unwrap();
     } catch (error) {
@@ -88,12 +103,12 @@ const Page = () => {
         typeof error === "string"
           ? error
           : error instanceof Error
-            ? error.message
-            : "Failed to delete user"
+          ? error.message
+          : "Failed to delete user"
       );
       console.error("Delete Error:", error);
     }
-  }
+  };
 
   return (
     <section className="h-auto   p-7">
@@ -113,75 +128,99 @@ const Page = () => {
         </div>
         <h1 className="h1 mb-4 mt-4">Users</h1>
 
-
         <div className="grid gap-4 md:grid-cols-3 mb-6 ">
           <SearchBar value={search} onChange={setSearch} />
-          <CategoryFilter value={category} onChange={setCategory} subscriptionOptions={subscriptionOptions} />
+          <CategoryFilter
+            value={category}
+            onChange={setCategory}
+            subscriptionOptions={subscriptionOptions}
+          />
           <SortSelect value={sortBy} onChange={setSortBy} />
         </div>
 
         {/* <UserTable users={paginatedUsers} onDelete={handleDelete} /> */}
-        {typeof window !== "undefined" && <UserTable users={paginatedUsers} onDelete={handleDelete} />}
-
+        {typeof window !== "undefined" && (
+          <UserTable users={paginatedUsers} onDelete={handleDelete} />
+        )}
 
         <div className="mt-4">
-
           {typeof window !== "undefined" && (
             <Pagination>
-  <PaginationContent>
-    <PaginationItem>
-      <PaginationPrevious
-        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-        className={currentPage === 1 ? "pointer-events-none opacity-50 " : "cursor-pointer text-[#742193] hover:text-[#57176e] hover:border hover:border-[#7421931A] hover:bg-[#7421931A]"}
-      />
-    </PaginationItem>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50 "
+                        : "cursor-pointer text-[#742193] hover:text-[#57176e] hover:border hover:border-[#7421931A] hover:bg-[#7421931A]"
+                    }
+                  />
+                </PaginationItem>
 
-    {currentPage > 3 && (
-      <>
-        <PaginationItem>
-          <PaginationLink onClick={() => setCurrentPage(1)} isActive={currentPage === 1} className="cursor-pointer text-[#742193] hover:text-[#57176e]">
-            1
-          </PaginationLink>
-        </PaginationItem>
-        {currentPage > 4 && <PaginationEllipsis />}
-      </>
-    )}
+                {currentPage > 3 && (
+                  <>
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(1)}
+                        isActive={currentPage === 1}
+                        className="cursor-pointer text-[#742193] hover:text-[#57176e]"
+                      >
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+                    {currentPage > 4 && <PaginationEllipsis />}
+                  </>
+                )}
 
-    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-      const pageNumber = Math.max(1, currentPage - 2) + i;
-      return pageNumber <= totalPages ? (
-        <PaginationItem key={pageNumber}>
-          <PaginationLink
-            onClick={() => setCurrentPage(pageNumber)}
-            isActive={currentPage === pageNumber}
-            className={currentPage === pageNumber ? "text-[#742193] border border-[#7421931A] bg-[#7421931A]" : "cursor-pointer text-[#742193] hover:text-[#57176e]"}
-          >
-            {pageNumber}
-          </PaginationLink>
-        </PaginationItem>
-      ) : null;
-    })}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNumber = Math.max(1, currentPage - 2) + i;
+                  return pageNumber <= totalPages ? (
+                    <PaginationItem key={pageNumber}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(pageNumber)}
+                        isActive={currentPage === pageNumber}
+                        className={
+                          currentPage === pageNumber
+                            ? "text-[#742193] border border-[#7421931A] bg-[#7421931A]"
+                            : "cursor-pointer text-[#742193] hover:text-[#57176e]"
+                        }
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ) : null;
+                })}
 
-    {currentPage < totalPages - 2 && (
-      <>
-        {currentPage < totalPages - 3 && <PaginationEllipsis />}
-        <PaginationItem>
-          <PaginationLink onClick={() => setCurrentPage(totalPages)} isActive={currentPage === totalPages} className="cursor-pointer text-[#742193] hover:text-[#57176e]">
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      </>
-    )}
+                {currentPage < totalPages - 2 && (
+                  <>
+                    {currentPage < totalPages - 3 && <PaginationEllipsis />}
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(totalPages)}
+                        isActive={currentPage === totalPages}
+                        className="cursor-pointer text-[#742193] hover:text-[#57176e]"
+                      >
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </>
+                )}
 
-    <PaginationItem>
-      <PaginationNext
-        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer text-[#742193] hover:text-[#57176e] hover:border hover:border-[#7421931A] hover:bg-[#7421931A]"}
-      />
-    </PaginationItem>
-  </PaginationContent>
-</Pagination>
-
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer text-[#742193] hover:text-[#57176e] hover:border hover:border-[#7421931A] hover:bg-[#7421931A]"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           )}
         </div>
       </div>

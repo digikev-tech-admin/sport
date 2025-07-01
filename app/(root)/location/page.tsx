@@ -143,6 +143,7 @@ const Page = () => {
                   setSortBy={setSortBy}
                   categories={categories}
                   sortOptions={sortOptions}
+                  title="City"
                 />
               </div>
               <div>

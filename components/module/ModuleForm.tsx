@@ -345,6 +345,7 @@ const EventForm  = ({id}: {id: string}) => {
               setTicketCost("");
               setDuration("");
               setCapacity("");
+              router.back();
             }}
           >
             Cancel

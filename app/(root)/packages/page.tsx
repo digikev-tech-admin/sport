@@ -36,7 +36,7 @@ const Page = () => {
       setPackages(packages.filter((item) => item.id !== id));
       toast.success("Package deleted successfully");
 
-      console.log("res", res);
+      // console.log("res", res);
     } catch (error) {
       console.log("Error:", error);
       toast.error("Failed to delete package");
@@ -47,25 +47,26 @@ const Page = () => {
     const fetchPackages = async () => {
       try {
         const response = await getAllPackages();
-        console.log("Packages fetched:", response);
-        const formattedPackages = response.map((item: any) => ({
-          id: item._id,
-          sport: item.sport,
-          level: item.level,
-          ageGroup: item.ageGroup,
-          duration: item.duration,
-          startDate: item.sessionDates?.[0],
-          price: item.price?.base,
-          seats: item.seatsCount,
-          enrolled: item.enrolledCount,
+        // console.log("Packages fetched:", response);
+        const formattedPackages = response?.map((item: any) => ({
+          id: item?._id,
+          sport: item?.sport,
+          level: item?.level,
+          ageGroup: item?.ageGroup,
+          duration: item?.duration,
+          startDate: item?.sessionDates?.[0],
+          price: item?.price?.base,
+          seats: item?.seatsCount,
+          enrolled: item?.enrolledCount,
+          locationId: item?.locationId?._id,
           clubs:
-            item.locationId.address +
+            item?.locationId?.address +
             ", " +
-            item.locationId.city +
+            item?.locationId?.city +
             ", " +
-            item.locationId.state,
+            item?.locationId?.state,
         }));
-        console.log("Formatted packages:", formattedPackages);
+        // console.log("Formatted packages:", formattedPackages);
         setPackages(formattedPackages);
       } catch (error) {
         console.error("Error fetching packages:", error);

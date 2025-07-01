@@ -60,8 +60,9 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
             options={{
                 multiple: isMultiple,
                 resourceType: "image",
-                clientAllowedFormats: ["image"],
+                clientAllowedFormats: ["image", "jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "bmp", "tiff", "svg"],
                 maxFiles: isMultiple ? 10 : 1,
+                maxFileSize: 10485760, // 10MB limit
             }}
         >
             {({ open }) => (

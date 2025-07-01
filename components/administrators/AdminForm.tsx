@@ -326,7 +326,10 @@ const AdminForm = () => {
             <Link href="/administrator">
               <button
                 type="button"
-                onClick={() => reset()}
+                onClick={() => {
+                  reset();
+                  router.back();
+                }}
                 className="flex-1 bg-[#FFCA74] hover:bg-[#e7ad4e] text-[#742193] py-2 px-4 rounded-md transition-colors duration-200"
               >
                 Cancel

@@ -13,7 +13,6 @@ import {
   BookOpen,
   Users,
   CreditCard,
-  HelpCircle,
   ShieldPlus,
   MapPin,
 } from "lucide-react";
@@ -25,13 +24,13 @@ import { getAdminData } from "@/config/token";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: PieChart, label: "Analytics", href: "/analytics" },
-  { icon: Blocks, label: "Events", href: "/events" },
-  { icon: MapPin, label: "Location", href: "/location" },
-  { icon: Box, label: "Coaches", href: "/coaches" },
   { icon: BookOpen, label: "Packages", href: "/packages" },
-  { icon: ShieldPlus, label: "Administrator", href: "/administrator" },
+  { icon: Blocks, label: "Events", href: "/events" },
+  { icon: Box, label: "Coaches", href: "/coaches" },
+  { icon: MapPin, label: "Location", href: "/location" },
   { icon: Users, label: "Users", href: "/users" },
+  { icon: PieChart, label: "Analytics", href: "/analytics" },
+  { icon: ShieldPlus, label: "Administrator", href: "/administrator" },
   { icon: CreditCard, label: "Plan & Billing", href: "/plan-billing" },
 ];
 

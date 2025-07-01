@@ -38,7 +38,7 @@ const Cloudinary: React.FC<CloudinaryProps> = ({ id, multiple, onSuccess }) => {
         options={{
           multiple: multiple || false,
           resourceType: "image",
-          clientAllowedFormats: ["image"],
+          clientAllowedFormats: ["image", "jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "bmp", "tiff", "svg"], 
           maxFiles: multiple ? 10 : 1,
         }}
       >
