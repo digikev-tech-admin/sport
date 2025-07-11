@@ -27,7 +27,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchUsers, removeUser } from "@/redux/features/userSlice";
 import { RootState } from "@/redux/store";
 import toast from "react-hot-toast";
-import { formatUserData } from "@/lib/utils";
+// import { formatUserData } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 5;
 const subscriptionOptions = [

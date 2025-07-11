@@ -164,19 +164,19 @@ const CoacheForm = ({ id }: { id?: string }) => {
         console.log("Coach created:", response);
         toast.success("Coach created successfully");
         router.push("/coaches");
-              setName("");
+        setName("");
               setPhoneNumber("");
               setEmergencyContact("");
-              setProfileImage(null);
-              setBio("");
-              setClubs([]);
-              setSports([]);
-              setExperience("");
-              setCertificationText("");
-              setCertificationFile(null);
-              setCertificateName("");
-              setCertificateImage(null);
-              setCertificates([]);
+        setProfileImage(null);
+        setBio("");
+        setClubs([]);
+        setSports([]);
+        setExperience("");
+        setCertificationText("");
+        setCertificationFile(null);
+        setCertificateName("");
+        setCertificateImage(null);
+        setCertificates([]);
         setSpecializations([]);
         setNewSpecialization("");
       }
@@ -226,7 +226,7 @@ const CoacheForm = ({ id }: { id?: string }) => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setProfileImage(null); 
+                      setProfileImage(null);
                     }}
                   >
                     <Trash2 />

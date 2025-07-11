@@ -2,11 +2,9 @@
 
 import {
   Heart,
-  BookOpen,
   Users,
-  Activity,
-  Eye,
-  UserRoundPlus,
+  // Eye,
+  // UserRoundPlus,
   Calendar,
   Package,
   UsersRound,
@@ -47,31 +45,31 @@ interface Package {
 }
 
 // Dummy data
-const topViewedCategories = [
-  { name: "Circulatory System", modules: 10, quizzes: 5, students: 15 },
-  { name: "Circulatory System", modules: 8, quizzes: 4, students: 12 },
-  { name: "Circulatory System", modules: 6, quizzes: 3, students: 10 },
-];
+// const topViewedCategories = [
+//   { name: "Circulatory System", modules: 10, quizzes: 5, students: 15 },
+//   { name: "Circulatory System", modules: 8, quizzes: 4, students: 12 },
+//   { name: "Circulatory System", modules: 6, quizzes: 3, students: 10 },
+// ];
 
-const topRatedModules = [
-  { name: "Circulatory System A-Z", rating: 4.8, students: 120, reviews: 45 },
-  { name: "Circulatory System A-Z", rating: 4.4, students: 98, reviews: 32 },
-  { name: "Circulatory System A-Z", rating: 4.2, students: 85, reviews: 28 },
-];
+// const topRatedModules = [
+//   { name: "Circulatory System A-Z", rating: 4.8, students: 120, reviews: 45 },
+//   { name: "Circulatory System A-Z", rating: 4.4, students: 98, reviews: 32 },
+//   { name: "Circulatory System A-Z", rating: 4.2, students: 85, reviews: 28 },
+// ];
 
-const topAnatomy = [
-  { name: "Circulatory System", views: 1200 },
-  { name: "Circulatory System", views: 980 },
-  { name: "Circulatory System", views: 850 },
-  { name: "Circulatory System", views: 800 },
-  { name: "Circulatory System", views: 840 },
-];
+// const topAnatomy = [
+//   { name: "Circulatory System", views: 1200 },
+//   { name: "Circulatory System", views: 980 },
+//   { name: "Circulatory System", views: 850 },
+//   { name: "Circulatory System", views: 800 },
+//   { name: "Circulatory System", views: 840 },
+// ];
 
-const mostAttemptedQuizzes = [
-  { name: "Circulatory System Chapter 1", attempts: 450 },
-  { name: "Circulatory System Chapter 1", attempts: 380 },
-  { name: "Circulatory System Chapter 1", attempts: 320 },
-];
+// const mostAttemptedQuizzes = [
+//   { name: "Circulatory System Chapter 1", attempts: 450 },
+//   { name: "Circulatory System Chapter 1", attempts: 380 },
+//   { name: "Circulatory System Chapter 1", attempts: 320 },
+// ];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -115,6 +113,8 @@ export default function Dashboard() {
   );
   const dispatch = useAppDispatch();
   const totalUsers = allUsers?.length || 0;
+  console.log({allUsers})
+  console.log({totalUsers})
   const [events, setEvents] = useState<Event[]>([]);
   const [coaches, setCoaches] = useState<Coach[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
@@ -132,20 +132,20 @@ export default function Dashboard() {
         const eventsData = await getAllEvents();
         const formattedEvents = eventsData
           .map((event: any) => ({
-            id: event._id,
-            title: event.title,
+            id: event?._id,
+            title: event?.title,
             location:
-              event.locationId.address +
+              event?.locationId?.address +
               ", " +
-              event.locationId.city +
+              event?.locationId?.city +
               ", " +
-              event.locationId.state,
-            sport: event.sport,
-            interested: event.enrolledCount,
+              event?.locationId?.state,
+            sport: event?.sport,
+            interested: event?.enrolledCount,
           }))
           .sort(
             (a: { interested: number }, b: { interested: number }) =>
-              b.interested - a.interested
+              b?.interested - a?.interested
           ) // Sort by enrolledCount in descending order
           .slice(0, 5); // Take only top 5 events
         setEvents(formattedEvents);
@@ -167,12 +167,12 @@ export default function Dashboard() {
 
         const formattedPackages = response
           .map((item: any) => ({
-            id: item._id,
-            sport: item.sport,
-            startDate: item.sessionDates?.[0],
-            duration: item.duration,
-            price: item.price?.base,
-            clubs: item.locationId.address + ", " + item.locationId.city,
+            id: item?._id,
+            sport: item?.sport,
+            startDate: item?.sessionDates?.[0],
+            duration: item?.duration,
+            price: item?.price?.base,
+            clubs: item?.locationId?.address + ", " + item?.locationId?.city,
           }))
           .filter(
             (pkg: { startDate: string }) => new Date(pkg.startDate) >= today
@@ -196,11 +196,11 @@ export default function Dashboard() {
         const coaches = await getAllCoaches();
         const formattedCoaches = coaches
           .map((coach: any) => ({
-            id: coach._id,
-            name: coach.name,
-            imageUrl: coach.image,
-            sports: coach.sports,
-            clubs: coach.locationIds?.map(
+            id: coach?._id,
+            name: coach?.name,
+            imageUrl: coach?.image,
+            sports: coach?.sports,
+            clubs: coach?.locationIds?.map(
               (location: any) => location?.address + " , " + location?.city
             ),
             rating: 3,

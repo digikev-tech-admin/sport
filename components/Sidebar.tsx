@@ -15,6 +15,7 @@ import {
   CreditCard,
   ShieldPlus,
   MapPin,
+  Bell,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -26,6 +27,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: BookOpen, label: "Packages", href: "/packages" },
   { icon: Blocks, label: "Events", href: "/events" },
+  { icon: Bell, label: "Notifications", href: "/notifications" },
   { icon: Box, label: "Coaches", href: "/coaches" },
   { icon: MapPin, label: "Location", href: "/location" },
   { icon: Users, label: "Users", href: "/users" },
