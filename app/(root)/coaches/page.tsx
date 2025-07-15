@@ -47,6 +47,7 @@ const Page = () => {
       const fetchCoaches = async () => {
         try {
           const coaches = await getAllCoaches();
+          console.log("Coaches fetched:", coaches);
           const formattedCoaches = coaches.map((coach: any) => ({
             id: coach._id,
             name: coach.name,

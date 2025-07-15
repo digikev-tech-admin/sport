@@ -12,6 +12,8 @@ import { ReCloudinary } from "../cloudinary";
 import { createCoach, getCoachById, updateCoach } from "@/api/coach";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Package } from "@/types/types";
+import { getAllPackages } from "@/api/package";
 
 // const clubOptions = [
 //   { id: 1, name: "Elite Ortho Club" },
@@ -36,6 +38,11 @@ const sportsOptions = [
 
 const sportsOptionsObj = sportsOptions.map((name, idx) => ({ id: idx, name }));
 
+interface FormattedPackage {
+  id: string;
+  name: string;
+}
+
 const CoacheForm = ({ id }: { id?: string }) => {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -55,6 +62,8 @@ const CoacheForm = ({ id }: { id?: string }) => {
   const [newSpecialization, setNewSpecialization] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+  const [packages, setPackages] = useState<FormattedPackage[]>([]);
+  const [selectedPackages, setSelectedPackages] = useState<Array<{ id: string; name: string }>>([]);
 
   
 
@@ -64,6 +73,9 @@ const CoacheForm = ({ id }: { id?: string }) => {
       setNewSpecialization("");
     }
   };
+
+
+
 
   const handleDeleteSpecialization = (index: number) => {
     setSpecializations(specializations.filter((_, i) => i !== index));
@@ -80,6 +92,27 @@ const CoacheForm = ({ id }: { id?: string }) => {
   const handleDeleteCertificate = (index: number) => {
     setCertificates(certificates.filter((_, i) => i !== index));
   };
+
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await getAllPackages();
+        // console.log("Packages fetched:", response);
+        const formattedPackages = response?.map((item: any) => ({
+          id: item?._id,
+          name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
+        }));
+        // console.log("Formatted packages:", formattedPackages);
+        setPackages(formattedPackages);
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      }
+    };
+    fetchPackages();
+  }, []);
+
+
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -104,11 +137,17 @@ const CoacheForm = ({ id }: { id?: string }) => {
       const fetchCoach = async () => {
        try {
         const response = await getCoachById(id);
-        console.log("Coach fetched:", response);
+        // console.log("Coach fetched:", response);
         const formattedLocations = response.locationIds.map((location: any) => ({
           id: location._id,
           name: location.address + ", " + location.city + ", " + location.state,
         }));
+
+        const formattedPackages = response?.packageIds?.map((item: any) => ({
+          id: item?._id,
+          name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
+        }));
+
         setName(response.name);
         setPhoneNumber(response.phoneNumber || "");
         setEmergencyContact(response.emergencyContact || "");
@@ -119,6 +158,16 @@ const CoacheForm = ({ id }: { id?: string }) => {
         setExperience(response.stats.yearsOfExperience.toString());
         setCertificates(response.stats.certifications);
         setSpecializations(response.stats.specializations);
+        setSelectedPackages(formattedPackages);
+        
+        // Handle packages if they exist in the response
+        // if (response.packageIds && response.packageIds.length > 0) {
+        //   const selectedPkgs = response.packageIds.map((pkgId: string) => {
+        //     const pkg = packages.find(p => p.id === pkgId);
+        //     return { id: pkgId, name: pkg?.name || pkgId };
+        //   });
+        //   setSelectedPackages(selectedPkgs);
+        // }
        } catch (error) {
         console.error("Error fetching coach:", error);
        }
@@ -140,6 +189,7 @@ const CoacheForm = ({ id }: { id?: string }) => {
       phoneNumber,
       emergencyContact,
       locationIds: clubs.map(club => club.id),
+      packageIds: selectedPackages.map(pkg => pkg.id),
       sports,
       aboutMe: bio,
       image: profileImage || "https://github.com/shadcn.png",
@@ -152,16 +202,17 @@ const CoacheForm = ({ id }: { id?: string }) => {
         specializations
       }
     };
-    console.log("Coach Data:", coachData);
+    // console.log("Coach Data:", coachData);
     try {
       if(id) {
-        const response = await updateCoach(id, coachData);
-        console.log("Coach updated:", response);
+        await updateCoach(id, coachData);
+        // console.log("Coach updated:", response);
         toast.success("Coach updated successfully");
+        router.push("/coaches");
         
       } else {
-        const response = await createCoach(coachData);
-        console.log("Coach created:", response);
+        await createCoach(coachData);
+        // console.log("Coach created:", response);
         toast.success("Coach created successfully");
         router.push("/coaches");
         setName("");
@@ -179,6 +230,7 @@ const CoacheForm = ({ id }: { id?: string }) => {
         setCertificates([]);
         setSpecializations([]);
         setNewSpecialization("");
+        setSelectedPackages([]);
       }
     } catch (error) {
       console.error("Error creating coach:", error);
@@ -335,6 +387,23 @@ const CoacheForm = ({ id }: { id?: string }) => {
           />
         </div>
         </div>
+        {id && <div className="space-y-2">
+          <label className="text-sm font-bold text-gray-700">Packages</label>
+          <MultipleLocationDropdown
+            value={selectedPackages.map(pkg => pkg.name)}
+            options={packages}
+            onChange={(selectedNames) => {
+              const selectedPkgs = selectedNames.map(name => {
+                const pkg = packages.find(p => p.name === name);
+                return { id: String(pkg?.id || ""), name: pkg?.name || "" };
+              });
+              setSelectedPackages(selectedPkgs);
+            }}
+            placeholder="Select package(s)..."
+            searchPlaceholder="Search package..."
+          />
+        </div>
+        }
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <label className="text-sm font-bold text-gray-700">Specializations</label>
@@ -473,6 +542,7 @@ const CoacheForm = ({ id }: { id?: string }) => {
               setCertificateName("");
               setCertificateImage(null);
               setCertificates([]);
+              setSelectedPackages([]);
                   // setLinkedin("");
                   // setInstagram("");
                   // setEmail("");
