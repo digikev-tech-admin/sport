@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, Trophy, Trash2, SquarePen } from "lucide-react";
+import { MapPin, Trophy, Trash2, SquarePen, Eye } from "lucide-react";
 import Image from "next/image";
 import { Coach } from "@/types/types";
 import { Button } from "../ui/button";
@@ -60,6 +60,12 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
     router.push(`/coaches/${coach.id}`);
   };
 
+  const handleCardClick = () => {
+    // Navigate to a detailed view page
+    router.push(`/coaches/${coach.id}/view`);
+  };
+
+
   return (
 
     <div className="bg-white rounded-2xl shadow border border-gray-200 p-4 gap-4  max-w-xl w-full">
@@ -97,6 +103,14 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
                   className="text-[blue] hover:text-blue-700 hover:bg-blue-50 font-medium px-1"
                 >
                   <SquarePen className="text-[blue] hover:text-blue-700" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCardClick}
+                  className="text-[#742193] hover:text-[#581770] hover:bg-[#742193]/10 font-medium px-1"
+                >
+                  <Eye className="text-[#742193] hover:text-[#581770]" />
                 </Button>
               </div>
             </div>
