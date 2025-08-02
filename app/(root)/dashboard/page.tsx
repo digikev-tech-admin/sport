@@ -26,6 +26,7 @@ import Link from "next/link";
 import { getAllCoaches } from "@/api/coach";
 import { getAllPackages } from "@/api/package";
 import { formatDateTime } from "@/lib/utils";
+import { getAllUsers } from "@/api/user/user";
 
 interface Event {
   id: string;
@@ -108,23 +109,29 @@ const cardVariants = {
 const MotionCard = motion(Card);
 
 export default function Dashboard() {
-  const { users: allUsers, status } = useAppSelector(
-    (state: RootState) => state.user
-  );
-  const dispatch = useAppDispatch();
-  const totalUsers = allUsers?.length || 0;
-  console.log({allUsers})
-  console.log({totalUsers})
+ 
+ 
   const [events, setEvents] = useState<Event[]>([]);
   const [coaches, setCoaches] = useState<Coach[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [totalPackages, setTotalPackages] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+
+
+
 
   useEffect(() => {
-    if (status === "idle" && !allUsers.length) {
-      dispatch(fetchUsers());
-    }
-  }, [dispatch, allUsers, status]);
+    const fetchUsers = async () => {
+      try {
+        const users = await getAllUsers();
+        // console.log({users})
+        setTotalUsers(users?.data?.length);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   useEffect(() => {
     const fetchEvents = async () => {

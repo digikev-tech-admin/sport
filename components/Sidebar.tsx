@@ -52,7 +52,7 @@ export const Sidebar = () => {
     }
   }, [pathname,router]);
   const admin = useMemo(() => getAdminData(), []);  
-  console.log({admin});
+  // console.log({admin});
 
 
   return (
@@ -64,9 +64,9 @@ export const Sidebar = () => {
         )}
       >
         {/* Profile Section */}
-        <div className={` border-b border-gray-200 ${isCollapsed? "p-2" : "p-4" }`}>
+        <div className={` border-b border-gray-200 ${isCollapsed? "p-2" : "p-3" }`}>
           
-          <div className=  {`flex items-center   ${isCollapsed ? ' gap-3 borderColor rounded-[10px] bg-[#7421931A] ' : "gap-3 border border-[#c858BA] rounded-[10px] bg-[#7421931A] p-3"}`}>
+          <div className=  {`flex items-center   ${isCollapsed ? ' borderColor rounded-[10px] bg-[#7421931A] ' : "gap-3 border border-[#c858BA] rounded-[10px] bg-[#7421931A] p-3"}`}>
             <Avatar>
             <AvatarImage src={admin?.avatar || "https://github.com/shadcn.png"} />
             <AvatarFallback>{admin?.name?.charAt(0) || "Ad"}</AvatarFallback>
@@ -85,14 +85,14 @@ export const Sidebar = () => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="p-2">
+        <nav className={`${isCollapsed ? "p-2" : "p-1"}`}>
           {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
               className={cn(
-                "flex items-center w-full justify-start gap-3 mb-1 transition-colors px-3 py-2 rounded-md ",
-                isCollapsed ? "px-2" : "px-3",
+                "flex items-center w-full justify-start gap-3 mb-1 transition-colors px-3  rounded-md ",
+                isCollapsed ? "px-2 py-2" : "px-3 py-1.5",
                 activeItem === item.label
                   ? "text-[#742193] commonBG"
                   : "text-[black] hover:text-[#742193] hover:bg-gray-50"

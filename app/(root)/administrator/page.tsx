@@ -46,6 +46,8 @@ const Page = () => {
   const { users: allUsers, status } = useAppSelector(
     (state: RootState) => state.user
   );
+  console.log({allUsers})
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("id_asc");
@@ -61,12 +63,14 @@ const Page = () => {
   const filteredUsers = Array.isArray(allUsers)
     ? allUsers
         .filter((user) => {
+          // Only show users with admin role
+          const isAdmin = user.role === "admin";
           const matchesSearch = user.name
             ?.toLowerCase() 
             .includes(search?.toLowerCase() ?? "");
           const matchesCategory =
             category === "All" || user.level === category?.toLowerCase();
-          return matchesSearch && matchesCategory;
+          return isAdmin && matchesSearch && matchesCategory;
         })
         .sort((a, b) => {
           switch (sortBy) {
