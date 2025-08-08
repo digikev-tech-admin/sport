@@ -34,6 +34,7 @@ const useFcmToken = () => {
                         });
                         if (currentToken) {
                             setToken(currentToken);
+                            console.log('FCM Token:', currentToken);
                         } else {
                             setError('No registration token available');
                         }

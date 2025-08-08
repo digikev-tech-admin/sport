@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import React from 'react'
-import { Settings ,CircleHelp, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { getToken, removeAdminData, removeToken } from '@/config/token';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';

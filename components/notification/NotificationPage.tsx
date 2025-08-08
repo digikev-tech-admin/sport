@@ -1,16 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  ArrowLeft,
   Calendar,
   Users,
   MessageSquare,
-  Tag,
   Link as LinkIcon,
 } from "lucide-react";
 import { getAllUsers } from "@/api/user/user";
