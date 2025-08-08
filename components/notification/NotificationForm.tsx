@@ -14,6 +14,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
+  fcmToken: string | null;
 }
 
 interface NotificationFormData {
@@ -21,8 +22,8 @@ interface NotificationFormData {
   message: string;
   notificationType: 'system' | 'reminder' | 'marketing';
   userIds: string[];
-//   link?: string;
-//   metadata: Record<string, any>;
+  //   link?: string;
+  //   metadata: Record<string, any>;
 }
 
 const NotificationForm = () => {
@@ -30,7 +31,8 @@ const NotificationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  
+  const [userFcmTokens, setUserFcmTokens] = useState<string[]>([]);
+
   const [formData, setFormData] = useState<NotificationFormData>({
     title: '',
     message: '',
@@ -46,7 +48,7 @@ const NotificationForm = () => {
       try {
         // Replace with your actual API call
         const usersData = await getAllUsers();
-        console.log({usersData});
+        console.log({ usersData });
         setUsers(usersData?.data);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -57,54 +59,67 @@ const NotificationForm = () => {
   }, []);
 
   // Fetch notification data if editing
-//   useEffect(() => {
-//     if (id) {
-//       const fetchNotification = async () => {
-//         try {
-//           // Replace with your actual API call
-//           const response = await fetch(`/api/notifications/${id}`);
-//           const notificationData = await response.json();
-//           setFormData({
-//             title: notificationData.title,
-//             message: notificationData.message,
-//             notificationType: notificationData.notificationType,
-//             userIds: notificationData.userIds,
-//             link: notificationData.link || '',
-//             // metadata: notificationData.metadata || {}
-//           });
-//           setSelectedUsers(notificationData.userIds);
-//         } catch (error) {
-//           console.error('Error fetching notification:', error);
-//           toast.error('Failed to fetch notification data');
-//         }
-//       };
-//       fetchNotification();
-//     }
-//   }, [id]);
+  //   useEffect(() => {
+  //     if (id) {
+  //       const fetchNotification = async () => {
+  //         try {
+  //           // Replace with your actual API call
+  //           const response = await fetch(`/api/notifications/${id}`);
+  //           const notificationData = await response.json();
+  //           setFormData({
+  //             title: notificationData.title,
+  //             message: notificationData.message,
+  //             notificationType: notificationData.notificationType,
+  //             userIds: notificationData.userIds,
+  //             link: notificationData.link || '',
+  //             // metadata: notificationData.metadata || {}
+  //           });
+  //           setSelectedUsers(notificationData.userIds);
+  //         } catch (error) {
+  //           console.error('Error fetching notification:', error);
+  //           toast.error('Failed to fetch notification data');
+  //         }
+  //       };
+  //       fetchNotification();
+  //     }
+  //   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.message.trim() || selectedUsers.length === 0) {
-      toast.error(  `Please fill all required fields and select at least one user`);
+      toast.error(`Please fill all required fields and select at least one user`);
+      return;
+    }
+
+    // Check if selected users have FCM tokens
+    const usersWithTokens = selectedUsers.filter(userId => {
+      const user = users.find(u => u._id === userId);
+      return user && user.fcmToken;
+    });
+
+    if (usersWithTokens.length === 0) {
+      toast.error('Selected users do not have notification tokens. They may not have enabled notifications.');
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const submitData = {
         ...formData,
-        userIds: selectedUsers
+        userIds: selectedUsers,
+        "userFcmTokens": userFcmTokens.filter(token => token !== null && token !== '')
       };
 
-      const response = await createNotification(submitData); 
+      const response = await createNotification(submitData);
       if (response) {
         toast.success('Notification sent successfully');
-          setSelectedUsers([]);
+        setSelectedUsers([]);
+        setUserFcmTokens([]);
         //   router.push('/notifications');
-        }
-            
+      }
+
     } catch (error) {
       console.error('Error sending notification:', error);
       toast.error('Failed to send notification');
@@ -113,21 +128,33 @@ const NotificationForm = () => {
     }
   };
 
-  const handleUserToggle = (userId: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
+  const handleUserToggle = (userId: string, fcmToken: string | null) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId)
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
+    );
+    setUserFcmTokens(prev =>
+      prev.includes(fcmToken || '')
+        ? prev.filter(token => token !== (fcmToken || ''))
+        : fcmToken ? [...prev, fcmToken] : prev
     );
   };
 
   const handleSelectAllUsers = () => {
-    setSelectedUsers(users?.map(user => user?._id));
+    const usersWithTokens = users.filter(user => user.fcmToken);
+    setSelectedUsers(usersWithTokens.map(user => user._id));
+    setUserFcmTokens(usersWithTokens.map(user => user.fcmToken!).filter(token => token !== null && token !== ''));
   };
 
   const handleDeselectAllUsers = () => {
     setSelectedUsers([]);
+    setUserFcmTokens([]);
   };
+
+  // Get users with valid FCM tokens
+  const usersWithTokens = users.filter(user => user.fcmToken);
+  const usersWithoutTokens = users.filter(user => !user.fcmToken);
 
   return (
     <div className="flex items-center justify-center py-4">
@@ -173,7 +200,7 @@ const NotificationForm = () => {
             <label className="text-sm font-bold text-gray-700">Notification Type</label>
             <Select
               value={formData.notificationType}
-              onValueChange={(value: 'system' | 'reminder' | 'marketing') => 
+              onValueChange={(value: 'system' | 'reminder' | 'marketing') =>
                 setFormData(prev => ({ ...prev, notificationType: value }))
               }
             >
@@ -210,7 +237,7 @@ const NotificationForm = () => {
                 onClick={handleSelectAllUsers}
                 className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300"
               >
-                Select All
+                Select All (with tokens)
               </Button>
               <Button
                 type="button"
@@ -223,36 +250,70 @@ const NotificationForm = () => {
               </Button>
             </div>
           </div>
-          
+
           <div className="border rounded-lg p-4 max-h-60 overflow-y-auto">
             {users?.length === 0 ? (
               <p className="text-gray-500 text-sm">Loading users...</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {users?.map((user) => (
-                  <label
-                    key={user?._id}
-                    className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.includes(user?._id)}
-                      onChange={() => handleUserToggle(user?._id)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
+              <div className="space-y-4">
+                {/* Users with FCM tokens */}
+                {usersWithTokens.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-green-600 mb-2">Users with notifications enabled ({usersWithTokens.length})</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {usersWithTokens.map((user) => (
+                        <label
+                          key={user._id}
+                          className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-pointer border border-green-200 bg-green-50"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(user._id)}
+                            onChange={() => handleUserToggle(user._id, user.fcmToken)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                            <p className="text-xs text-gray-500">{user.email}</p>
+                          </div>
+                        </label>
+                      ))}
                     </div>
-                  </label>
-                ))}
+                  </div>
+                )}
+
+                {/* Users without FCM tokens */}
+                {usersWithoutTokens.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-orange-600 mb-2">Users without notifications ({usersWithoutTokens.length})</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {usersWithoutTokens.map((user) => (
+                        <label
+                          key={user._id}
+                          className="flex items-center space-x-2 p-2 rounded hover:bg-gray-50 cursor-not-allowed border border-orange-200 bg-orange-50 opacity-60"
+                        >
+                          <input
+                            type="checkbox"
+                            disabled
+                            className="rounded border-gray-300 text-gray-400 focus:ring-gray-500"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-500">{user.name}</p>
+                            <p className="text-xs text-gray-400">{user.email}</p>
+                            <p className="text-xs text-orange-600">You can't send notification to this user</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-          
+
           {selectedUsers.length > 0 && (
             <p className="text-sm text-gray-600">
-              Selected {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''}
+              Selected {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} with notification tokens
             </p>
           )}
         </div>

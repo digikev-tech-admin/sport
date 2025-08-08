@@ -4,11 +4,14 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "react-hot-toast";
 import StoreProvider from "./StoreProvider";
+import FcmTokenComp from "@/components/shared/firebaseForeground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+// ravi2020mishra@gamil.com -pass 123456
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -31,11 +34,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <StoreProvider>
-        <div className="h-screen overflow-hidden flex flex-col">
-          <Navbar />
+          <div className="h-screen overflow-hidden flex flex-col">
+            <FcmTokenComp />
+            <Navbar />
 
-          {children}
-        </div>
+            {children}
+          </div>
         </StoreProvider>
         <Toaster position="top-center" reverseOrder={false} />
 
