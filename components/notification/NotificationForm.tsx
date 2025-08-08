@@ -300,7 +300,7 @@ const NotificationForm = () => {
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-500">{user.name}</p>
                             <p className="text-xs text-gray-400">{user.email}</p>
-                            <p className="text-xs text-orange-600">You can't send notification to this user</p>
+                            <p className="text-xs text-orange-600">You can&apos;t send notification to this user</p>
                           </div>
                         </label>
                       ))}
