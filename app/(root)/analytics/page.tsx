@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, ClockArrowUp, Landmark } from "lucide-react";
+import { Users, ClockArrowUp, Landmark, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { MetricCardProps } from "@/types/types";
@@ -16,6 +16,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useEffect, useState } from "react";
+import { getAllUsers } from "@/api/user/user";
+import { getUserStats } from "@/api/chartData";
+import { getAllPackages } from "@/api/package";
+import PackageChart from "@/components/dashboard/PackageChart";
 // Dummy data
 
 const containerVariants = {
@@ -55,6 +60,62 @@ const cardVariants = {
 const MotionCard = motion(Card);
 
 export default function Page() {
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [userLastLogin, setUserLastLogin] = useState(0);
+  const [userData, setUserData] = useState<any>(null);
+  const [packages, setPackages] = useState<any[]>([]);
+
+
+
+
+
+
+
+
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await getAllPackages();
+        setPackages(response);
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      }
+    };
+    fetchPackages();
+  }, []);
+
+  
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const users = await getAllUsers();
+        setUserData(users?.data);
+
+        setTotalUsers(users?.data?.length || 0);
+        const lastLogin = users?.data?.map((user: any) => user?.lastLogin);
+        setUserLastLogin(lastLogin || 0);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+
+
+  useEffect(() => {
+    const fetchUserOrderData = async () => {
+      try {
+        const stats  = await getUserStats();
+        console.log({stats})
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      }
+    };
+    fetchUserOrderData(); 
+  }, []);
+
   return (
     <div className="hidden sm:block min-h-screen bg-gray-50 p-2 sm:p-4 xl:p-8">
       <div>
@@ -83,7 +144,7 @@ export default function Page() {
 
       {/* Metrics Cards */}
       <motion.div
-        className="grid grid-cols-3 gap-3 xl:gap-10 mb-6"
+        className="grid grid-cols-2 gap-3 xl:gap-10 mb-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -91,14 +152,14 @@ export default function Page() {
         {[
           {
             title: "Total Users",
-            value: "100",
+            value: totalUsers,
             icon: <Users className="h-5 w-5 text-[#742193]" />,
           },
-          {
-            title: "Total Hours",
-            value: "100",
-            icon: <ClockArrowUp className="h-5 w-5 text-[#742193]" />,
-          },
+          // {
+          //   title: "Total Hours",
+          //   value: "100",
+          //   icon: <ClockArrowUp className="h-5 w-5 text-[#742193]" />,
+          // },
           {
             title: "Total Revenue",
             value: "100",
@@ -119,10 +180,10 @@ export default function Page() {
         <MotionCard className="p-6" variants={cardVariants} whileHover="hover">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-bold text-xl">Users</h2>
-            <h2 className="font-bold text-xl">Total Users : 100</h2>
+            <h2 className="font-bold text-xl">Total Users : {totalUsers}</h2>
           </div>
           <motion.div className="flex justify-center items-center">
-            <UserPieChart />
+            <UserPieChart userLastLogin={userLastLogin} />
           </motion.div>
         </MotionCard>
 
@@ -138,8 +199,8 @@ export default function Page() {
         initial="hidden"
         animate="visible"
       >
-        <MotionCard className="p-6 " variants={cardVariants} whileHover="hover">
-          <TopCountriesChart />
+        <MotionCard className="p-4 " variants={cardVariants} whileHover="hover">
+          <TopCountriesChart userData={userData} />
           <motion.div
             className="relative w-48 h-4 mx-auto"
             initial={{ rotate: -90 }}
@@ -149,7 +210,23 @@ export default function Page() {
         </MotionCard>
 
         <MotionCard className=" p-4" variants={cardVariants} whileHover="hover">
-          <SubscribersChart />
+          <SubscribersChart packages={packages}  />
+        </MotionCard>
+      </motion.div>
+      <motion.div
+        className="grid grid-cols-1  gap-6 mb-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <MotionCard className="p-4 " variants={cardVariants} whileHover="hover">
+          <PackageChart packages={packages}  />
+          <motion.div
+            className="relative w-48 h-4 mx-auto"
+            initial={{ rotate: -90 }}
+            animate={{ rotate: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          ></motion.div>
         </MotionCard>
       </motion.div>
     </div>

@@ -118,6 +118,6 @@ export interface UserType {
 
 export interface MetricCardProps {
   title: string;
-  value:  string;
+  value:  number | string;
   icon: React.ReactNode;
 }

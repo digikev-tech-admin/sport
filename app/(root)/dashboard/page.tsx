@@ -17,10 +17,10 @@ import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { Coach, MetricCardProps } from "@/types/types";
 import AdminPieChart from "@/components/dashboard/PieChart";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { RootState } from "@/redux/store";
+// import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+// import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
-import { fetchUsers } from "@/redux/features/userSlice";
+// import { fetchUsers } from "@/redux/features/userSlice";
 import { getAllEvents } from "@/api/event";
 import Link from "next/link";
 import { getAllCoaches } from "@/api/coach";
@@ -137,16 +137,17 @@ export default function Dashboard() {
     const fetchEvents = async () => {
       try {
         const eventsData = await getAllEvents();
+        
         const formattedEvents = eventsData
           .map((event: any) => ({
             id: event?._id,
             title: event?.title,
-            location:
+            location:  event?.locationId ?
               event?.locationId?.address +
               ", " +
               event?.locationId?.city +
               ", " +
-              event?.locationId?.state,
+              event?.locationId?.state :"N/A",
             sport: event?.sport,
             interested: event?.enrolledCount,
           }))
@@ -167,6 +168,7 @@ export default function Dashboard() {
     const fetchPackages = async () => {
       try {
         const response = await getAllPackages();
+        console.log({response})
         const totalPackages = response.length;
         setTotalPackages(totalPackages);
         const today = new Date();
@@ -174,12 +176,12 @@ export default function Dashboard() {
 
         const formattedPackages = response
           .map((item: any) => ({
-            id: item?._id,
-            sport: item?.sport,
-            startDate: item?.sessionDates?.[0],
-            duration: item?.duration,
-            price: item?.price?.base,
-            clubs: item?.locationId?.address + ", " + item?.locationId?.city,
+            id: item?._id || item?.id,
+            sport: item?.sport || "N/A" ,
+            startDate: item?.sessionDates?.[0] || "N/A",
+            duration: item?.duration || "N/A",
+            price: item?.price?.base || "N/A",
+            clubs:  item?.locationId ? item?.locationId?.address + ", " + item?.locationId?.city : "N/A",
           }))
           .filter(
             (pkg: { startDate: string }) => new Date(pkg.startDate) >= today
@@ -189,6 +191,7 @@ export default function Dashboard() {
               new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
           ) // Sort by startDate ascending (today to future)
           .slice(0, 5); // Take only top 5 packages
+        console.log({formattedPackages})
         setPackages(formattedPackages);
       } catch (error) {
         console.error("Error fetching packages:", error);
@@ -201,15 +204,16 @@ export default function Dashboard() {
     const fetchCoaches = async () => {
       try {
         const coaches = await getAllCoaches();
+        console.log({coaches})
         const formattedCoaches = coaches
           .map((coach: any) => ({
             id: coach?._id,
             name: coach?.name,
             imageUrl: coach?.image,
             sports: coach?.sports,
-            clubs: coach?.locationIds?.map(
+            clubs: coach?.locationIds ? coach?.locationIds?.map(
               (location: any) => location?.address + " , " + location?.city
-            ),
+            ) : [],
             rating: 3,
             // averageRating: coach.averageRating,
             reviews: 20,
@@ -401,7 +405,7 @@ export default function Dashboard() {
           </div>
           <motion.div className="flex justify-center items-center -mt-7 ">
             {/* <div className="flex justify-center items-center  bg-gray-100"> */}
-            <AdminPieChart />
+            <AdminPieChart data={coaches} />
             {/* </div> */}
           </motion.div>
         </MotionCard>

@@ -19,7 +19,9 @@ const data = [
   { month: 'June', free: 3000, planA: 2700, planB: 4500 },
 ];
 
-const SubscribersChart = () => {
+const SubscribersChart = ({packages}:{packages:any} ) => {
+  console.log({packages});
+  
   return (
     <div className="p-4 ">
       <h2 className="text-xl font-bold">Subscribers</h2>

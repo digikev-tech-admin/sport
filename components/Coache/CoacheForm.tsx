@@ -29,12 +29,27 @@ const sportsOptions = [
   "Badminton",
   "Yoga",
   "Pilates",
+  "Cricket",
   "Football",
   "Baseball",
   "Basketball",
   "Volleyball",
-  "Aerobics"
-];
+  "Aerobics",
+  "Hockey",
+    "Golf",
+    "Rugby",
+    "Table Tennis",
+    "Swimming",
+    "Running",
+    "Cycling",
+    "Walking",
+    "Gymnastics",
+    "Martial Arts",
+    "Chess",
+    "Volleyball",
+    "Baseball",
+    "Soccer",
+  ];
 
 const sportsOptionsObj = sportsOptions.map((name, idx) => ({ id: idx, name }));
 
