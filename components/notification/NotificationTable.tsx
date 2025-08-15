@@ -28,7 +28,7 @@ interface NotificationTableProps {
 }
 
 const NotificationTable = ({ notifications, onDelete }: NotificationTableProps) => {
-  console.log({notifications})
+  // console.log({notifications})
   const router = useRouter()
 
   const handleViewDetails = (id: string) => {
@@ -63,7 +63,12 @@ const NotificationTable = ({ notifications, onDelete }: NotificationTableProps) 
                   : notification?.message}
               </TableCell>
               <TableCell className="capitalize ">{notification?.notificationType}</TableCell>
-              <TableCell>{new Date(notification?.createdAt).toLocaleDateString('en-GB')}</TableCell>
+              <TableCell>
+              {notification?.createdAt
+              ? new Date(notification.createdAt).toLocaleString()
+              : ''}
+
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-center gap-2">
                   <Button

@@ -18,10 +18,10 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import Filters from "@/components/AllFilters";
-import { Frown, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 import { useRouter } from "next/navigation";
-import { deleteNotification, getAllNotifications, getAllNotificationsForAdmin } from "@/api/notification";
+import { deleteNotification, getAllNotificationsForAdmin } from "@/api/notification";
 import toast from "react-hot-toast";
 import NotificationTable from "@/components/notification/NotificationTable";
 
@@ -49,7 +49,7 @@ const Page = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       const notifications = await getAllNotificationsForAdmin();
-      console.log({notifications});
+      // console.log({notifications});
     //   const {data} = notifications?.data;
       const formattedNotifications = notifications?.data?.map( 
         (notification: any) => ({
@@ -58,10 +58,10 @@ const Page = () => {
           message: notification?.message,
           notificationType: notification?.notificationType,
           userIds: notification?.userIds,
-          createdAt: new Date(notification?.createdAt).toLocaleString(),
+          createdAt: notification?.createdAt,
         })
       );
-    //   console.log({formattedNotifications});  
+      // console.log({formattedNotifications});  
       setNotifications(formattedNotifications);
     };
     fetchNotifications();

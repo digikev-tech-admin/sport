@@ -24,7 +24,7 @@ export const getAllNotifications = async () => {
 export const getAllNotificationsForAdmin = async () => {
     try {
         const response = await axiosInstance.get(`/notifications/admin/all`);
-        console.log({response});
+        // console.log({response});
         return response?.data;
     } catch (error: any) {
         throw error.response?.data?.error || "Fetching notifications failed";
