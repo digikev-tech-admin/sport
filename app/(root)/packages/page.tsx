@@ -15,14 +15,16 @@ import { Frown, Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 import { useRouter } from "next/navigation";
 import PackageCard from "@/components/Package/packageCard";
-import { deletePackage, getAllPackages } from "@/api/package";
-import toast from "react-hot-toast";
+import { getAllPackages } from "@/api/package";
+// import toast from "react-hot-toast";
 
 const Page = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("all");
+  const [selectedSport, setSelectedSport] = useState("all");
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState("all");
 
   const route = useRouter();
 
@@ -30,31 +32,22 @@ const Page = () => {
     route.push(`/packages/addPackage`);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await deletePackage(id);
-      setPackages(packages.filter((item) => item.id !== id));
-      toast.success("Package deleted successfully");
-
-      // console.log("res", res);
-    } catch (error) {
-      console.log("Error:", error);
-      toast.error("Failed to delete package");
-    }
-  };
-
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         const response = await getAllPackages();
-        // console.log("Packages fetched:", response);
+        console.log("Packages fetched:", response);
         const formattedPackages = response?.map((item: any) => ({
           id: item?._id,
+          title: item?.title,
           sport: item?.sport,
           level: item?.level,
           ageGroup: item?.ageGroup,
           duration: item?.duration,
           startDate: item?.sessionDates?.[0],
+          endDate: item?.sessionDates?.[1],
+          coachName: item?.coachId?.name,
+        
           price: item?.price?.base,
           seats: item?.seatsCount,
           enrolled: item?.enrolledCount,
@@ -75,6 +68,31 @@ const Page = () => {
     fetchPackages();
   }, []);
 
+  const categories = [
+    "all",
+    ...Array.from(new Set(packages.map((pkg) => pkg.level))),
+  ];
+
+  const sports = [
+    "all",
+    ...Array.from(new Set(packages.map((pkg) => pkg.sport)))
+  ];
+
+  const ageGroups = [
+    "all",
+    "kids",
+    "teens",
+    "adults"
+  ];
+
+  const sortOptions = [
+    { value: "all", label: "All" },
+    { value: "price-asc", label: "Price (Low to High)" },
+    { value: "price-desc", label: "Price (High to Low)" },
+    { value: "startDate-asc", label: "Start Date (Earliest First)" },
+    { value: "startDate-desc", label: "Start Date (Latest First)" },
+  ];
+
   const filteredPackages = useMemo(() => {
     return packages
       .filter((item) => {
@@ -88,32 +106,50 @@ const Page = () => {
           selectedCategory === "all" ||
           item.level.toLowerCase() === selectedCategory.toLowerCase();
 
-        return (sportMatch || levelMatch || clubsMatch) && categoryMatch;
+        // Sport filter
+        const sportFilterMatch =
+          selectedSport === "all" ||
+          item.sport.toLowerCase() === selectedSport.toLowerCase();
+
+        // Age group filter
+        const ageGroupFilterMatch =
+          selectedAgeGroup === "all" ||
+          item.ageGroup.toLowerCase() === selectedAgeGroup.toLowerCase();
+
+        return (
+          (sportMatch || levelMatch || clubsMatch) &&
+          categoryMatch &&
+          sportFilterMatch &&
+          ageGroupFilterMatch
+        );
       })
       .sort((a, b) => {
-        if (sortBy === "price") {
-          // Remove $ and convert to number for sorting
+        if (sortBy === "price-asc") {
           const priceA = Number(a.price ?? 0);
           const priceB = Number(b.price ?? 0);
           return priceA - priceB;
+        }
+        if (sortBy === "price-desc") {
+          const priceA = Number(a.price ?? 0);
+          const priceB = Number(b.price ?? 0);
+          return priceB - priceA;
+        }
+        if (sortBy === "startDate-asc") {
+          const dateA = new Date(a.startDate).getTime();
+          const dateB = new Date(b.startDate).getTime();
+          return dateA - dateB;
+        }
+        if (sortBy === "startDate-desc") {
+          const dateA = new Date(a.startDate).getTime();
+          const dateB = new Date(b.startDate).getTime();
+          return dateB - dateA;
         }
         if (sortBy === "seats") {
           return b.seats - a.seats;
         }
         return 0;
       });
-  }, [packages, search, selectedCategory, sortBy]);
-
-  const categories = [
-    "all",
-    ...Array.from(new Set(packages.map((pkg) => pkg.level))),
-  ];
-
-  const sortOptions = [
-    { value: "all", label: "All" },
-    { value: "price", label: "Price" },
-    { value: "seats", label: "Seats" },
-  ];
+  }, [packages, search, selectedCategory, sortBy, selectedSport, selectedAgeGroup]);
 
   return (
     <>
@@ -153,6 +189,14 @@ const Page = () => {
                   setSortBy={setSortBy}
                   categories={categories}
                   sortOptions={sortOptions}
+                  selectedSport={selectedSport}
+                  setSelectedSport={setSelectedSport}
+                  sports={sports}
+                  selectedAgeGroup={selectedAgeGroup}
+                  setSelectedAgeGroup={setSelectedAgeGroup}
+                  ageGroups={ageGroups}
+                  noOfFilters={5}
+                  title="Level"
                 />
               </div>
               <div>
@@ -176,7 +220,7 @@ const Page = () => {
                       <PackageCard
                         key={item.id}
                         item={item}
-                        onDelete={handleDelete}
+                        // onDelete={handleDelete}
                       />
                     ))}
                   </div>

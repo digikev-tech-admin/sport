@@ -35,7 +35,7 @@ const Page = () => {
 
       <h1 className="h2 mt-2">Add Coach</h1> 
       <div>
-      <CoacheForm id={""} /> 
+      <CoacheForm id={""} isEditing={true} /> 
       </div>
 
     </section>

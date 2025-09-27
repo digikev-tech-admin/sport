@@ -11,12 +11,13 @@ import {
 import { Coach } from "@/types/types";
 // import { coaches as initialCoaches } from "@/data/constants";
 import Filters from "@/components/AllFilters";
-import { Frown, Plus } from "lucide-react";
+import { Frown, Loader2, Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 import { useRouter } from "next/navigation";
 import CoachCard from "@/components/Coache/CoacheCard";
 import { deleteCoach, getAllCoaches } from "@/api/coach";
 import toast from "react-hot-toast";
+import Loader from "@/components/shared/Loader";
 
 
 
@@ -26,6 +27,7 @@ const Page = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("all");
   const route = useRouter()
+  const [loading, setLoading] = useState(true);
 
 
 
@@ -45,6 +47,7 @@ const Page = () => {
 
     useEffect(() => {
       const fetchCoaches = async () => {
+        setLoading(true);
         try {
           const coaches = await getAllCoaches();
           console.log("Coaches fetched:", coaches);
@@ -56,6 +59,7 @@ const Page = () => {
             clubs: coach.locationIds?.map((location: any) => location?.address+ " , " + location?.city + " , " + location?.state),
             specializations: coach.stats?.specializations || [],
             rating: 3,
+            experience: coach.stats?.yearsOfExperience || 0,
             // averageRating: coach.averageRating,
             reviews: 20,
           }));
@@ -63,6 +67,8 @@ const Page = () => {
           console.log(formattedCoaches);
         } catch (error) {
           console.error("Error fetching coaches:", error);
+        } finally {
+          setLoading(false);
         }
       };
       fetchCoaches();
@@ -152,9 +158,13 @@ const Page = () => {
                   sortOptions={sortOptions}
                 />
               </div>
-              <div>
+              <div className="">
                 <h3 className="text-[#742193] font-semibold  "> All Coaches</h3>
-             {filteredCoaches.length === 0 ? (
+             {loading ? (
+              <div className="flex justify-center items-center gap-2">
+                <Loader/>
+              </div>
+             ) : filteredCoaches.length === 0 ? (
               <>
               <div className="flex justify-center items-center gap-2">
               <Frown className="darkText"/>

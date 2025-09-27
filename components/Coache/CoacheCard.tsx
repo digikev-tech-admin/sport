@@ -1,8 +1,7 @@
 import React from "react";
-import { MapPin, Trophy, Trash2, SquarePen, Eye } from "lucide-react";
+import {  Trophy, UserRoundCog  } from "lucide-react";
 import Image from "next/image";
 import { Coach } from "@/types/types";
-import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 
 interface CoachCardProps {
@@ -52,23 +51,18 @@ function renderStars(rating: number) {
 
 const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
   const router = useRouter();
-  const handleDelete = () => {
-    onDelete(coach.id);
-  };
 
-  const handleEdit = () => {
-    router.push(`/coaches/${coach.id}`);
-  };
 
   const handleCardClick = () => {
-    // Navigate to a detailed view page
-    router.push(`/coaches/${coach.id}/view`);
+    router.push(`/coaches/${coach.id}`);
   };
 
 
   return (
 
-    <div className="bg-white rounded-2xl shadow border border-gray-200 p-4 gap-4  max-w-xl w-full">
+    <div className="bg-white rounded-2xl shadow border border-gray-200 p-4 gap-4  max-w-xl w-full cursor-pointer"
+    onClick={handleCardClick}
+    >
       
       <div className="flex flex-col w-full sm:flex-row  gap-4 items-center sm:items-start">
       <div className="w-full sm:w-[120px] h-[120px] rounded-xl overflow-hidden flex-shrink-0">
@@ -88,35 +82,35 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
                 {coach.name}
               </h3>
               <div className="flex items-center gap-2">
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleDelete}
                   className="text-[red] hover:text-red-700 hover:bg-red-50 font-medium px-1"
                 >
                   <Trash2 className="text-[red] hover:text-red-700" />
-                </Button>
-                <Button
+                </Button> */}
+                {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleEdit}
                   className="text-[blue] hover:text-blue-700 hover:bg-blue-50 font-medium px-1"
                 >
                   <SquarePen className="text-[blue] hover:text-blue-700" />
-                </Button>
-                <Button
+                </Button> */}
+                {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleCardClick}
                   className="text-[#742193] hover:text-[#581770] hover:bg-[#742193]/10 font-medium px-1"
                 >
                   <Eye className="text-[#742193] hover:text-[#581770]" />
-                </Button>
+                </Button> */}
               </div>
             </div>
             <div className="flex items-center text-gray-600 text-sm mb-1">
-              <MapPin className="w-4 h-4 mr-1" />
-              {coach.clubs.join(", ")}
+              <UserRoundCog   className="w-4 h-4 mr-1" />
+              {coach.experience} years experience
             </div>
           </div>
         </div>
@@ -141,7 +135,7 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
         </div> */}
       </div>
       </div>
-      <div className="mt-2 flex items-center gap-2 flex-wrap">
+      {/* <div className="mt-2 flex items-center gap-2 flex-wrap">
         <span className="text-[#742193] font-bold text-sm flex items-center">
           <span className="mr-1">⚡</span> Specializations:
         </span>
@@ -153,7 +147,7 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
             <span className="text-gray-800 text-sm font-medium">{specialization}</span>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

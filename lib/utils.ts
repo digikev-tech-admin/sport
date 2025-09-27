@@ -88,3 +88,19 @@ export function makeLinksClickable(text: string): React.ReactNode {
     return part;
   });
 }
+
+
+
+export const formatDateTimeForPackage = (dateString: string) => {
+  if(!dateString) return "";
+  const date = new Date(dateString);
+  return format(date, 'EEE, dd-MMM');
+};
+
+export const formatTime = (dateString: string): string => {
+  if(!dateString) return "";
+  const date = new Date(dateString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};

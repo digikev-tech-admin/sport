@@ -26,10 +26,12 @@ interface TimeSlot {
 
 export const WeeklyScheduleComponent = ({ 
     value, 
-    onChange 
+    onChange,
+    disabled
   }: { 
     value: WeeklySchedule;
     onChange: (schedule: WeeklySchedule) => void;
+    disabled?: boolean;
   }) => {
     const handleTimeChange = (day: string, field: "startTime" | "endTime", time: string) => {
       const newSchedule = { ...value };
@@ -70,6 +72,7 @@ export const WeeklyScheduleComponent = ({
                       : "bg-gray-100 text-gray-700 hover:bg-purple-100"}
                   `}
                   onClick={() => toggleDay(day)}
+                  disabled={disabled}
                 >
                   {day}
                 </button>
@@ -82,6 +85,7 @@ export const WeeklyScheduleComponent = ({
                         value={value[day].startTime}
                         onChange={(e) => handleTimeChange(day, "startTime", e.target.value)}
                         className="w-28 border-gray-300"
+                        disabled={disabled}
                       />
                     </div>
                     <span className="text-gray-500 font-medium">to</span>
@@ -91,6 +95,7 @@ export const WeeklyScheduleComponent = ({
                         value={value[day].endTime}
                         onChange={(e) => handleTimeChange(day, "endTime", e.target.value)}
                         className="w-28 border-gray-300"
+                        disabled={disabled}
                       />
                       {/* <Clock className="h-4 w-4 text-gray-400" /> */}
                     </div>

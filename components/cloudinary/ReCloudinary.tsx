@@ -21,6 +21,7 @@ interface CloudinaryProps {
 
     isAlwaysBtn?: boolean;
     isImgPreview?: boolean;
+    disabled?: boolean;
 }
 
 const ReCloudinary: React.FC<CloudinaryProps> = ({ 
@@ -34,7 +35,8 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
     btnIcon = <Plus className="w-4 h-4" />, 
     isImgPreview = true, 
     isAlwaysBtn, 
-    onSuccess 
+    onSuccess,
+    disabled = false
 }) => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl ?? null)
 
@@ -74,6 +76,7 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
                             variant="outline"
                             className={` ${btnClassName}`}
                             onClick={() => open()}
+                            disabled={disabled}
                         >
                             {btnIcon}
                             {btnText}
@@ -93,6 +96,7 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
                                 type="button"
                                 className="absolute -top-1 -right-1 bg-white rounded-full hover:rotate-180 transition hover:scale-110 transform focus:outline-none"
                                 onClick={() => setPreviewUrl(null)}
+                                disabled={disabled}
                             >
                                 <IoIosCloseCircleOutline className="text-blueCustom size-4 sm:size-5" />
                             </button>

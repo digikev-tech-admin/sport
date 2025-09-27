@@ -22,6 +22,7 @@ import { getAllLocations } from "@/api/location";
 export interface LocationOption {
   id: string | number;
   name: string;
+  
 }
 
 // this is a dropdown for the location 
@@ -30,11 +31,13 @@ export function LocationDropdown({
   onChange,
   placeholder = "Select...",
   searchPlaceholder = "Search...",
+  disabled = false,
 }: {
   value: string;
   onChange: (selected: string) => void;
   placeholder?: string;
   searchPlaceholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   const [locationData, setLocationData] = React.useState<LocationOption[]>([]);
@@ -70,7 +73,8 @@ export function LocationDropdown({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between truncate capitalize" 
+            className="w-full justify-between truncate capitalize " 
+            disabled={disabled}
           >
             {selectedLocation?.name || placeholder}
             <ChevronsUpDown className="opacity-50" />
@@ -91,6 +95,7 @@ export function LocationDropdown({
                       setSelectedLocation(opt);
                       setOpen(false);
                     }}
+                    disabled={disabled}
                   >
                     <span className="truncate">{opt.name}</span>
                     <Check

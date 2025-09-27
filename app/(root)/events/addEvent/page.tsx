@@ -35,7 +35,7 @@ const Page = () => {
 
       <h1 className="h2 mt-2">Add Event</h1>
       <div>
-      <EventForm id={""} /> 
+      <EventForm id={""} isEditing={true} /> 
       </div>
 
     </section>

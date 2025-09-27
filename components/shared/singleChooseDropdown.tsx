@@ -29,12 +29,14 @@ export function SingleSelect({
   onChange,
   placeholder = "Select...",
   searchPlaceholder = "Search...",
+  disabled = false,
 }: {
   options: SingleSelectOption[];
   value: string;
   onChange: (selected: string) => void;
   placeholder?: string;
   searchPlaceholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -47,7 +49,8 @@ export function SingleSelect({
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between truncate capitalize" 
-          >
+            disabled={disabled}
+            >
             {value || placeholder}
             <ChevronsUpDown className="opacity-50" />
           </Button>
@@ -67,6 +70,7 @@ export function SingleSelect({
                       setOpen(false);
                     }}
                     className="cursor-pointer"
+                    disabled={disabled}
                   >
                     <span className="truncate">{opt.name}</span>
                     <Check

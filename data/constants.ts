@@ -1,61 +1,61 @@
 import { Coach, Event } from "@/types/types";
 
-export const events: Event[] = [
-    {
-        id: '1',
-        title: 'Run For Cancer Event',
-        imageUrl: '/lovable-uploads/run-for-cancer.jpg',
-        date: 'May 22, 2023',
-        location: '123 Oak Street, CA 98765',
-        interested: 4700,
-        sport: 'Running'
-    },
-    {
-        id: '2',
-        title: 'Community Yoga Day',
-        imageUrl: '/lovable-uploads/community-yoga.jpg',
-        date: 'June 10, 2023',
-        location: '456 Maple Avenue, CA 90001',
-        interested: 3200,
-        sport: 'Yoga'
-    },
-    {
-        id: '3',
-        title: 'Charity Football Match',
-        imageUrl: '/lovable-uploads/charity-football.jpg',
-        date: 'July 5, 2023',
-        location: '789 Stadium Road, CA 90210',
-        interested: 5100,
-        sport: 'Football'
-    },
-    {
-        id: '4',
-        title: 'Health Awareness Walk',
-        imageUrl: '/lovable-uploads/health-walk.jpg',
-        date: 'August 15, 2023',
-        location: '321 Park Lane, CA 90300',
-        interested: 2800,
-        sport: 'Walking'
-    },
-    {
-        id: '5',
-        title: 'Kids Fun Run',
-        imageUrl: '/lovable-uploads/kids-fun-run.jpg',
-        date: 'September 2, 2023',
-        location: '654 Playground Blvd, CA 90400',
-        interested: 1500,
-        sport: 'Golf'
-    },
-    {
-        id: '6',
-        title: 'Senior Fitness Meetup',
-        imageUrl: '/lovable-uploads/senior-fitness.jpg',
-        date: 'October 20, 2023',
-        location: '987 Wellness St, CA 90500',
-        interested: 900,
-        sport: 'Fitness'
-    }
-  ];
+// export const events: Event[] = [
+//     {
+//         id: '1',
+//         title: 'Run For Cancer Event',
+//         imageUrl: '/lovable-uploads/run-for-cancer.jpg',
+//         date: 'May 22, 2023',
+//         location: '123 Oak Street, CA 98765',
+//         interested: 4700,
+//         sport: 'Running'
+//     },
+//     {
+//         id: '2',
+//         title: 'Community Yoga Day',
+//         imageUrl: '/lovable-uploads/community-yoga.jpg',
+//         date: 'June 10, 2023',
+//         location: '456 Maple Avenue, CA 90001',
+//         interested: 3200,
+//         sport: 'Yoga'
+//     },
+//     {
+//         id: '3',
+//         title: 'Charity Football Match',
+//         imageUrl: '/lovable-uploads/charity-football.jpg',
+//         date: 'July 5, 2023',
+//         location: '789 Stadium Road, CA 90210',
+//         interested: 5100,
+//         sport: 'Football'
+//     },
+//     {
+//         id: '4',
+//         title: 'Health Awareness Walk',
+//         imageUrl: '/lovable-uploads/health-walk.jpg',
+//         date: 'August 15, 2023',
+//         location: '321 Park Lane, CA 90300',
+//         interested: 2800,
+//         sport: 'Walking'
+//     },
+//     {
+//         id: '5',
+//         title: 'Kids Fun Run',
+//         imageUrl: '/lovable-uploads/kids-fun-run.jpg',
+//         date: 'September 2, 2023',
+//         location: '654 Playground Blvd, CA 90400',
+//         interested: 1500,
+//         sport: 'Golf'
+//     },
+//     {
+//         id: '6',
+//         title: 'Senior Fitness Meetup',
+//         imageUrl: '/lovable-uploads/senior-fitness.jpg',
+//         date: 'October 20, 2023',
+//         location: '987 Wellness St, CA 90500',
+//         interested: 900,
+//         sport: 'Fitness'
+//     }
+//   ];
 
 // export const coaches: Coach[] = [
 //   {
@@ -260,4 +260,44 @@ export const sportsOptions = [
   {id: 22, name: "Chess"},
   {id: 23, name: "Volleyball"},
   {id: 24, name: "Baseball"},
+];
+
+
+
+export const dummyUsers = [
+    
+  {
+    id: "1",
+    name: "Ravi Mishra",
+    email: "ravi@gmail.com",
+    phone: "987-654-3210",
+    level: "Intermediate",
+    ageGroup: "26-35",
+    avatar: "https://github.com/shadcn.png",
+    price: "£150",
+    status: "Active",
+  },
+  {
+    id: "2",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "123-456-7890",
+    level: "Beginner",
+    ageGroup: "18-25",
+    avatar: "https://github.com/shadcn.png",
+    price: "£100",
+    status: "Active",
+  },
+  {
+    id: "3",
+    name: "Jane Smith",
+    email: "jane.smith@example.com",
+    phone: "987-654-3210",
+    level: "Intermediate",
+    ageGroup: "26-35",
+    avatar: "https://github.com/shadcn.png",
+    price: "£150",
+    status: "Inactive",
+  },
+
 ];

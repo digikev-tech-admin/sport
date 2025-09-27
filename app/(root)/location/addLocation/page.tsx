@@ -35,7 +35,7 @@ const Page = () => {
 
       <h1 className="h2 mt-2">Add Location</h1> 
       <div>
-      <LocationForm id={""} /> 
+      <LocationForm id={""} isEditing={true} /> 
       </div>
 
     </section>

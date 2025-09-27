@@ -35,7 +35,7 @@ const Page = () => {
 
       <h1 className="h2 mt-2">Add Package</h1> 
       <div>
-      <PackageForm id={""} /> 
+      <PackageForm id={""} isEditing={true} /> 
       </div>
 
     </section>
