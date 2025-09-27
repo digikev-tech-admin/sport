@@ -30,11 +30,13 @@ export function SingleCoachDropdown({
   onChange,
   placeholder = "Select...",
   searchPlaceholder = "Search...",
+  disabled = false,
 }: {
   value: string;
   onChange: (selected: string) => void;
   placeholder?: string;
   searchPlaceholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   const [coachData, setCoachData] = React.useState<CoachOption[]>([]);
@@ -71,6 +73,7 @@ export function SingleCoachDropdown({
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between truncate capitalize" 
+            disabled={disabled}
           >
             {selectedCoach?.name || placeholder}
             <ChevronsUpDown className="opacity-50" />
@@ -91,6 +94,7 @@ export function SingleCoachDropdown({
                       setSelectedCoach(opt);
                       setOpen(false);
                     }}
+                    disabled={disabled}
                   >
                     <span className="truncate">{opt.name}</span>
                     <Check

@@ -111,7 +111,7 @@ const Page = () => {
   };
 
   return (
-    <section className="h-auto   p-7">
+    <section className="h-auto   p-2 sm:p-7">
       <div className="container mx-auto">
         <div>
           <Breadcrumb>

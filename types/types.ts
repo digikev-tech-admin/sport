@@ -2,7 +2,8 @@ export interface Event {
     id: string;
     title: string;
     imageUrl: string;
-    date: string;
+    toDate: string;
+    fromDate: string;
     location: string;
     interested: number;
     sport: string;
@@ -20,6 +21,7 @@ export interface Event {
     rating: number;   // e.g., 4.5
     reviews: number;  // e.g., 1872
     isFavorite: boolean; // true if the coach is marked as favorite
+    experience?: number;
   }
 
   export interface Package {
@@ -29,11 +31,14 @@ export interface Event {
     clubs: string;
     ageGroup: string;
     startDate: string;
+    endDate: string;
     price: string;
     seats: number;
     enrolled: number;
     duration: number;
     locationId?: string;
+    coachName: string;
+    title: string;
   }
   
   // export interface Package {

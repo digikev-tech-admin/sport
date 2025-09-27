@@ -14,7 +14,7 @@ const Page = () => {
     
   
   return (
-    <section className="bg-[#f9f9f9] h-50 p-2 sm:p-4 xl:p-8">
+    <section className="bg-[#f9f9f9] h-50 p-1 sm:p-4 xl:p-8">
       <div>
         <Breadcrumb>
           <BreadcrumbList>
@@ -35,7 +35,7 @@ const Page = () => {
 
       <h1 className="h2 mt-2">Add Package</h1> 
       <div>
-      <PackageForm id={""} /> 
+      <PackageForm id={""} isEditing={true} /> 
       </div>
 
     </section>

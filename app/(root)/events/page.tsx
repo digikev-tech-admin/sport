@@ -21,7 +21,8 @@ export interface Event {
   id: string;
   title: string;
   imageUrl: string;
-  date: string;
+  toDate: string;
+  fromDate: string;
   location: string;
   interested: number;
   sport: string;
@@ -57,13 +58,9 @@ const Page = () => {
           id: event?._id,
           title: event?.title,
           imageUrl: event?.image,
-          date: event?.eventDate,
-          location:
-            event?.locationId?.address +
-            ", " +
-            event?.locationId?.city +
-            ", " +
-            event?.locationId?.state,
+          toDate: event?.toDate,
+          fromDate: event?.fromDate,
+          location:event?.locationId?.city,
           sport: event?.sport,
           ageGroup: event?.ageGroup,
           interested: event?.enrolledCount,
@@ -94,7 +91,7 @@ const Page = () => {
       )
       .sort((a, b) => {
         if (sortBy === "date") {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          return new Date(b.toDate).getTime() - new Date(a.toDate).getTime();
         }
         if (sortBy === "interested") {
           return b.interested - a.interested;
@@ -167,7 +164,7 @@ const Page = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-2  gap-5 mb-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4  gap-4 mb-5">
                     {/* lg:grid-cols-3 */}
                     {filteredEvents.map((event) => (
                       <EventCard

@@ -108,7 +108,7 @@ const AdminDetails = ({ id }: { id: string }) => {
 
   if (loaded) return <span>Loading....</span>
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm ">
+    <div className="bg-white p-2 sm:p-6 rounded-lg shadow-sm ">
       <div className="space-y-6">
         <div className="flex items-start gap-6">
           <div className=" ">

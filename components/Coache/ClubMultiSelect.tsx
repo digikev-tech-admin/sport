@@ -29,12 +29,14 @@ export function MultiSelect({
   onChange,
   placeholder = "Select...",
   searchPlaceholder = "Search...",
+  disabled = false,
 }: {
   options: MultiSelectOption[];
   value: string[];
   onChange: (selected: string[]) => void;
   placeholder?: string;
   searchPlaceholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -55,8 +57,9 @@ export function MultiSelect({
             {val}
             <button
               type="button"
-              className="ml-2 text-gray-400 hover:text-red-500"
+              className="ml-2 text-gray-400 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => onChange(value.filter((v) => v !== val))}
+              disabled={disabled}
             >
               <X className="w-4 h-4" />
             </button>
@@ -71,6 +74,7 @@ export function MultiSelect({
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between" 
+            disabled={disabled}
           >
             {placeholder}
             <ChevronsUpDown className="opacity-50" />
