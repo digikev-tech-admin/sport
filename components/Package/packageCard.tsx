@@ -35,11 +35,11 @@ const PackageCard = ({ item }: PackageCardProps) => {
     onClick={handleCardClick}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap- truncate">
           {/* <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-200">
              <Trophy className="w-5 h-5 text-[#742193]"/>
           </div> */}
-          <span className="text-lg font-semibold text-gray-900 truncate">{item.title}</span>
+          <span className="text-lg font-semibold text-gray-900 ">{item.title}</span>
         </div>
         <span className={`${item.level === 'advanced' ? 'bg-red-600' : item.level === 'intermediate' ? 'bg-orange-400' : 'bg-green-400'} text-gray-900 font-semibold rounded-full px-4 py-1 text-sm shadow border border-gray-200`}>
           {item?.level}

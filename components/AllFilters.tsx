@@ -48,7 +48,7 @@ const Filters: React.FC<FiltersProps> = ({
   noOfFilters = 3,
 }) => {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-${noOfFilters} gap-4`}>
+    <div className={`grid grid-cols-1 gap-4 ${noOfFilters === 3 ? "md:grid-cols-3" : "md:grid-cols-5"}`}>
       <div>
         <h3 className="text-[#742193] font-semibold text-sm">Search</h3>
         <Input

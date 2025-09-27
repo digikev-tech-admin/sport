@@ -60,47 +60,49 @@ export const WeeklyScheduleComponent = ({
             {daysOfWeek.map((day) => (
               <div
                 key={day}
-                className={`flex items-center gap-2 p-2 rounded-lg transition
+                className={`p-2 rounded-lg transition
                   ${value[day] ? "bg-purple-50 border border-purple-200" : "hover:bg-gray-50"}
                 `}
               >
-                <button
-                  type="button"
-                  className={`capitalize font-medium px-3 py-1 rounded transition
-                    ${value[day]
-                      ? "bg-purple-600 text-white shadow"
-                      : "bg-gray-100 text-gray-700 hover:bg-purple-100"}
-                  `}
-                  onClick={() => toggleDay(day)}
-                  disabled={disabled}
-                >
-                  {day}
-                </button>
-                {value[day] && (
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <Input
-                        type="time"
-                        value={value[day].startTime}
-                        onChange={(e) => handleTimeChange(day, "startTime", e.target.value)}
-                        className="w-28 border-gray-300"
-                        disabled={disabled}
-                      />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <button
+                    type="button"
+                    className={`capitalize font-medium px-3 py-1 rounded transition w-full sm:w-auto
+                      ${value[day]
+                        ? "bg-purple-600 text-white shadow"
+                        : "bg-gray-100 text-gray-700 hover:bg-purple-100"}
+                    `}
+                    onClick={() => toggleDay(day)}
+                    disabled={disabled}
+                  >
+                    {day}
+                  </button>
+                  {value[day] && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <Input
+                          type="time"
+                          value={value[day].startTime}
+                          onChange={(e) => handleTimeChange(day, "startTime", e.target.value)}
+                          className="w-full sm:w-28 border-gray-300"
+                          disabled={disabled}
+                        />
+                      </div>
+                      <span className="text-gray-500 font-medium text-center sm:text-left">to</span>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="time"
+                          value={value[day].endTime}
+                          onChange={(e) => handleTimeChange(day, "endTime", e.target.value)}
+                          className="w-full sm:w-28 border-gray-300"
+                          disabled={disabled}
+                        />
+                        {/* <Clock className="h-4 w-4 text-gray-400" /> */}
+                      </div>
                     </div>
-                    <span className="text-gray-500 font-medium">to</span>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="time"
-                        value={value[day].endTime}
-                        onChange={(e) => handleTimeChange(day, "endTime", e.target.value)}
-                        className="w-28 border-gray-300"
-                        disabled={disabled}
-                      />
-                      {/* <Clock className="h-4 w-4 text-gray-400" /> */}
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
           </div>

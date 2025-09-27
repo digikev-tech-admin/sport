@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { getAdminData } from "@/config/token";
+import { useLayout } from "@/contexts/LayoutContext";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -39,6 +40,7 @@ const navItems = [
 export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState("Dashboard");
+  const { closeMobileMenu, isMobile } = useLayout();
 
   const pathname = usePathname();
 
@@ -51,16 +53,26 @@ export const Sidebar = () => {
       setActiveItem(foundItem.label);
     }
   }, [pathname,router]);
+  
   const admin = useMemo(() => getAdminData(), []);  
   // console.log({admin});
 
+  const handleNavClick = (itemLabel: string) => {
+    setActiveItem(itemLabel);
+    // Close mobile menu if on mobile
+    if (isMobile) {
+      closeMobileMenu();
+    }
+  };
+
 
   return (
-    <div className="relative h-[calc(100vh-3.5rem)]">
+    <div className="relative h-screen md:h-[calc(100vh-3.5rem)]">
       <div
         className={cn(
           "h-full bg-white border-r border-gray-200 transition-all duration-300 ease-in-out z-50",
-          isCollapsed ? "w-[60px]" : "w-[240px]"
+          isCollapsed ? "w-[60px]" : "w-[240px]",
+          "md:relative md:translate-x-0" // Ensure desktop sidebar is always visible
         )}
       >
         {/* Profile Section */}
@@ -75,7 +87,10 @@ export const Sidebar = () => {
               <div className="flex flex-col">
                 <span className="text-sm font-medium ml-3">{admin?.name ?? "Admin"}</span>
                 <Link href={`/administrator/${admin?._id ?? ''}?isProfile=true`}>
-                <Button className="bg-[white] text-xs text-gray-500 h-[20px] hover:bg-gray-50">
+                <Button 
+                  className="bg-[white] text-xs text-gray-500 h-[20px] hover:bg-gray-50"
+                  onClick={() => isMobile && closeMobileMenu()}
+                >
                 View Profile
                 </Button>
                 </Link>
@@ -97,7 +112,7 @@ export const Sidebar = () => {
                   ? "text-[#742193] commonBG"
                   : "text-[black] hover:text-[#742193] hover:bg-gray-50"
               )}
-              onClick={() => setActiveItem(item.label)}
+              onClick={() => handleNavClick(item.label)}
             >
               <item.icon
                 size={20}
@@ -124,9 +139,9 @@ export const Sidebar = () => {
           </Link>
         </div> */}
 
-        {/* Collapse Button */}
+        {/* Collapse Button - Hidden on mobile */}
         <button
-          className="absolute -right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 rounded-full borderColor commonDarkBG text-[white] shadow-sm flex items-center justify-center"
+          className="absolute -right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 rounded-full borderColor commonDarkBG text-[white] shadow-sm items-center justify-center hidden md:flex"
           onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? (

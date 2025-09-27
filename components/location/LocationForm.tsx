@@ -286,11 +286,11 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
     <div className="flex items-center justify-center py-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full min-w-xl bg-white rounded-xl border p-8 space-y-6"
+        className="w-full min-w-xl bg-white rounded-xl border p-2 sm:p-8 space-y-6"
       >
         <div className="space-y-2">
           <label className="">Upload Photo</label>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="w-full border h-10 rounded-md flex items-center px-4">
               <p className="text-sm font-bold text-gray-700 opacity-70 max-w-md line-clamp-1">
                 {formData.photo

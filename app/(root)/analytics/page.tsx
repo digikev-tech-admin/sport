@@ -117,7 +117,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="hidden sm:block min-h-screen bg-gray-50 p-2 sm:p-4 xl:p-8">
+    <div className=" min-h-screen bg-gray-50 p-2 sm:p-4 xl:p-8">
       <div>
         <Breadcrumb>
           <BreadcrumbList>

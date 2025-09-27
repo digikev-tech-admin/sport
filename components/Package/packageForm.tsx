@@ -157,13 +157,13 @@ const PackageForm = ({
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-1 sm:p-4">
       {loading && id ? (
         <Loader />
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
+          className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-1 sm:p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
         >
           <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
             <div className="flex flex-col items-center w-full sm:w-40">
@@ -171,7 +171,7 @@ const PackageForm = ({
                 <Image
                   src={profileImage || "https://github.com/shadcn.png"}
                   alt="Profile"
-                  className="w-36 h-36 rounded-3xl object-cover mt-2"
+                  className="w-26 h-26 sm:h-36 sm:w-36 rounded-3xl object-cover mt-2"
                   width={112}
                   height={112}
                 />

@@ -329,14 +329,14 @@ const CoacheForm = ({
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-1 sm:p-4">
       {loading && id ? (
         <Loader />
       ) : (
         <>
           <form
             onSubmit={handleSubmit}
-            className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
+            className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-2 sm:p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
           >
             {/* Ensure input fields are editable based on isEditing */}
             <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">

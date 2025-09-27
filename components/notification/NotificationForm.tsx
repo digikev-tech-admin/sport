@@ -160,7 +160,7 @@ const NotificationForm = () => {
     <div className="flex items-center justify-center py-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-4xl bg-white rounded-xl border p-8 space-y-6"
+        className="w-full max-w-4xl bg-white rounded-xl border p-2 sm:p-8 space-y-6"
       >
         <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">Notification Title</label>

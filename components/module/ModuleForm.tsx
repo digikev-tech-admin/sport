@@ -191,14 +191,14 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
   console.log({ dates: toDate, fromDate });
 
   return (
-    <div className="flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-1 sm:p-4">
       {loading && id ? (
         <Loader />
       ) : (
         <>
           <form
             onSubmit={handleSubmit}
-            className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
+            className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-2 sm:p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
           >
             <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
               {/* Image upload and preview */}
@@ -276,7 +276,7 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
               <label className="text-sm font-bold text-gray-700">
                 From - To Date and Time
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   type="datetime-local"
                   value={fromDate}
