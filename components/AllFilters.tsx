@@ -26,6 +26,12 @@ interface FiltersProps {
   selectedAgeGroup?: string;
   setSelectedAgeGroup?: (value: string) => void;
   ageGroups?: string[];
+  selectedClub?: string;
+  setSelectedClub?: (value: string) => void;
+  clubs?: string[];
+  selectedCoach?: string;
+  setSelectedCoach?: (value: string) => void;
+  coaches?: string[];
   noOfFilters?: number;
 }
 
@@ -45,10 +51,16 @@ const Filters: React.FC<FiltersProps> = ({
   selectedAgeGroup,
   setSelectedAgeGroup,
   ageGroups,
+  selectedClub,
+  setSelectedClub,
+  clubs,
+  selectedCoach,
+  setSelectedCoach,
+  coaches,
   noOfFilters = 3,
 }) => {
   return (
-    <div className={`grid grid-cols-1 gap-4 ${noOfFilters === 3 ? "md:grid-cols-3" : "md:grid-cols-5"}`}>
+    <div className={`grid grid-cols-1 gap-4 ${noOfFilters === 3 ? "md:grid-cols-3" : "md:grid-cols-7"}`}>
       <div>
         <h3 className="text-[#742193] font-semibold text-sm">Search</h3>
         <Input
@@ -121,6 +133,41 @@ const Filters: React.FC<FiltersProps> = ({
             </SelectContent>
           </Select>
         </div>
+        {clubs && setSelectedClub && selectedClub !== undefined && (
+          <div>
+            <h3 className="text-[#742193] font-semibold text-sm">{"Club"}</h3>
+            <Select value={selectedClub} onValueChange={setSelectedClub}>
+              <SelectTrigger className="border-[#742193] focus:outline-none focus:ring-0">
+                <SelectValue placeholder="Select club" />
+              </SelectTrigger>
+              <SelectContent>
+                {clubs.map((club) => (
+                  <SelectItem key={club} value={club} onClick={(e) => e.stopPropagation()}>
+                    {club}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {coaches && setSelectedCoach && selectedCoach !== undefined && (
+          <div>
+            <h3 className="text-[#742193] font-semibold text-sm">{"Coach"}</h3>
+            <Select value={selectedCoach} onValueChange={setSelectedCoach}>
+              <SelectTrigger className="border-[#742193] focus:outline-none focus:ring-0">
+                <SelectValue placeholder="Select coach" />
+              </SelectTrigger>
+              <SelectContent>
+                {coaches.map((coach) => (
+                  <SelectItem key={coach} value={coach} onClick={(e) => e.stopPropagation()}>
+                    {coach}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         </>
       )}
     

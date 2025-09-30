@@ -25,6 +25,8 @@ const Page = () => {
   const [sortBy, setSortBy] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
   const [selectedAgeGroup, setSelectedAgeGroup] = useState("all");
+  const [selectedClub, setSelectedClub] = useState("all");
+  const [selectedCoach, setSelectedCoach] = useState("all");
 
   const route = useRouter();
 
@@ -46,18 +48,13 @@ const Page = () => {
           duration: item?.duration,
           startDate: item?.sessionDates?.[0],
           endDate: item?.sessionDates?.[1],
-          coachName: item?.coachId?.name,
+          coachName: item?.coachId?.name || "unknown",
         
           price: item?.price?.base,
           seats: item?.seatsCount,
           enrolled: item?.enrolledCount,
           locationId: item?.locationId?._id,
-          clubs:
-            item?.locationId?.address +
-            ", " +
-            item?.locationId?.city +
-            ", " +
-            item?.locationId?.state,
+          clubs:item?.locationId?.title
         }));
         // console.log("Formatted packages:", formattedPackages);
         setPackages(formattedPackages);
@@ -85,6 +82,16 @@ const Page = () => {
     "adults"
   ];
 
+  const clubs = [
+    "all",
+    ...Array.from(new Set(packages.map((pkg) => pkg.clubs).filter(Boolean)))
+  ];
+
+  const coaches = [
+    "all",
+    ...Array.from(new Set(packages.map((pkg) => pkg.coachName).filter(Boolean)))
+  ];
+
   const sortOptions = [
     { value: "all", label: "All" },
     { value: "price-asc", label: "Price (Low to High)" },
@@ -96,31 +103,47 @@ const Page = () => {
   const filteredPackages = useMemo(() => {
     return packages
       .filter((item) => {
-        const searchLower = search.toLowerCase();
-        const sportMatch = item.sport.toLowerCase().includes(searchLower);
-        const levelMatch = item.level.toLowerCase().includes(searchLower);
-        const clubsMatch = item.clubs.toLowerCase().includes(searchLower);
+        console.log("item",item);
+        
+        const searchLower = (search ?? "").toLowerCase();
+        const sportMatch = String(item?.sport ?? "").toLowerCase().includes(searchLower);
+        const title = String(item?.title ?? "").toLowerCase().includes(searchLower);
+        const levelMatch = String(item?.level ?? "").toLowerCase().includes(searchLower);
+        const clubsMatch = String(item?.clubs ?? "").toLowerCase().includes(searchLower);
+        const coachMatch = String(item?.coachName ?? "").toLowerCase().includes(searchLower);
 
         // Category filter by level
         const categoryMatch =
           selectedCategory === "all" ||
-          item.level.toLowerCase() === selectedCategory.toLowerCase();
+          String(item?.level ?? "").toLowerCase() === String(selectedCategory ?? "").toLowerCase();
 
         // Sport filter
         const sportFilterMatch =
           selectedSport === "all" ||
-          item.sport.toLowerCase() === selectedSport.toLowerCase();
+          String(item?.sport ?? "").toLowerCase() === String(selectedSport ?? "").toLowerCase();
 
         // Age group filter
         const ageGroupFilterMatch =
           selectedAgeGroup === "all" ||
-          item.ageGroup.toLowerCase() === selectedAgeGroup.toLowerCase();
+          String(item?.ageGroup ?? "").toLowerCase() === String(selectedAgeGroup ?? "").toLowerCase();
+
+        // Club filter
+        const clubFilterMatch =
+          selectedClub === "all" ||
+          String(item?.clubs ?? "").toLowerCase() === String(selectedClub ?? "").toLowerCase();
+
+        // Coach filter
+        const coachFilterMatch =
+          selectedCoach === "all" ||
+          String(item?.coachName ?? "").toLowerCase() === String(selectedCoach ?? "").toLowerCase();
 
         return (
-          (sportMatch || levelMatch || clubsMatch) &&
+          (title || sportMatch || levelMatch || clubsMatch || coachMatch) &&
           categoryMatch &&
           sportFilterMatch &&
-          ageGroupFilterMatch
+          ageGroupFilterMatch &&
+          clubFilterMatch &&
+          coachFilterMatch
         );
       })
       .sort((a, b) => {
@@ -135,21 +158,23 @@ const Page = () => {
           return priceB - priceA;
         }
         if (sortBy === "startDate-asc") {
-          const dateA = new Date(a.startDate).getTime();
-          const dateB = new Date(b.startDate).getTime();
+          const dateA = a?.startDate ? new Date(a.startDate).getTime() : 0;
+          const dateB = b?.startDate ? new Date(b.startDate).getTime() : 0;
           return dateA - dateB;
         }
         if (sortBy === "startDate-desc") {
-          const dateA = new Date(a.startDate).getTime();
-          const dateB = new Date(b.startDate).getTime();
+          const dateA = a?.startDate ? new Date(a.startDate).getTime() : 0;
+          const dateB = b?.startDate ? new Date(b.startDate).getTime() : 0;
           return dateB - dateA;
         }
         if (sortBy === "seats") {
-          return b.seats - a.seats;
+          const seatsA = Number(a.seats ?? 0);
+          const seatsB = Number(b.seats ?? 0);
+          return seatsB - seatsA;
         }
         return 0;
       });
-  }, [packages, search, selectedCategory, sortBy, selectedSport, selectedAgeGroup]);
+  }, [packages, search, selectedCategory, sortBy, selectedSport, selectedAgeGroup, selectedClub, selectedCoach]);
 
   return (
     <>
@@ -197,6 +222,12 @@ const Page = () => {
                   ageGroups={ageGroups}
                   noOfFilters={5}
                   title="Level"
+                  selectedClub={selectedClub}
+                  setSelectedClub={setSelectedClub}
+                  clubs={clubs}
+                  selectedCoach={selectedCoach}
+                  setSelectedCoach={setSelectedCoach}
+                  coaches={coaches}
                 />
               </div>
               <div>

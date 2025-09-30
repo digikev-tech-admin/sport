@@ -7,16 +7,16 @@ import { MultiSelect } from "./ClubMultiSelect";
 import { MultipleLocationDropdown } from "../shared/MultipleLocationDrodown";
 import { getAllLocations } from "@/api/location";
 import { LocationOption } from "../shared/LocationDropdown";
-import { Frown, RefreshCcw, Trash2 } from "lucide-react";
+import {  RefreshCcw, Trash2 } from "lucide-react";
 import { ReCloudinary } from "../cloudinary";
 import { createCoach, getCoachById, updateCoach } from "@/api/coach";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 // import { Package } from "@/types/types";
-import { getAllPackages } from "@/api/package";
+// import { getAllPackages } from "@/api/package";
 import Loader from "../shared/Loader";
 import ButtonLoader from "../shared/ButtonLoader";
-import PackageCard from "../Package/packageCard";
+// import PackageCard from "../Package/packageCard";
 
 // const clubOptions = [
 //   { id: 1, name: "Elite Ortho Club" },
@@ -92,7 +92,7 @@ const CoacheForm = ({
   const [newSpecialization, setNewSpecialization] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
-  const [packages, setPackages] = useState<FormattedPackage[]>([]);
+  // const [packages, setPackages] = useState<FormattedPackage[]>([]);
   const [selectedPackages, setSelectedPackages] = useState<
     Array<{ id: string; name: string }>
   >([]);
@@ -126,53 +126,53 @@ const CoacheForm = ({
   //   setCertificates(certificates.filter((_, i) => i !== index));
   // };
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        console.log("coach id", id);
-        const response = await getAllPackages();
-        console.log("Packages fetched:", response);
-        const filteredPackages = response.filter(
-          (pkg: any) => pkg?.coachId?.id === id
-        );
-        console.log("Filtered packages:", filteredPackages);
+  // useEffect(() => {
+  //   const fetchPackages = async () => {
+  //     try {
+  //       console.log("coach id", id);
+  //       const response = await getAllPackages();
+  //       console.log("Packages fetched:", response);
+  //       const filteredPackages = response.filter(
+  //         (pkg: any) => pkg?.coachId?.id === id
+  //       );
+  //       console.log("Filtered packages:", filteredPackages);
 
-        // const formattedPackages = response?.map((item: any) => ({
-        //   id: item?._id,
-        //   name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
-        // }));
-        // console.log("Formatted packages:", formattedPackages);
-        const formattedPackages = filteredPackages?.map((item: any) => ({
-          id: item?._id,
-          title: item?.title,
-          sport: item?.sport,
-          level: item?.level,
-          ageGroup: item?.ageGroup,
-          duration: item?.duration,
-          startDate: item?.sessionDates?.[0],
-          endDate: item?.sessionDates?.[1],
-          coachName: item?.coachId?.name,
+  //       // const formattedPackages = response?.map((item: any) => ({
+  //       //   id: item?._id,
+  //       //   name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
+  //       // }));
+  //       // console.log("Formatted packages:", formattedPackages);
+  //       const formattedPackages = filteredPackages?.map((item: any) => ({
+  //         id: item?._id,
+  //         title: item?.title,
+  //         sport: item?.sport,
+  //         level: item?.level,
+  //         ageGroup: item?.ageGroup,
+  //         duration: item?.duration,
+  //         startDate: item?.sessionDates?.[0],
+  //         endDate: item?.sessionDates?.[1],
+  //         coachName: item?.coachId?.name,
 
-          price: item?.price?.base,
-          seats: item?.seatsCount,
-          enrolled: item?.enrolledCount,
-          locationId: item?.locationId?._id,
-          clubs:
-            item?.locationId?.address +
-            ", " +
-            item?.locationId?.city +
-            ", " +
-            item?.locationId?.state,
-        }));
-        // console.log("Formatted packages:", formattedPackages);
-        setPackages(formattedPackages);
-        // setPackages(filteredPackages);
-      } catch (error) {
-        console.error("Error fetching packages:", error);
-      }
-    };
-    fetchPackages();
-  }, []);
+  //         price: item?.price?.base,
+  //         seats: item?.seatsCount,
+  //         enrolled: item?.enrolledCount,
+  //         locationId: item?.locationId?._id,
+  //         clubs:
+  //           item?.locationId?.address +
+  //           ", " +
+  //           item?.locationId?.city +
+  //           ", " +
+  //           item?.locationId?.state,
+  //       }));
+  //       // console.log("Formatted packages:", formattedPackages);
+  //       setPackages(formattedPackages);
+  //       // setPackages(filteredPackages);
+  //     } catch (error) {
+  //       console.error("Error fetching packages:", error);
+  //     }
+  //   };
+  //   fetchPackages();
+  // }, []);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -180,7 +180,7 @@ const CoacheForm = ({
         const locations = await getAllLocations();
         const formattedLocations = locations.map((location: any) => ({
           id: location._id,
-          name: location.address + ", " + location.city + ", " + location.state,
+          name: location?.title ,
         }));
         setLocationData(formattedLocations);
       } catch (error) {
@@ -490,43 +490,7 @@ const CoacheForm = ({
                 />
               </div>
             </div>
-            {id && (
-              <>
-                <div>
-                  <h3 className="text-[#742193] font-semibold mt-2 mb-2 ">
-                    {" "}
-                    Associated Packages
-                  </h3>
-                  {packages.length === 0 ? (
-                    <>
-                      <div className="flex justify-center items-center gap-2">
-                        <Frown className="darkText" />
-                        <p className="text-gray-500 text-center">
-                          No packages associated with this coach.
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2  gap-5 mb-5">
-                      {/* lg:grid-cols-3 */}
-                      {packages.map((item: any) => (
-                        <PackageCard
-                          key={item.id}
-                          item={item as any}
-                          // onDelete={handleDelete}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  <button
-                    className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
-                    onClick={() => (window.location.href = "/packages")}
-                  >
-                    View All Packages
-                  </button>
-                </div>
-              </>
-            )}
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="text-sm font-bold text-gray-700">
@@ -587,6 +551,23 @@ const CoacheForm = ({
                   disabled={!isEditing}
                 />
               </div>
+              {id && (
+              <>
+                <div>
+                  <h3 className="text-[#742193] font-semibold mt-2 mb-2 ">
+                    {" "}
+                    Associated Packages
+                  </h3>
+                 
+                  <button
+                    className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
+                    onClick={() => (window.location.href = "/packages")}
+                  >
+                    View All Packages
+                  </button>
+                </div>
+              </>
+            )}
             </div>
             {/* <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">Certifications</label>
@@ -697,7 +678,7 @@ const CoacheForm = ({
                   setSelectedPackages([]);
                   router.back();
                 }}
-                disabled={isSubmitting}
+                disabled={isEditing}
               >
                 Cancel
               </Button>

@@ -24,6 +24,7 @@ interface Location {
   zipCode: string;
   image: string;
   about: string;
+  title: string;
 }
 
 const Page = () => {

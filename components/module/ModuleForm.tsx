@@ -559,7 +559,7 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
                   setCapacity("");
                   router.back();
                 }}
-                // disabled={!isEditing}
+                disabled={isEditing}
               >
                 Cancel
               </Button>

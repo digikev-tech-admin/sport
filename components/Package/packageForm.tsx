@@ -449,7 +449,7 @@ const PackageForm = ({
             <Button
               type="submit"
               className="flex-1 commonDarkBG text-white hover:bg-[#581770] transition-all duration-300"
-              disabled={isSubmitting}
+              disabled={!isEditing}
             >
               {isSubmitting && id ? (
                 <ButtonLoader text="Updating..." />
@@ -466,6 +466,7 @@ const PackageForm = ({
               variant="outline"
               className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
               onClick={handleCancel}
+              disabled={isEditing}
             >
               Cancel
             </Button>
