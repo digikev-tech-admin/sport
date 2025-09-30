@@ -60,7 +60,7 @@ const Page = () => {
           imageUrl: event?.image,
           toDate: event?.toDate,
           fromDate: event?.fromDate,
-          location:event?.locationId?.city,
+          location:event?.locationId?.title,
           sport: event?.sport,
           ageGroup: event?.ageGroup,
           interested: event?.enrolledCount,

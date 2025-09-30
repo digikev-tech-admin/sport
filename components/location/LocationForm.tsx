@@ -19,12 +19,15 @@ import { getAllEvents } from "@/api/event";
 import { getAllPackages } from "@/api/package";
 import { Event } from "@/types/types";
 import { Package } from "@/types/types";
-import PackageCard from "../Package/packageCard";
-import EventCard from "../ModuleCard";
+// import PackageCard from "../Package/packageCard";
+// import EventCard from "../ModuleCard";
 
 const locationSchema = z.object({
+  title: z.string().min(1, "Please add a location title"),
+  address1: z.string().min(1, "Please add address line 1"),
+  address2: z.string().optional(),
   address: z.string().min(1, "Please add an address"),
-  image: z.string().min(1, "Please add an image"),
+  image: z.string().optional(),
   facilities: z.array(z.string()).min(1, "Please add at least one facility"),
   about: z.string().min(1, "Please add an about"),
   city: z.string().min(1, "Please add a city"),
@@ -40,7 +43,13 @@ interface FormData {
   photo: string;
 }
 
-const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
+const LocationForm = ({
+  id,
+  isEditing,
+}: {
+  id?: string;
+  isEditing?: boolean;
+}) => {
   const router = useRouter();
 
   const [facilities, setFacilities] = useState<string[]>([
@@ -172,6 +181,9 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
       try {
         const location = await getLocationById(id);
         setFormData({ photo: location.image });
+        setValue("title", location.title);
+        setValue("address1", location.address1);
+        setValue("address2", location.address2);
         setValue("address", location.address);
         setValue("city", location.city);
         setValue("state", location.state);
@@ -196,14 +208,19 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
   }, [id, setValue]);
 
   // Generate Google Static Maps API URL
-  const generateStaticMapUrl = (lat: number, lng: number, zoom: number = 15, size: string = "400x300") => {
+  const generateStaticMapUrl = (
+    lat: number,
+    lng: number,
+    zoom: number = 15,
+    size: string = "400x300"
+  ) => {
     console.log("Generating static map URL for coordinates:", { lat, lng });
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
       console.error("Google Maps API key not found");
       return null;
     }
-    
+
     const baseUrl = "https://maps.googleapis.com/maps/api/staticmap";
     const params = new URLSearchParams({
       center: `${lat},${lng}`,
@@ -212,25 +229,35 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
       markers: `color:red|${lat},${lng}`,
       key: apiKey,
     });
-    
+
     return `${baseUrl}?${params.toString()}`;
   };
 
   const onSubmit = async (data: LocationFormValues) => {
+    // console.log("image",data)
+    if(!data?.image){
+      toast.error("Please add a image.")
+      return;
+    }
     try {
       // Generate static map URL if coordinates are available
       let locationImageUrl = null;
-    if (data.latitude && data.longitude) {
-      locationImageUrl = generateStaticMapUrl(data.latitude, data.longitude);
-      if (!locationImageUrl) {
-        toast.error("Failed to generate map image. Please check API configuration.");
-        return;
+      if (data.latitude && data.longitude) {
+        locationImageUrl = generateStaticMapUrl(data.latitude, data.longitude);
+        if (!locationImageUrl) {
+          toast.error(
+            "Failed to generate map image. Please check API configuration."
+          );
+          return;
+        }
+        console.log("Generated Static Map URL:", locationImageUrl);
+        console.log("Coordinates used:", {
+          lat: data.latitude,
+          lng: data.longitude,
+        });
+      } else {
+        console.log("No coordinates available for static map generation");
       }
-      console.log("Generated Static Map URL:", locationImageUrl);
-      console.log("Coordinates used:", { lat: data.latitude, lng: data.longitude });
-    } else {
-      console.log("No coordinates available for static map generation");
-    }
       const submitData = {
         ...data,
         image: formData.photo,
@@ -248,28 +275,30 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
         toast.success("Location created successfully");
       }
 
-      // router.push("/location");
+      router.push("/location");
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to submit form");
     }
   };
 
-
   // Console logging for debugging
-  console.log("Current form values:", {
-    latitude: watch("latitude"),
-    longitude: watch("longitude"),
-    address: watch("address"),
-    city: watch("city"),
-    state: watch("state"),
-    zipCode: watch("zipCode")
-  });
-  
+  // console.log("Current form values:", {
+  //   title: watch("title"),
+  //   address1: watch("address1"),
+  //   address2: watch("address2"),
+  //   latitude: watch("latitude"),
+  //   longitude: watch("longitude"),
+  //   address: watch("address"),
+  //   city: watch("city"),
+  //   state: watch("state"),
+  //   zipCode: watch("zipCode"),
+  // });
+
   // Log when coordinates change
   const currentLat = watch("latitude");
   const currentLng = watch("longitude");
-  
+
   React.useEffect(() => {
     if (currentLat && currentLng) {
       console.log("Coordinates updated:", { lat: currentLat, lng: currentLng });
@@ -277,7 +306,9 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
       if (mapUrl) {
         console.log("Generated map URL:", mapUrl);
       } else {
-        console.warn("Failed to generate map URL: Invalid coordinates or API key");
+        console.warn(
+          "Failed to generate map URL: Invalid coordinates or API key"
+        );
       }
     }
   }, [currentLat, currentLng]);
@@ -288,69 +319,153 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full min-w-xl bg-white rounded-xl border p-2 sm:p-8 space-y-6"
       >
-        <div className="space-y-2">
-          <label className="">Upload Photo</label>
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-full border h-10 rounded-md flex items-center px-4">
-              <p className="text-sm font-bold text-gray-700 opacity-70 max-w-md line-clamp-1">
-                {formData.photo
-                  ? formData.photo.split("/").pop()
-                  : "Select a file"}
-              </p>
-            </div>
-
-            <div className="flex gap-1">
-              {formData.photo && (
-                <div className="w-10 h-10 rounded-md overflow-hidden border">
-                  <Image
-                    src={formData.photo}
-                    alt="Uploaded photo"
-                    className="w-full h-full object-cover"
-                    width={100}
-                    height={100}
-                  />
-                </div>
-              )}
-              <ReCloudinary
-                id="profilePic"
-                initialUrl={formData.photo}
-                onSuccess={(res) => {
-                  const imgUrl = res.url;
-                  setFormData((prev: FormData) => ({ ...prev, photo: imgUrl }));
-                  setValue("image", imgUrl); // Set the form value for validation
-                }}
-                btnClassName="border border-[#c858ba] bg-[#7421931A] text-sm !px-4  text-[#742193] p-1 rounded-lg"
-                btnIcon={""}
-                btnText="Choose File"
-                isAlwaysBtn
-                isImgPreview={false}
-                disabled={!isEditing}
+        <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
+          <div className="flex flex-col items-center w-full sm:w-40">
+            <div>
+              <Image
+                src={formData.photo || "https://github.com/shadcn.png"}
+                alt="Profile"
+                className="w-36 h-36 rounded-3xl object-cover mt-2"
+                width={112}
+                height={112}
               />
-              {formData.photo && (
+
+              <div className="flex justify-center gap-2 mt-2 ">
+                <ReCloudinary
+                  id="profilePic"
+                  initialUrl={formData.photo || "https://github.com/shadcn.png"}
+                  onSuccess={(res) => {
+                    const imgUrl = res.url;
+                    setFormData((prev: FormData) => ({
+                      ...prev,
+                      photo: imgUrl,
+                    }));
+                    setValue("image", imgUrl); // Set the form value for validation
+                  }}
+                  btnClassName="border border-[#c858ba] bg-[#7421931A] text-sm text-[#742193] p-1 rounded-lg"
+                  btnIcon={<RefreshCcw />}
+                  btnText=""
+                  isAlwaysBtn
+                  isImgPreview={false}
+                  disabled={!isEditing}
+                />
                 <Button
+                  type="button"
                   variant="secondary"
                   size="icon"
-                  className="border border-[#c858ba] bg-[#7421931A] text-sm  text-[#742193] p-1 rounded-lg"
-                  onClick={() => {
+                  className="border border-[#c858ba] bg-[#7421931A] text-sm text-[#742193] p-1 rounded-lg"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setFormData((prev: FormData) => ({ ...prev, photo: "" }));
-                    setValue("image", ""); // Clear the form value
+                    setValue("image", "");
                   }}
                   disabled={!isEditing}
                 >
                   <Trash2 />
                 </Button>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div className="space-y-2 col-span-2">
+              <label htmlFor="title" className="block mb-1">
+                Location Title
+              </label>
+              <input
+                id="title"
+                type="text"
+                {...register("title")}
+                className="w-full p-2 border rounded"
+                placeholder="Enter location title (e.g., Main Office, Downtown Branch)"
+                disabled={!isEditing}
+              />
+              {errors.title && (
+                <p className="text-red-500 text-sm">{errors.title.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <label htmlFor="about" className="block mb-1">
+                About
+              </label>
+              <textarea
+                id="about"
+                {...register("about")}
+                className="w-full p-2 border rounded"
+                rows={4}
+                disabled={!isEditing}
+                placeholder="Enter your description of your location..."
+              />
+              {/* <p className="text-sm text-gray-500 mt-1">
+            You can include web links in your description. They will be
+            automatically detected and made clickable.
+          </p> */}
+              {errors.about && (
+                <p className="text-red-500 text-sm">{errors.about.message}</p>
               )}
             </div>
           </div>
-          {errors.image && (
-            <p className="text-red-500 text-sm">{errors.image.message}</p>
-          )}
         </div>
-
-
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2 ">
+            <label className="text-sm font-bold text-gray-700">
+              Facilities and Other tags
+            </label>
+            <div className="flex flex-wrap gap-2 mb-2 mt-2">
+              {facilities.map((spec, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
+                >
+                  <span>{spec}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteFacility(index)}
+                    className="text-red-500 hover:text-red-600 "
+                    disabled={!isEditing}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={newFacility}
+                onChange={(e) => setNewFacility(e.target.value)}
+                placeholder="Add facility like Wi-Fi, Payment Counter, parking area etc."
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddFacility();
+                  }
+                }}
+                disabled={!isEditing}
+              />
+              <Button
+                type="button"
+                onClick={handleAddFacility}
+                className="commonDarkBG text-white hover:bg-[#581770]"
+                disabled={!isEditing}
+              >
+                Add
+              </Button>
+            </div>
+            {errors.facilities && (
+              <p className="text-red-500 text-sm">
+                {errors.facilities.message}
+              </p>
+            )}
+          </div>
+        </div>
         <LocationMap
           value={{
             address: watch("address") || "",
+            title: watch("title") || "",
+            address1: watch("address1") || "",
+            address2: watch("address2") || "",
             city: watch("city") || "",
             state: watch("state") || "",
             zipCode: watch("zipCode") || "",
@@ -358,6 +473,9 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
             lng: watch("longitude"),
           }}
           onChange={(v) => {
+            if (v.title !== undefined) setValue("title", v.title);
+            if (v.address1 !== undefined) setValue("address1", v.address1);
+            if (v.address2 !== undefined) setValue("address2", v.address2);
             if (v.address !== undefined) setValue("address", v.address);
             if (v.city !== undefined) setValue("city", v.city);
             if (v.state !== undefined) setValue("state", v.state);
@@ -369,6 +487,40 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
           height={400}
         />
         <div>
+          <label htmlFor="address1" className="block mb-1">
+            Address
+          </label>
+          <input
+            id="address1"
+            type="text"
+            {...register("address1")}
+            className="w-full p-2 border rounded"
+            placeholder="Enter street address, building number"
+            disabled={!isEditing}
+          />
+          {errors.address1 && (
+            <p className="text-red-500 text-sm">{errors.address1.message}</p>
+          )}
+        </div>
+
+        <div className="hidden">
+          <label htmlFor="address2" className="block mb-1">
+            Address Line 2
+          </label>
+          <input
+            id="address2"
+            type="text"
+            {...register("address2")}
+            className="w-full p-2 border rounded"
+            placeholder="Apartment, suite, unit, building, floor, etc. (optional)"
+            disabled={!isEditing}
+          />
+          {errors.address2 && (
+            <p className="text-red-500 text-sm">{errors.address2.message}</p>
+          )}
+        </div>
+
+        <div className="hidden">
           <label htmlFor="address" className="block mb-1">
             Address
           </label>
@@ -436,12 +588,12 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block mb-1 text-sm font-medium">Latitude</label>
             <input
               type="text"
-              value={watch('latitude') || ''}
+              value={watch("latitude") || ""}
               readOnly
               className="w-full p-2 border rounded bg-gray-50"
               placeholder="Select location on map"
@@ -452,114 +604,48 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
             <label className="block mb-1 text-sm font-medium">Longitude</label>
             <input
               type="text"
-              value={watch('longitude') || ''}
+              value={watch("longitude") || ""}
               readOnly
               className="w-full p-2 border rounded bg-gray-50"
               placeholder="Select location on map"
               disabled={!isEditing}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Static Map Preview */}
-        {watch('latitude') && watch('longitude') && generateStaticMapUrl(watch('latitude')!, watch('longitude')!) ? (
-  <div>
-    <label className="block mb-2 text-sm font-medium">Location Map Preview</label>
-    <div className="border rounded p-2 bg-gray-50">
-       <Image
-         src={generateStaticMapUrl(watch('latitude')!, watch('longitude')!) || ''}
-         alt="Location map"
-         width={400}
-         height={300}
-         className="w-full h-48 object-cover rounded"
-         onLoad={() => console.log("Static map loaded successfully")}
-         onError={() => console.error("Failed to load static map")}
-       />
-      <p className="text-xs text-gray-500 mt-1">
-        This map will be saved as locationImageUrl in your database
-      </p>
-    </div>
-  </div>
-) : (
-  <p className="text-sm text-gray-500">Select a location to see the map preview</p>
-)}
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="col-span-2 ">
-            <label className="text-sm font-bold text-gray-700">
-              Facilities
+        {/* {watch("latitude") &&
+        watch("longitude") &&
+        generateStaticMapUrl(watch("latitude")!, watch("longitude")!) ? (
+          <div>
+            <label className="block mb-2 text-sm font-medium">
+              Location Map Preview
             </label>
-            <div className="flex flex-wrap gap-2 mb-2 mt-2">
-              {facilities.map((spec, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
-                >
-                  <span>{spec}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteFacility(index)}
-                    className="text-red-500 hover:text-red-600 "
-                    disabled={!isEditing}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                value={newFacility}
-                onChange={(e) => setNewFacility(e.target.value)}
-                placeholder="Add facility like Wi-Fi, Payment Counter, parking area etc."
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddFacility();
-                  }
-                }}
-                disabled={!isEditing}
+            <div className="border rounded p-2 bg-gray-50">
+              <Image
+                src={
+                  generateStaticMapUrl(
+                    watch("latitude")!,
+                    watch("longitude")!
+                  ) || ""
+                }
+                alt="Location map"
+                width={400}
+                height={300}
+                className="w-full h-48 object-cover rounded"
+                onLoad={() => console.log("Static map loaded successfully")}
+                onError={() => console.error("Failed to load static map")}
               />
-              <Button
-                type="button"
-                onClick={handleAddFacility}
-                className="commonDarkBG text-white hover:bg-[#581770]"
-                disabled={!isEditing}
-              >
-                Add
-              </Button>
-            </div>
-            {errors.facilities && (
-              <p className="text-red-500 text-sm">
-                {errors.facilities.message}
+              <p className="text-xs text-gray-500 mt-1">
+                This map will be saved as locationImageUrl in your database
               </p>
-            )}
+            </div>
           </div>
-        </div>
-
-        <div>
-          <label htmlFor="about" className="block mb-1">
-            About
-          </label>
-          <textarea
-            id="about"
-            {...register("about")}
-            className="w-full p-2 border rounded"
-            rows={4}
-            disabled={!isEditing}
-            placeholder="Enter your description of your location..."
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            You can include web links in your description. They will be
-            automatically detected and made clickable.
+        ) : (
+          <p className="text-sm text-gray-500">
+            Select a location to see the map preview
           </p>
-          {errors.about && (
-            <p className="text-red-500 text-sm">{errors.about.message}</p>
-          )}
-        </div>
-
-       
+        )} */}
 
         {/* Hidden inputs to ensure lat/lng are submitted */}
         <input
@@ -578,7 +664,7 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
                 {" "}
                 Associated Packages
               </h3>
-              {packages?.length === 0 ? (
+              {/* {packages?.length === 0 ? (
                 <>
                   <div className="flex justify-center items-center gap-2">
                     <Frown className="darkText" />
@@ -589,16 +675,14 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
                 </>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2  gap-5 mb-5">
-                  {/* lg:grid-cols-3 */}
                   {packages.map((item) => (
                     <PackageCard
                       key={item.id}
                       item={item}
-                      // onDelete={handleDelete}
                     />
                   ))}
                 </div>
-              )}
+              )} */}
               <button
                 className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
                 onClick={() => (window.location.href = "/packages")}
@@ -612,7 +696,7 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
                 {" "}
                 Associated Events
               </h3>
-              {events?.length === 0 ? (
+              {/* {events?.length === 0 ? (
                 <>
                   <div className="flex justify-center items-center gap-2">
                     <Frown className="darkText" />
@@ -623,12 +707,11 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
                 </>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4  gap-4 mb-5">
-                  {/* lg:grid-cols-3 */}
                   {events.map((event) => (
                     <EventCard key={event.id} module={event} />
                   ))}
                 </div>
-              )}
+              )} */}
 
               <button
                 className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
@@ -664,6 +747,7 @@ const LocationForm = ({ id ,isEditing}: { id?: string,isEditing?:boolean }) => {
               reset();
               router.push("/location");
             }}
+            disabled={isEditing}
           >
             Cancel
           </Button>

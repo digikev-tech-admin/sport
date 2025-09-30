@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 interface Location {
   id: string;
   address: string;
+  title: string;
   image: string;
   city: string;
   state: string;
@@ -25,7 +26,7 @@ const LocationCard = ({
   location: Location;
   onDelete: (id: string) => void;
 }) => {
-  console.log({location});
+  // console.log({location});
   const router = useRouter();
   const [showAllFacilities, setShowAllFacilities] = useState(false);
   // const handleEdit = () => {
@@ -61,7 +62,7 @@ const LocationCard = ({
           <div className="flex items-start gap-2 flex-1">
             {/* <MapPin className="w-5 h-5 text-[#742193] mt-1 flex-shrink-0" /> */}
             <h3 className="font-semibold text-gray-900 line-clamp-2 truncate">
-              {location.address}
+              {location?.title || ' '}
             </h3>
           </div>
           {/* <div className="flex items-center gap-1"> */}

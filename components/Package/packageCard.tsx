@@ -50,10 +50,10 @@ const PackageCard = ({ item }: PackageCardProps) => {
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-[#742193]" />
           <a
-            href={`/location/${item.locationId}/view`}
+            href={`/location/${item.locationId}`}
             className="underline text-gray-700 hover:text-blue-600 truncate"
           >
-            {item.clubs.split(',')[1].trim()}
+            {item.clubs}
           </a>
         </div>
         <div className="flex items-center gap-2">

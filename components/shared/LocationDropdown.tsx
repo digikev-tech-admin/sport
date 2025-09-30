@@ -49,7 +49,7 @@ export function LocationDropdown({
         const locations = await getAllLocations();
         const formattedLocations = locations.map((location: any) => ({
           id: location._id,
-          name: location.address + ", " + location.city + ", " + location.state,
+          name: location?.title,
         }));
         setLocationData(formattedLocations);
         

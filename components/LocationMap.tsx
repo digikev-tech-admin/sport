@@ -24,6 +24,9 @@ const defaultCenter = {
 
 type PlaceValue = {
   address: string;
+  title?: string;
+  address1?: string;
+  address2?: string;
   city?: string;
   state?: string;
   zipCode?: string;
@@ -50,6 +53,7 @@ export default function LocationMap({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>(value?.address || '');
+  const [isManualInput, setIsManualInput] = useState<boolean>(false);
   const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(
     value?.lat && value?.lng ? { lat: value.lat, lng: value.lng } : null
   );
@@ -73,11 +77,36 @@ export default function LocationMap({
   ) => {
     const result: Partial<PlaceValue> = {};
     if (!components) return result;
+    
     for (const c of components) {
-      if (c.types.includes('locality')) result.city = c.long_name;
-      if (c.types.includes('administrative_area_level_1')) result.state = c.long_name;
-      if (c.types.includes('postal_code')) result.zipCode = c.long_name;
-      if (c.types.includes('country')) result.country = c.long_name;
+      // Extract title from premise (e.g., "Shankar Bazar")
+      if (c.types.includes('premise')) {
+        result.title = c.long_name;
+      }
+      // Extract address1 from route (e.g., "Rajapur Road")
+      if (c.types.includes('route')) {
+        result.address1 = c.long_name;
+      }
+      // Extract address2 from neighborhood (e.g., "Talib City")
+      if (c.types.includes('neighborhood') || c.types.includes('postal_town')) {
+        result.address2 = c.long_name;
+      }
+      // Extract city from locality
+      if (c.types.includes('locality') || c.types.includes('postal_town')) {
+        result.city = c.long_name;
+      }
+      // Extract state from administrative_area_level_1
+      if (c.types.includes('administrative_area_level_1')) {
+        result.state = c.long_name;
+      }
+      // Extract zipCode from postal_code
+      if (c.types.includes('postal_code')) {
+        result.zipCode = c.long_name;
+      }
+      // Extract country
+      if (c.types.includes('country')) {
+        result.country = c.long_name;
+      }
     }
     return result;
   };
@@ -89,9 +118,18 @@ export default function LocationMap({
         console.log('No details available for input: ' + place.name);
         return;
       }
-      // Auto-fetch and set address details
-      const formatted = place.formatted_address || '';
-      setSelectedAddress(formatted);
+
+      console.log("place",place);
+      
+      
+      // Parse address components to extract structured data
+      const parsed = parseAddressComponents(place.address_components || undefined);
+      
+      // Store the full original address (including plus codes)
+      const fullAddress = place.formatted_address || '';
+      
+      setSelectedAddress(fullAddress);
+      setIsManualInput(false); // Reset manual input flag when place is selected
       const coords = {
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
@@ -104,25 +142,35 @@ export default function LocationMap({
         map.setZoom(15);
       }
       
-      // Optional: Log or store full place details (e.g., components for street, city)
-      const parsed = parseAddressComponents(place.address_components || undefined);
+      // Create the structured value with parsed components
       const nextValue: PlaceValue = {
-        address: formatted,
-        ...parsed,
-        ...coords,
+        address: fullAddress, // Store full address including plus codes
+        title: place?.name || parsed.title,
+        address1: parsed.address1,
+        address2: parsed.address2,
+        city: parsed.city,
+        state: parsed.state,
+        zipCode: parsed.zipCode,
+        country: parsed.country,
+        lat: coords.lat,
+        lng: coords.lng,
       };
+      
       if (onChange) onChange(nextValue);
-      console.log('Place details:', place.address_components);
+      console.log('Parsed address components:', parsed);
+      console.log('Final structured value:', nextValue);
     }
   };
 
 
   useEffect(() => {
-    setSelectedAddress(value?.address || '');
-    setMarkerPosition(
-      value?.lat && value?.lng ? { lat: value.lat, lng: value.lng } : null
-    );
-  }, [value]);
+    if (!isManualInput) {
+      setSelectedAddress(value?.address || '');
+      setMarkerPosition(
+        value?.lat && value?.lng ? { lat: value.lat, lng: value.lng } : null
+      );
+    }
+  }, [value, isManualInput]);
 
   const onAutocompleteLoad = React.useCallback(function callback(autoCompleteInstance: google.maps.places.Autocomplete) {
     setAutocomplete(autoCompleteInstance);
@@ -143,8 +191,11 @@ export default function LocationMap({
           <input
             ref={inputRef}
             type="text"
-            value={value?.address || selectedAddress}
-            onChange={(e) => setSelectedAddress(e.target.value)}
+            value={selectedAddress}
+            onChange={(e) => {
+              setSelectedAddress(e.target.value);
+              setIsManualInput(true);
+            }}
             placeholder="Enter an address..."
             className="w-full p-2 border border-gray-300 rounded"
             style={{ width: '100%' }}
