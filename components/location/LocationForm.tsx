@@ -300,14 +300,14 @@ const LocationForm = ({
         className="w-full min-w-xl bg-white rounded-xl border p-2 sm:p-8 space-y-6"
       >
         <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
-          <div className="flex flex-col items-center w-full sm:w-40">
+          <div className="flex flex-col items-center w-full sm:w-auto">
             <div>
               <Image
                 src={formData.photo || "https://github.com/shadcn.png"}
                 alt="Profile"
-                className="w-36 h-36 rounded-3xl object-cover mt-2"
-                width={112}
-                height={112}
+                className="w-48 h-32 rounded-2xl object-cover mt-2"
+                width={192}
+                height={128}
               />
 
               <div className="flex justify-center gap-2 mt-2 ">

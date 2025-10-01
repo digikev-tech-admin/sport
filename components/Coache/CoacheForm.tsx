@@ -7,7 +7,7 @@ import { MultiSelect } from "./ClubMultiSelect";
 import { MultipleLocationDropdown } from "../shared/MultipleLocationDrodown";
 import { getAllLocations } from "@/api/location";
 import { LocationOption } from "../shared/LocationDropdown";
-import {  RefreshCcw, Trash2 } from "lucide-react";
+import { RefreshCcw, Trash2 } from "lucide-react";
 import { ReCloudinary } from "../cloudinary";
 import { createCoach, getCoachById, updateCoach } from "@/api/coach";
 import toast from "react-hot-toast";
@@ -68,11 +68,11 @@ interface FormattedPackage {
 const CoacheForm = ({
   id,
   isEditing,
-  setIsEditing
+  setIsEditing,
 }: {
   id?: string;
   isEditing?: boolean;
-  setIsEditing?: (value: boolean) => void
+  setIsEditing?: (value: boolean) => void;
 }) => {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -164,7 +164,7 @@ const CoacheForm = ({
         const locations = await getAllLocations();
         const formattedLocations = locations.map((location: any) => ({
           id: location._id,
-          name: location?.title ,
+          name: location?.title,
         }));
         setLocationData(formattedLocations);
       } catch (error) {
@@ -184,8 +184,7 @@ const CoacheForm = ({
           const formattedLocations = response.locationIds.map(
             (location: any) => ({
               id: location._id,
-              name:
-                location.title ,
+              name: location.title,
             })
           );
 
@@ -274,7 +273,7 @@ const CoacheForm = ({
         await updateCoach(id, coachData);
         // console.log("Coach updated:", response);
         toast.success("Coach updated successfully");
-       
+
         setIsEditing?.(false);
         router.push(`/coaches/${id}?/#coach`);
       } else {
@@ -321,14 +320,14 @@ const CoacheForm = ({
             {/* Ensure input fields are editable based on isEditing */}
             <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
               {/* Image upload and preview */}
-              <div className="flex flex-col items-center w-full sm:w-40">
+              <div className="flex flex-col items-center w-full sm:w-auto">
                 <div>
                   <Image
                     src={profileImage || "https://github.com/shadcn.png"}
                     alt="Profile"
-                    className="w-36 h-36 rounded-3xl object-cover mt-2"
-                    width={112}
-                    height={112}
+                    className="w-48 h-32 rounded-2xl object-cover mt-2"
+                    width={192}
+                    height={128}
                   />
 
                   <div className="flex gap-2 mt-2 justify-center">
@@ -470,7 +469,7 @@ const CoacheForm = ({
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="text-sm font-bold text-gray-700">
@@ -532,26 +531,26 @@ const CoacheForm = ({
                 />
               </div>
               {id && !isEditing && (
-              <>
-                <div>
-                  <button
-                   type="button"
-                    className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg text-sm"
-                    onClick={() => {
-                      const titles = (packages || [])
-                        .map((p) => p.title)
-                        .filter(Boolean);
-                      const query = titles.length
-                        ? `?package=${encodeURIComponent(titles.join(","))}`
-                        : "";
-                      window.location.href = `/packages${query}`;
-                    }}
-                  >
-                   Associated Packages
-                  </button>
-                </div>
-              </>
-            )}
+                <>
+                  <div>
+                    <button
+                      type="button"
+                      className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg text-sm"
+                      onClick={() => {
+                        const titles = (packages || [])
+                          .map((p) => p.title)
+                          .filter(Boolean);
+                        const query = titles.length
+                          ? `?package=${encodeURIComponent(titles.join(","))}`
+                          : "";
+                        window.location.href = `/packages${query}`;
+                      }}
+                    >
+                      Associated Packages
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
             {/* <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">Certifications</label>
@@ -630,7 +629,6 @@ const CoacheForm = ({
             {/* {isEditing &&  */}
             <div className="flex gap-4 pt-4">
               <Button
-                 
                 type="button"
                 className="flex-1 commonDarkBG text-white hover:bg-[#581770] transition-all duration-300"
                 disabled={!isEditing}
@@ -669,7 +667,7 @@ const CoacheForm = ({
                   setCertificateImage(null);
                   setCertificates([]);
                   setSelectedPackages([]);
-                 
+
                   router.back();
                 }}
                 disabled={isSubmitting}
@@ -677,7 +675,7 @@ const CoacheForm = ({
                 Cancel
               </Button>
             </div>
-           {/* } */}
+            {/* } */}
           </form>
         </>
       )}
