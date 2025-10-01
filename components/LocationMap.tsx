@@ -41,6 +41,7 @@ interface LocationMapProps {
   country?: string | string[]; // e.g. 'us' or ['us','ca']
   height?: number; // override map height
   initialCenter?: { lat: number; lng: number };
+  isEditing?: boolean;
 }
 
 export default function LocationMap({
@@ -49,6 +50,7 @@ export default function LocationMap({
   country = 'gb',
   height,
   initialCenter,
+  isEditing,
 }: LocationMapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
@@ -149,12 +151,13 @@ export default function LocationMap({
         address1: parsed.address1,
         address2: parsed.address2,
         city: parsed.city,
-        state: parsed.state,
+        state: parsed.state ?  parsed.state + ", " + parsed.country : parsed.country,
         zipCode: parsed.zipCode,
         country: parsed.country,
         lat: coords.lat,
         lng: coords.lng,
       };
+      
       
       if (onChange) onChange(nextValue);
       console.log('Parsed address components:', parsed);
@@ -199,6 +202,7 @@ export default function LocationMap({
             placeholder="Enter an address..."
             className="w-full p-2 border border-gray-300 rounded"
             style={{ width: '100%' }}
+            disabled={!isEditing}
           />
         </Autocomplete>
         {selectedAddress && (

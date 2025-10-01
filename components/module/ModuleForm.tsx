@@ -23,7 +23,7 @@ import { format } from "date-fns";
 import ButtonLoader from "../shared/ButtonLoader";
 import PackageUserTable from "../Package/PackageUserTable";
 
-const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
+const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boolean, setIsEditing?: (isEditing: boolean) => void }) => {
   const router = useRouter();
   const [eventName, setEventName] = useState("");
   const [about, setAbout] = useState("");
@@ -172,7 +172,9 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
       if (id) {
         const response = await updateEvent(id, eventData);
         toast.success("Event updated successfully");
-        router.push("/events");
+          setIsEditing?.(false);
+        
+        router.push(`/events/${id}/#event`);
         console.log("Event updated:", response);
       } else {
         const response = await createEvent(eventData);
@@ -191,7 +193,7 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
   console.log({ dates: toDate, fromDate });
 
   return (
-    <div className="flex items-center justify-center p-1 sm:p-4">
+    <div id="event" className="flex items-center justify-center p-1 sm:p-4">
       {loading && id ? (
         <Loader />
       ) : (
@@ -508,7 +510,7 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
               </div>
             </div>
 
-            {id && (
+            {id && !isEditing && (
             <>
               <h1 className="text-sm font-bold text-gray-700 mt-2">
                 Users Enrolled in this Event
@@ -544,6 +546,13 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
                 variant="outline"
                 className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
                 onClick={() => {
+                  if (id && isEditing) {
+                  if (setIsEditing) {
+                    setIsEditing(false);
+                    router.push(`/events/${id}?/#event`);
+                    return;
+                  }
+                  }
                   setEventName("");
                   setAbout("");
                   setFromDate("");
@@ -557,9 +566,10 @@ const EventForm = ({ id, isEditing }: { id: string; isEditing: boolean }) => {
                   setTicketCost("");
                   setDuration("");
                   setCapacity("");
+                 
                   router.back();
                 }}
-                disabled={isEditing}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>

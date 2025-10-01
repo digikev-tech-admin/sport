@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Frown, RefreshCcw, Trash2 } from "lucide-react";
+import { RefreshCcw, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { ReCloudinary } from "../cloudinary";
 import Image from "next/image";
@@ -46,9 +46,11 @@ interface FormData {
 const LocationForm = ({
   id,
   isEditing,
+  setIsEditing,
 }: {
   id?: string;
   isEditing?: boolean;
+  setIsEditing?: (isEditing: boolean) => void;
 }) => {
   const router = useRouter();
 
@@ -86,7 +88,7 @@ const LocationForm = ({
       // setLoading(true);
       try {
         const eventsData = await getAllEvents();
-        console.log({ eventsData });
+        // console.log({ eventsData });
         const filteredEvents = eventsData.filter(
           (event: any) => event?.locationId?._id === id
         );
@@ -94,15 +96,8 @@ const LocationForm = ({
         const formattedEvents = filteredEvents?.map((event: any) => ({
           id: event?._id,
           title: event?.title,
-          imageUrl: event?.image,
-          toDate: event?.toDate,
-          fromDate: event?.fromDate,
-          location: event?.locationId?.city,
-          sport: event?.sport,
-          ageGroup: event?.ageGroup,
-          interested: event?.enrolledCount,
         }));
-        console.log("Formatted events:", formattedEvents);
+        // console.log("Formatted events:", formattedEvents);
         setEvents(formattedEvents);
       } catch (error) {
         console.error("err", error);
@@ -120,30 +115,12 @@ const LocationForm = ({
         const filteredPackages = response.filter(
           (pkg: any) => pkg?.locationId?._id === id
         );
-        console.log("Packages fetched:", response);
+        // console.log("Packages fetched:", response);
         const formattedPackages = filteredPackages?.map((item: any) => ({
           id: item?._id,
           title: item?.title,
-          sport: item?.sport,
-          level: item?.level,
-          ageGroup: item?.ageGroup,
-          duration: item?.duration,
-          startDate: item?.sessionDates?.[0],
-          endDate: item?.sessionDates?.[1],
-          coachName: item?.coachId?.name,
-
-          price: item?.price?.base,
-          seats: item?.seatsCount,
-          enrolled: item?.enrolledCount,
-          locationId: item?.locationId?._id,
-          clubs:
-            item?.locationId?.address +
-            ", " +
-            item?.locationId?.city +
-            ", " +
-            item?.locationId?.state,
         }));
-        console.log("Formatted packages:", formattedPackages);
+        // console.log("Formatted packages:", formattedPackages);
         setPackages(formattedPackages);
       } catch (error) {
         console.error("Error fetching packages:", error);
@@ -214,7 +191,7 @@ const LocationForm = ({
     zoom: number = 15,
     size: string = "400x300"
   ) => {
-    console.log("Generating static map URL for coordinates:", { lat, lng });
+    // console.log("Generating static map URL for coordinates:", { lat, lng });
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
       console.error("Google Maps API key not found");
@@ -251,10 +228,10 @@ const LocationForm = ({
           return;
         }
         console.log("Generated Static Map URL:", locationImageUrl);
-        console.log("Coordinates used:", {
-          lat: data.latitude,
-          lng: data.longitude,
-        });
+        // console.log("Coordinates used:", {
+        //   lat: data.latitude,
+        //   lng: data.longitude,
+        // });
       } else {
         console.log("No coordinates available for static map generation");
       }
@@ -265,17 +242,20 @@ const LocationForm = ({
         locationImageUrl, // Add the static map URL to submission
       };
 
-      console.log("Submitting data:", submitData);
+      // console.log("Submitting data:", submitData);
 
       if (id) {
         await updateLocation(id, submitData);
         toast.success("Location updated successfully");
+        router.push(`/location/${id}/#location`);
+        setIsEditing?.(false);
       } else {
         await createLocation(submitData);
         toast.success("Location created successfully");
+        router.push("/location");
       }
 
-      router.push("/location");
+     
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Failed to submit form");
@@ -301,7 +281,7 @@ const LocationForm = ({
 
   React.useEffect(() => {
     if (currentLat && currentLng) {
-      console.log("Coordinates updated:", { lat: currentLat, lng: currentLng });
+      // console.log("Coordinates updated:", { lat: currentLat, lng: currentLng });
       const mapUrl = generateStaticMapUrl(currentLat, currentLng);
       if (mapUrl) {
         console.log("Generated map URL:", mapUrl);
@@ -314,7 +294,7 @@ const LocationForm = ({
   }, [currentLat, currentLng]);
 
   return (
-    <div className="flex items-center justify-center py-4">
+    <div id="location" className="flex items-center justify-center py-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="w-full min-w-xl bg-white rounded-xl border p-2 sm:p-8 space-y-6"
@@ -367,7 +347,38 @@ const LocationForm = ({
               </div>
             </div>
           </div>
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          <div className="flex-1 grid grid-cols-1 w-full">
+          <LocationMap
+          value={{
+            address: watch("address") || "",
+            title: watch("title") || "",
+            address1: watch("address1") || "",
+            address2: watch("address2") || "",
+            city: watch("city") || "",
+            state: watch("state") || "",
+            zipCode: watch("zipCode") || "",
+            lat: watch("latitude"),
+            lng: watch("longitude"),
+          }}
+          onChange={(v) => {
+            if (v.title !== undefined) setValue("title", v.title);
+            if (v.address1 !== undefined) setValue("address1", v.address1);
+            if (v.address2 !== undefined) setValue("address2", v.address2);
+            if (v.address !== undefined) setValue("address", v.address);
+            if (v.city !== undefined) setValue("city", v.city);
+            if (v.state !== undefined) setValue("state", v.state);
+            if (v.zipCode !== undefined) setValue("zipCode", v.zipCode);
+            if (v.lat !== undefined) setValue("latitude", v.lat);
+            if (v.lng !== undefined) setValue("longitude", v.lng);
+          }}
+          country={["us", "gb", "in"]}
+          height={200}
+          isEditing={isEditing}
+        />
+          
+        </div>
+        </div>
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div className="space-y-2 col-span-2">
               <label htmlFor="title" className="block mb-1">
                 Location Title
@@ -406,7 +417,6 @@ const LocationForm = ({
               )}
             </div>
           </div>
-        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2 ">
             <label className="text-sm font-bold text-gray-700">
@@ -460,32 +470,7 @@ const LocationForm = ({
             )}
           </div>
         </div>
-        <LocationMap
-          value={{
-            address: watch("address") || "",
-            title: watch("title") || "",
-            address1: watch("address1") || "",
-            address2: watch("address2") || "",
-            city: watch("city") || "",
-            state: watch("state") || "",
-            zipCode: watch("zipCode") || "",
-            lat: watch("latitude"),
-            lng: watch("longitude"),
-          }}
-          onChange={(v) => {
-            if (v.title !== undefined) setValue("title", v.title);
-            if (v.address1 !== undefined) setValue("address1", v.address1);
-            if (v.address2 !== undefined) setValue("address2", v.address2);
-            if (v.address !== undefined) setValue("address", v.address);
-            if (v.city !== undefined) setValue("city", v.city);
-            if (v.state !== undefined) setValue("state", v.state);
-            if (v.zipCode !== undefined) setValue("zipCode", v.zipCode);
-            if (v.lat !== undefined) setValue("latitude", v.lat);
-            if (v.lng !== undefined) setValue("longitude", v.lng);
-          }}
-          country={["us", "gb", "in"]}
-          height={400}
-        />
+        
         <div>
           <label htmlFor="address1" className="block mb-1">
             Address
@@ -657,13 +642,13 @@ const LocationForm = ({
           {...register("longitude", { valueAsNumber: true })}
         />
 
-        {id && (
+        {id && !isEditing && (
           <>
             <div>
-              <h3 className="text-[#742193] font-semibold mb-2 ">
+              {/* <h3 className="text-[#742193] font-semibold mb-2 ">
                 {" "}
                 Associated Packages
-              </h3>
+              </h3> */}
               {/* {packages?.length === 0 ? (
                 <>
                   <div className="flex justify-center items-center gap-2">
@@ -684,15 +669,25 @@ const LocationForm = ({
                 </div>
               )} */}
               <button
-                className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
-                onClick={() => (window.location.href = "/packages")}
+                type="button"
+                className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg text-sm"
+                onClick={() => {
+                  const titles = (packages || [])
+                    .map((p) => p.title)
+                    .filter(Boolean);
+                  const query = titles.length
+                    ? `?package=${encodeURIComponent(titles.join(","))}`
+                    : "";
+                  window.location.href = `/packages${query}`;
+                }}
+              
               >
-                View All Packages
+                Associated Packages
               </button>
             </div>
 
             <div>
-              <h3 className="text-[#742193] font-semibold  ">
+              {/*   <h3 className="text-[#742193] font-semibold  ">
                 {" "}
                 Associated Events
               </h3>
@@ -714,10 +709,20 @@ const LocationForm = ({
               )} */}
 
               <button
-                className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
-                onClick={() => (window.location.href = "/events")}
+                type="button"
+                className=" px-6 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg text-sm"
+                onClick={() => {
+                  const titles = (events || [])
+                    .map((e) => e.title)
+                    .filter(Boolean);
+                  const query = titles.length
+                    ? `?event=${encodeURIComponent(titles.join(","))}`
+                    : "";
+                  window.location.href = `/events${query}`;
+                }}
+              
               >
-                View All Events
+                Associated Events
               </button>
             </div>
           </>
@@ -729,29 +734,31 @@ const LocationForm = ({
             className="flex-1 commonDarkBG text-white hover:bg-[#581770] transition-all duration-300"
             disabled={!isEditing}
           >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <RefreshCcw className="animate-spin" size={18} />
-                <span>Submitting...</span>
-              </div>
-            ) : (
-              "Submit"
-            )}
+            {isSubmitting && id ? "Updating..." : isSubmitting ? "Submitting..." : id ? "Update Location" : "Submit"}
+            
           </Button>
           <Button
             type="button"
             variant="outline"
             className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
             onClick={() => {
+              if (isEditing && id) {
+                if (setIsEditing) {
+                  setIsEditing(false);
+                  router.push(`/location/${id}?/#location`);
+                }
+                return;
+              }
               setFormData({ photo: "" });
               reset();
               router.push("/location");
             }}
-            disabled={isEditing}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
         </div>
+        
       </form>
     </div>
   );

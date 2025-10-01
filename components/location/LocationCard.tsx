@@ -4,6 +4,7 @@ import Image from "next/image";
 // import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useRouter } from "next/navigation";
+import { MapPin } from "lucide-react";
 // import { makeLinksClickable } from "@/lib/utils";
 // import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 
@@ -40,7 +41,7 @@ const LocationCard = ({
 
   return (
     <div 
-      className=" bg-white rounded-2xl shadow border border-gray-200 p-4 gap-4  max-w-xl w-full cursor-pointer"
+      className="bg-white rounded-2xl shadow border border-gray-200 p-4 gap-4 max-w-xl w-full cursor-pointer overflow-hidden"
       onClick={handleCardClick}
     >
       <div className="flex flex-col w-full sm:flex-row  gap-2 items-center sm:items-start ">
@@ -57,13 +58,19 @@ const LocationCard = ({
         {/* <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
       </div>
       
-      <div className=" space-y-1 ml-0 sm:ml-2">
+      <div className="space-y-1 ml-0 sm:ml-2 flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-2 flex-1">
-            {/* <MapPin className="w-5 h-5 text-[#742193] mt-1 flex-shrink-0" /> */}
-            <h3 className="font-semibold text-gray-900 line-clamp-2 truncate">
+          <div className="flex items-start lg:items-center gap-2 flex-1 text-sm min-w-0">
+            <MapPin className="w-5 h-5 text-[#742193]  mt-1 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm lg:text-lg text-gray-900 line-clamp-2 truncate">
               {location?.title || ' '}
             </h3>
+            <p className="text-xs lg:text-sm text-gray-600 line-clamp-2 truncate">
+              {/* {location?.address || ' '} */}
+              {location.city} {location.state} {location.zipCode}
+            </p>
+            </div>
           </div>
           {/* <div className="flex items-center gap-1"> */}
             {/* <Button
@@ -128,10 +135,10 @@ const LocationCard = ({
         </div>
 
        
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            {/* <span className="font-medium text-gray-900">City:</span> */}
+          {/* <div className="flex items-center gap-1 text-xs text-gray-600 ml-2">
+            <span className="font-medium text-gray-900">City:</span>
             {location.city} {location.state} {location.zipCode}
-          </div>
+          </div> */}
         
           {Array.isArray(location.facilities) && location.facilities.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
