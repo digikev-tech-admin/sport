@@ -13,7 +13,7 @@ import { Package } from "@/types/types";
 import Filters from "@/components/AllFilters";
 import { Frown, Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PackageCard from "@/components/Package/packageCard";
 import { getAllPackages } from "@/api/package";
 // import toast from "react-hot-toast";
@@ -27,8 +27,10 @@ const Page = () => {
   const [selectedAgeGroup, setSelectedAgeGroup] = useState("all");
   const [selectedClub, setSelectedClub] = useState("all");
   const [selectedCoach, setSelectedCoach] = useState("all");
+  const [packageParamParts, setPackageParamParts] = useState<string[]>([]);
 
   const route = useRouter();
+  const searchParams = useSearchParams();
 
   const handleAddEvent = () => {
     route.push(`/packages/addPackage`);
@@ -64,6 +66,25 @@ const Page = () => {
     };
     fetchPackages();
   }, []);
+
+  // Apply filters from query params like ?package=Title or ?package=Title1,Title2
+  useEffect(() => {
+    const param = searchParams?.get("package");
+    if (param) {
+      const parts = param
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      setPackageParamParts(parts);
+    } else {
+      setPackageParamParts([]);
+    }
+  }, [searchParams]);
+
+  const handleClearPackageFilter = () => {
+    setPackageParamParts([]);
+    route.replace(`/packages`);
+  };
 
   const categories = [
     "all",
@@ -101,7 +122,16 @@ const Page = () => {
   ];
 
   const filteredPackages = useMemo(() => {
-    return packages
+    let list = packages;
+
+    if (packageParamParts.length > 0) {
+      const lcParts = packageParamParts.map((p) => p.toLowerCase());
+      list = list.filter((item) =>
+        lcParts.some((p) => String(item?.title ?? "").toLowerCase().includes(p))
+      );
+    }
+
+    return list
       .filter((item) => {
         console.log("item",item);
         
@@ -174,7 +204,7 @@ const Page = () => {
         }
         return 0;
       });
-  }, [packages, search, selectedCategory, sortBy, selectedSport, selectedAgeGroup, selectedClub, selectedCoach]);
+  }, [packages, search, selectedCategory, sortBy, selectedSport, selectedAgeGroup, selectedClub, selectedCoach, packageParamParts]);
 
   return (
     <>
@@ -231,9 +261,20 @@ const Page = () => {
                 />
               </div>
               <div>
-                <h3 className="text-[#742193] font-semibold  ">
+                <h3 className="text-[#742193] font-semibold mb-3 ">
                   {" "}
                   All Packages
+                  <span className="text-gray-500 text-sm">
+                    {packageParamParts.length > 0 && `: ${packageParamParts.join(", ")}`}
+                  </span>
+                  {packageParamParts.length > 0 && (
+                    <button
+                      onClick={handleClearPackageFilter}
+                      className="ml-2 text-xs text-blue-600 hover:underline"
+                    >
+                      Remove filter
+                    </button>
+                  )}
                 </h3>
                 {filteredPackages.length === 0 ? (
                   <>

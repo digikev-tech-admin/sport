@@ -12,7 +12,7 @@ import {
 import Filters from "@/components/AllFilters";
 import { Frown, Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import EventCard from "@/components/ModuleCard";
 import { deleteEvent, getAllEvents } from "@/api/event";
 import toast from "react-hot-toast";
@@ -35,6 +35,7 @@ const Page = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("date");
+  const [eventParamParts, setEventParamParts] = useState<string[]>([]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -47,6 +48,25 @@ const Page = () => {
     }
   };
   const route = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const eventTitle = searchParams.get("event");
+    if (eventTitle) {
+      console.log("event param:", eventTitle);
+      const parts = eventTitle
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      console.log("event parts:", parts);
+      setEventParamParts(parts);
+    }
+  }, [searchParams]);
+
+  const handleClearEventFilter = () => {
+    setEventParamParts([]);
+    route.replace(`/events`);
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -82,7 +102,16 @@ const Page = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    return events
+    let list = events;
+
+    if (eventParamParts.length > 0) {
+      const lcParts = eventParamParts.map((p) => p.toLowerCase());
+      list = list.filter((e) =>
+        lcParts.some((p) => e.title.toLowerCase().includes(p))
+      );
+    }
+
+    return list
       .filter(
         (event) =>
           (event.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -98,7 +127,7 @@ const Page = () => {
         }
         return 0;
       });
-  }, [events, search, selectedCategory, sortBy]);
+  }, [events, search, selectedCategory, sortBy, eventParamParts]);
 
   const categories = ["all", ...new Set(events.map((e) => e.ageGroup))];
 
@@ -153,7 +182,21 @@ const Page = () => {
                 />
               </div>
               <div>
-                <h3 className="text-[#742193] font-semibold  "> All Events</h3>
+                <h3 className="text-[#742193] font-semibold mb-2  ">
+                  All Events
+                  <span className="text-gray-500 text-sm">
+                    {eventParamParts.length > 0 && `: ${eventParamParts.join(", ")}`}
+                  </span>
+                  {eventParamParts.length > 0 && (
+                    <button
+                      onClick={handleClearEventFilter}
+                      className="ml-2 text-xs text-blue-600 hover:underline"
+                    >
+                      Remove filter
+                    </button>
+                  )}
+                </h3>
+                
                 {filteredEvents.length === 0 ? (
                   <>
                     <div className="flex justify-center items-center gap-2">

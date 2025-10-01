@@ -68,7 +68,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Edit Location</BreadcrumbPage>
+              <BreadcrumbPage>{!isEditing ? "Location Detail" :"Edit Location"}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -76,7 +76,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
 
       {/* <h1 className="h2 mt-2">Edit Location</h1>/ */}
       <div className="flex justify-between items-center mt-4">
-        <h1 className="h2">Edit Location</h1>
+        <h1 className="h2">{!isEditing ? "Location Detail" :"Edit Location"}</h1>
         <EditDeleteActions
           onEdit={handleEnableEdit}
           editLabel="Edit Location"
@@ -123,7 +123,7 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
       </div>
 
       <div>
-        <LocationForm id={id} isEditing={isEditing} />
+        <LocationForm id={id} isEditing={isEditing} setIsEditing={setIsEditing} />
       </div>
     </section>
   )

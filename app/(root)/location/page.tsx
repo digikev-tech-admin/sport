@@ -134,7 +134,7 @@ const Page = () => {
 
           <div className=" h-12 mt-4">
             <div className="min-w-xl mx-auto">
-              <div className="mb-8 space-y-4">
+              {/* <div className="mb-8 space-y-4">
                 <Filters
                   search={search}
                   setSearch={setSearch}
@@ -146,7 +146,7 @@ const Page = () => {
                   sortOptions={sortOptions}
                   title="City"
                 />
-              </div>
+              </div> */}
               <div>
                 <h3 className="text-[#742193] font-semibold  ">
                   {" "}
@@ -162,7 +162,7 @@ const Page = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-2  gap-5 mb-5">
+                  <div className="grid grid-cols-1 xl:grid-cols-2  gap-5 mb-5">
                     {/* lg:grid-cols-3 */}
                     {filteredLocations.map((location) => (
                       <LocationCard

@@ -11,7 +11,7 @@ import {
 import { Coach } from "@/types/types";
 // import { coaches as initialCoaches } from "@/data/constants";
 import Filters from "@/components/AllFilters";
-import { Frown, Loader2, Plus } from "lucide-react";
+import { Frown, Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 import { useRouter } from "next/navigation";
 import CoachCard from "@/components/Coache/CoacheCard";
@@ -146,7 +146,7 @@ const Page = () => {
 
           <div className=" h-12 mt-4">
             <div className="min-w-xl mx-auto">
-              <div className="mb-8 space-y-4">
+              {/* <div className="mb-8 space-y-4">
                 <Filters
                   search={search}
                   setSearch={setSearch}
@@ -157,7 +157,7 @@ const Page = () => {
                   categories={categories}
                   sortOptions={sortOptions}
                 />
-              </div>
+              </div> */}
               <div className="">
                 <h3 className="text-[#742193] font-semibold  "> All Coaches</h3>
              {loading ? (

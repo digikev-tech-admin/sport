@@ -13,7 +13,7 @@ import { createCoach, getCoachById, updateCoach } from "@/api/coach";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 // import { Package } from "@/types/types";
-// import { getAllPackages } from "@/api/package";
+import { getAllPackages } from "@/api/package";
 import Loader from "../shared/Loader";
 import ButtonLoader from "../shared/ButtonLoader";
 // import PackageCard from "../Package/packageCard";
@@ -68,9 +68,11 @@ interface FormattedPackage {
 const CoacheForm = ({
   id,
   isEditing,
+  setIsEditing
 }: {
   id?: string;
   isEditing?: boolean;
+  setIsEditing?: (value: boolean) => void
 }) => {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -92,7 +94,7 @@ const CoacheForm = ({
   const [newSpecialization, setNewSpecialization] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
-  // const [packages, setPackages] = useState<FormattedPackage[]>([]);
+  const [packages, setPackages] = useState<FormattedPackage[]>([]);
   const [selectedPackages, setSelectedPackages] = useState<
     Array<{ id: string; name: string }>
   >([]);
@@ -126,53 +128,35 @@ const CoacheForm = ({
   //   setCertificates(certificates.filter((_, i) => i !== index));
   // };
 
-  // useEffect(() => {
-  //   const fetchPackages = async () => {
-  //     try {
-  //       console.log("coach id", id);
-  //       const response = await getAllPackages();
-  //       console.log("Packages fetched:", response);
-  //       const filteredPackages = response.filter(
-  //         (pkg: any) => pkg?.coachId?.id === id
-  //       );
-  //       console.log("Filtered packages:", filteredPackages);
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        console.log("coach id", id);
+        const response = await getAllPackages();
+        console.log("Packages fetched:", response);
+        const filteredPackages = response.filter(
+          (pkg: any) => pkg?.coachId?.id === id
+        );
+        console.log("Filtered packages:", filteredPackages);
 
-  //       // const formattedPackages = response?.map((item: any) => ({
-  //       //   id: item?._id,
-  //       //   name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
-  //       // }));
-  //       // console.log("Formatted packages:", formattedPackages);
-  //       const formattedPackages = filteredPackages?.map((item: any) => ({
-  //         id: item?._id,
-  //         title: item?.title,
-  //         sport: item?.sport,
-  //         level: item?.level,
-  //         ageGroup: item?.ageGroup,
-  //         duration: item?.duration,
-  //         startDate: item?.sessionDates?.[0],
-  //         endDate: item?.sessionDates?.[1],
-  //         coachName: item?.coachId?.name,
-
-  //         price: item?.price?.base,
-  //         seats: item?.seatsCount,
-  //         enrolled: item?.enrolledCount,
-  //         locationId: item?.locationId?._id,
-  //         clubs:
-  //           item?.locationId?.address +
-  //           ", " +
-  //           item?.locationId?.city +
-  //           ", " +
-  //           item?.locationId?.state,
-  //       }));
-  //       // console.log("Formatted packages:", formattedPackages);
-  //       setPackages(formattedPackages);
-  //       // setPackages(filteredPackages);
-  //     } catch (error) {
-  //       console.error("Error fetching packages:", error);
-  //     }
-  //   };
-  //   fetchPackages();
-  // }, []);
+        // const formattedPackages = response?.map((item: any) => ({
+        //   id: item?._id,
+        //   name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
+        // }));
+        // console.log("Formatted packages:", formattedPackages);
+        const formattedPackages = filteredPackages?.map((item: any) => ({
+          id: item?._id,
+          title: item?.title,
+        }));
+        console.log("Formatted packages:", formattedPackages);
+        setPackages(formattedPackages);
+        // setPackages(filteredPackages);
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -201,7 +185,7 @@ const CoacheForm = ({
             (location: any) => ({
               id: location._id,
               name:
-                location.address + ", " + location.city + ", " + location.state,
+                location.title ,
             })
           );
 
@@ -246,8 +230,6 @@ const CoacheForm = ({
     if (
       name === "" ||
       bio === "" ||
-      clubs.length === 0 ||
-      sports.length === 0 ||
       experience === "" ||
       phoneNumber === "" ||
       emergencyContact === ""
@@ -258,10 +240,6 @@ const CoacheForm = ({
             ? "name"
             : bio === ""
             ? "bio"
-            : clubs.length === 0
-            ? "clubs"
-            : sports.length === 0
-            ? "sports"
             : experience === ""
             ? "experience"
             : phoneNumber === ""
@@ -296,7 +274,9 @@ const CoacheForm = ({
         await updateCoach(id, coachData);
         // console.log("Coach updated:", response);
         toast.success("Coach updated successfully");
-        router.push("/coaches");
+       
+        setIsEditing?.(false);
+        router.push(`/coaches/${id}?/#coach`);
       } else {
         await createCoach(coachData);
         // console.log("Coach created:", response);
@@ -329,7 +309,7 @@ const CoacheForm = ({
   };
 
   return (
-    <div className="flex items-center justify-center p-1 sm:p-4">
+    <div id="coach" className="flex items-center justify-center p-1 sm:p-4">
       {loading && id ? (
         <Loader />
       ) : (
@@ -551,19 +531,23 @@ const CoacheForm = ({
                   disabled={!isEditing}
                 />
               </div>
-              {id && (
+              {id && !isEditing && (
               <>
                 <div>
-                  <h3 className="text-[#742193] font-semibold mt-2 mb-2 ">
-                    {" "}
-                    Associated Packages
-                  </h3>
-                 
                   <button
-                    className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg"
-                    onClick={() => (window.location.href = "/packages")}
+                   type="button"
+                    className=" px-4 py-2 commonDarkBG text-white hover:bg-[#581770] rounded-lg text-sm"
+                    onClick={() => {
+                      const titles = (packages || [])
+                        .map((p) => p.title)
+                        .filter(Boolean);
+                      const query = titles.length
+                        ? `?package=${encodeURIComponent(titles.join(","))}`
+                        : "";
+                      window.location.href = `/packages${query}`;
+                    }}
                   >
-                    View All Packages
+                   Associated Packages
                   </button>
                 </div>
               </>
@@ -643,9 +627,11 @@ const CoacheForm = ({
             {/* </div>
         </div> */}
 
+            {/* {isEditing &&  */}
             <div className="flex gap-4 pt-4">
               <Button
-                type="submit"
+                 
+                type="button"
                 className="flex-1 commonDarkBG text-white hover:bg-[#581770] transition-all duration-300"
                 disabled={!isEditing}
               >
@@ -664,6 +650,13 @@ const CoacheForm = ({
                 variant="outline"
                 className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
                 onClick={() => {
+                  if (isEditing && id) {
+                    if (setIsEditing) {
+                      setIsEditing(false);
+                      router.push(`/coaches/${id}?/#coach`);
+                    }
+                    return;
+                  }
                   setName("");
                   setProfileImage(null);
                   setBio("");
@@ -676,13 +669,15 @@ const CoacheForm = ({
                   setCertificateImage(null);
                   setCertificates([]);
                   setSelectedPackages([]);
+                 
                   router.back();
                 }}
-                disabled={isEditing}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
             </div>
+           {/* } */}
           </form>
         </>
       )}

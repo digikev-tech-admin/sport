@@ -30,9 +30,11 @@ import PackageUserTable from "./PackageUserTable";
 const PackageForm = ({
   id,
   isEditing,
+  setIsEditing,
 }: {
   id?: string;
   isEditing?: boolean;
+  setIsEditing?: (isEditing: boolean) => void;
 }) => {
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -125,12 +127,15 @@ const PackageForm = ({
       if (id) {
         await updatePackage(id, packageData);
         toast.success("Package updated successfully");
+        router.push(`/packages/${id}?/#package`);
+        setIsEditing?.(false);
       } else {
         await createPackage(packageData);
         toast.success("Package created successfully");
+        router.push("/packages");
         handleCancel();
       }
-      router.push("/packages");
+      
     } catch (error) {
       console.log("Error:", error);
       toast.error("Failed to create package");
@@ -140,6 +145,13 @@ const PackageForm = ({
   };
 
   const handleCancel = () => {
+    if (id && isEditing) {
+    if (setIsEditing) {
+      window.location.href = `/packages/${id}?/#package`;
+      setIsEditing(false);
+      return;
+    }
+    }
     setSport("");
     setTitle("");
     setDescription("");
@@ -157,7 +169,7 @@ const PackageForm = ({
   };
 
   return (
-    <div className="flex items-center justify-center p-1 sm:p-4">
+    <div id="package" className="flex items-center justify-center p-1 sm:p-4">
       {loading && id ? (
         <Loader />
       ) : (
@@ -429,7 +441,7 @@ const PackageForm = ({
             </div>
           </div>
 
-          {id && (
+          {id && !isEditing && (
             <>
               <h1 className="text-sm font-bold text-gray-700 mt-2">
                 Users Enrolled in this Package
@@ -466,7 +478,7 @@ const PackageForm = ({
               variant="outline"
               className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
               onClick={handleCancel}
-              disabled={isEditing}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>

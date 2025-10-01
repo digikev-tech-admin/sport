@@ -31,7 +31,7 @@ const PackageCard = ({ item }: PackageCardProps) => {
 
    
   return (
-    <div className="bg-[#ffffff] rounded-2xl border border-[#e6eaff] p-4 max-w-md w-full flex flex-col gap-3 shadow-lg cursor-pointer"
+    <div className="bg-[#ffffff] rounded-2xl border border-[#e6eaff] p-4 max-w-xl w-full flex flex-col gap-3 shadow-lg cursor-pointer"
     onClick={handleCardClick}
     >
       <div className="flex items-center justify-between">
@@ -48,7 +48,8 @@ const PackageCard = ({ item }: PackageCardProps) => {
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-2 text-[15px] text-gray-700 mt-1">
 
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-[#742193]" />
+          <span className="flex-shrink-0"> <MapPin className="w-4 h-4 text-[#742193]" /></span>
+         
           <a
             href={`/location/${item.locationId}`}
             className="underline text-gray-700 hover:text-blue-600 truncate"

@@ -3,6 +3,7 @@ import {  Trophy, UserRoundCog  } from "lucide-react";
 import Image from "next/image";
 import { Coach } from "@/types/types";
 import { useRouter } from "next/navigation";
+import { Badge } from "../ui/badge";
 
 interface CoachCardProps {
   coach: Coach;
@@ -51,6 +52,7 @@ function renderStars(rating: number) {
 
 const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
   const router = useRouter();
+
 
 
   const handleCardClick = () => {
@@ -114,12 +116,16 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 mt-2">
-          <Trophy className="w-5 h-5 text-[#581770] " />
+        <div className="flex flex-wrap items-center gap-1 mt-2">
+          <Trophy className="w-5 h-5 text-[#581770] flex-shrink-0" />
           {coach.sports.map((sport) => (
-            <div key={sport} className=" bg-purple-100 rounded-full px-2 py-1">
-              <span className="text-gray-800 text-sm font-medium">{sport}</span>
-            </div>
+            <Badge
+              key={sport}
+              variant="secondary"
+              className="rounded-full px-2 lg:px-3 py-1 text-[12px] whitespace-nowrap"
+            >
+              {sport}
+            </Badge>
           ))}
         </div>
         {/* <div className="flex items-center justify-between gap-2 mt-4 border-t pt-2 border-gray-100">
