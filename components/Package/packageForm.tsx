@@ -178,14 +178,14 @@ const PackageForm = ({
           className="w-full max-w-5xl bg-white rounded-xl shadow-lg p-1 sm:p-8 space-y-6 transition-all duration-300 hover:shadow-xl"
         >
           <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
-            <div className="flex flex-col items-center w-full sm:w-40">
+            <div className="flex flex-col items-center w-full sm:w-auto">
               <div>
                 <Image
                   src={profileImage || "https://github.com/shadcn.png"}
                   alt="Profile"
-                  className="w-26 h-26 sm:h-36 sm:w-36 rounded-3xl object-cover mt-2"
-                  width={112}
-                  height={112}
+                  className="w-48 h-32 rounded-2xl object-cover mt-2"
+                  width={192}
+                  height={128}
                 />
 
                 <div className="flex gap-2 mt-2 justify-center">

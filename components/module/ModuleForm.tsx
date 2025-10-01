@@ -204,14 +204,14 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
           >
             <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
               {/* Image upload and preview */}
-              <div className="flex flex-col items-center w-full sm:w-40">
+              <div className="flex flex-col items-center w-full sm:w-auto">
                 <div>
                   <Image
                     src={photo || "https://github.com/shadcn.png"}
                     alt="Profile"
-                    className="w-36 h-36 rounded-3xl object-cover mt-2"
-                    width={112}
-                    height={112}
+                    className="w-48 h-32 rounded-2xl object-cover mt-2"
+                    width={192}
+                    height={128}
                   />
 
                   <div className="flex gap-2 mt-2 justify-center">
