@@ -16,6 +16,7 @@ import {
   ShieldPlus,
   MapPin,
   Bell,
+  Ticket,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -35,6 +36,7 @@ const navItems = [
   { icon: PieChart, label: "Analytics", href: "/analytics" },
   { icon: ShieldPlus, label: "Administrator", href: "/administrator" },
   { icon: CreditCard, label: "Plan & Billing", href: "/plan-billing" },
+  { icon: Ticket, label: "Promotions", href: "/promotion" },
 ];
 
 export const Sidebar = () => {
@@ -78,7 +80,7 @@ export const Sidebar = () => {
         {/* Profile Section */}
         <div className={` border-b border-gray-200 ${isCollapsed? "p-2" : "p-3" }`}>
           
-          <div className=  {`flex items-center   ${isCollapsed ? ' borderColor rounded-[10px] bg-[#7421931A] ' : "gap-3 border border-[#c858BA] rounded-[10px] bg-[#7421931A] p-3"}`}>
+          <div className=  {`flex items-center   ${isCollapsed ? ' borderColor rounded-[10px] bg-[#7421931A] ' : "gap-3 border border-[#c858BA] rounded-[10px] bg-[#7421931A] p-2"}`}>
             <Avatar>
             <AvatarImage src={admin?.avatar || "https://github.com/shadcn.png"} />
             <AvatarFallback>{admin?.name?.charAt(0) || "Ad"}</AvatarFallback>
@@ -100,14 +102,14 @@ export const Sidebar = () => {
         </div>
 
         {/* Navigation Items */}
-        <nav className={`${isCollapsed ? "p-2" : "p-1"}`}>
+        <nav className={`${isCollapsed ? "p-1" : "p-1"}`}>
           {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
               className={cn(
                 "flex items-center w-full justify-start gap-3 mb-1 transition-colors px-3  rounded-md ",
-                isCollapsed ? "px-2 py-2" : "px-3 py-1.5",
+                isCollapsed ? "px-2 py-2" : "px-3 py-1",
                 activeItem === item.label
                   ? "text-[#742193] commonBG"
                   : "text-[black] hover:text-[#742193] hover:bg-gray-50"
