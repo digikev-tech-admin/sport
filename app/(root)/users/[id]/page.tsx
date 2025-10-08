@@ -1,4 +1,5 @@
-import React from "react";
+'use client'
+  import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,9 +11,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PersonalDetails from "@/components/users/PersonalDetails";
 import SubscriptionDetails from "@/components/users/SubscriptionDetails";
+import { useParams } from "next/navigation";
 
-export default async function Page({ params, }: { params: Promise<{ id: string }> }) {
-  const id = (await params).id;
+export default function Page() {
+  const {id} = useParams<{id: string}>();
 
   return (
     <section className="bg-[#f9f9f9] h-50 p-2 sm:p-7">

@@ -12,7 +12,7 @@ import PackageForm from '@/components/Package/packageForm';
 import { deletePackage } from '@/api/package';
 import toast from 'react-hot-toast';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { loginAdmin } from '@/api/admin/admin';
 import { getAdminData } from '@/config/token';
 import EditDeleteActions from '@/components/common/EditDeleteActions';
@@ -20,8 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
 import PromotionForm from '@/components/promotion/PromotionForm';
 
-const Page = ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = React.use(params);
+const Page = () => {
+  const {id} = useParams<{id: string}>();
   const [isEditing, setIsEditing] = useState(false);
 
   const router = useRouter();

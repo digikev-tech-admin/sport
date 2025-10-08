@@ -1,3 +1,4 @@
+'use client'
 import React from "react";
 import {
   Breadcrumb,
@@ -11,9 +12,11 @@ import {
 // import { useParams } from "next/navigation";
 
 import AdminDetails from "@/components/administrators/AdminDetails";
+import { useParams } from "next/navigation";
 
-export default async function Page({ params, }: { params: Promise<{ id: string }> }) {
-  const id = (await params).id;
+export default function Page() {
+  const {id} = useParams<{id: string}>();
+
 
 
   return (

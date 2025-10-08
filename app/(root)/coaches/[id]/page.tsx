@@ -12,13 +12,13 @@ import CoacheForm from "@/components/Coache/CoacheForm";
 import { deleteCoach } from "@/api/coach";
 import { loginAdmin } from "@/api/admin/admin";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 // Icons are used inside EditDeleteActions; remove direct imports here
 import EditDeleteActions from "@/components/common/EditDeleteActions";
 import { getAdminData } from "@/config/token";
 
-const Page = ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = React.use(params);
+const Page = () => {
+  const {id} = useParams<{id: string}>();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);

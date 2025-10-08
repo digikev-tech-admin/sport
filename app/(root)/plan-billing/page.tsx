@@ -36,7 +36,7 @@ const PlanBillingPage = () => {
 
   // console.log({coupons});
 
-  const [activeTab, setActiveTab] = useState<"plans" | "coupons">("coupons");
+  const [activeTab, setActiveTab] = useState<"plans" | "coupons">("plans");
 
   const router = useRouter();
 
@@ -93,15 +93,22 @@ const PlanBillingPage = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Subscription</BreadcrumbPage>
+              <BreadcrumbPage>Subscription & Plans</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <h1 className="h2 mt-4">Subscription</h1>
+      <div className="flex justify-between items-center">
+      <h1 className="h2 mt-4">Subscription & Plans</h1>
+      <SectionHeader
+            buttonText={activeTab === "plans" ? "Add Plan" : "Add Coupon"}
+            onButtonClick={handleAddCoupon}
+            icon={<Plus />}
+            className="mb-4"
+          />
 
-      <div className="flex justify-between items-center ">
-        <div className="w-[40%]">
+      {/* <div className="flex justify-between items-center "> */}
+        {/* <div className="w-[40%]">
           <div className="flex flex-row justify-evenly gap-10 ">
             <button
               className={`font-bold text-center w-[50%] p-1 ${activeTab === "plans"
@@ -122,18 +129,13 @@ const PlanBillingPage = () => {
             >
               Coupons
             </button>
-          </div>
-        </div>
-        <div>
+          </div> */}
+        {/* </div> */}
+        {/* <div> */}
 
-          <SectionHeader
-            buttonText={activeTab === "plans" ? "Add Plan" : "Add Coupon"}
-            onButtonClick={handleAddCoupon}
-            icon={<Plus />}
-            className="mb-4"
-          />
+          
         </div>
-      </div>
+      {/* </div> */}
 
       {activeTab === "plans" && (
         <div className="min-w-xl mx-auto grid grid-cols-1 gap-4">
