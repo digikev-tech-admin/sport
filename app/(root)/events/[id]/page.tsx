@@ -11,15 +11,16 @@ import {
 import EventForm from '@/components/module/ModuleForm';
 import { deleteEvent } from '@/api/event';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 // import { Button } from '@/components/ui/button';
 // import { Edit, Loader2, Trash2 } from 'lucide-react';
 import { getAdminData } from '@/config/token';
 import { loginAdmin } from '@/api/admin/admin';
 import EditDeleteActions from '@/components/common/EditDeleteActions';
 
-const Page = ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = React.use(params);
+const Page = () => {
+  // const params = useParams<{ tag: string; item: string }>()
+    const {id} = useParams<{id: string}>();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();

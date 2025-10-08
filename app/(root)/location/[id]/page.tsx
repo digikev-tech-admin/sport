@@ -11,13 +11,13 @@ import {
 import LocationForm from '@/components/location/LocationForm';
 import { deleteLocation } from '@/api/location';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import EditDeleteActions from '@/components/common/EditDeleteActions';
 import { getAdminData } from '@/config/token';
 import { loginAdmin } from '@/api/admin/admin';
 
-const Page = ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = React.use(params);
+  const Page = () => {
+  const {id} = useParams<{id: string}>();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
