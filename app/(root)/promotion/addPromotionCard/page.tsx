@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Loader from '@/components/shared/Loader';
-import PromotionForm from '@/components/promotion/PromotionForm';
+// import PromotionCardForm from '@/components/promotion/PromotionCardForm';
 
 const Promotion = () => {
   return (
@@ -26,14 +26,16 @@ const Promotion = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Add Promotion</BreadcrumbPage>
+              <BreadcrumbPage>Add Promotion Card</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
 
-      <h1 className="h2 mt-2">Add Promotion</h1>
-      <PromotionForm id={""} isEditing={true} />
+      <h1 className="h2 mt-2">Add Promotion Card</h1>
+      {/* <PromotionCardForm id={""} isEditing={true} /> */}
+      {/* <PromotionCardForm /> */}
+      <h1>Under Development</h1>
 
     </section>
   )
