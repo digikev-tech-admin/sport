@@ -1,0 +1,693 @@
+/* Quill Editor Styles */
+
+/* Custom Undo/Redo Button Styles */
+.ql-toolbar .ql-undo::before {
+  content: '↶';
+  font-size: 18px;
+}
+
+.ql-toolbar .ql-redo::before {
+  content: '↷';
+  font-size: 18px;
+}
+
+.ql-toolbar .ql-undo,
+.ql-toolbar .ql-redo {
+  width: 28px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Make Quill editor resizable */
+.ql-container {
+  resize: vertical;
+  overflow: auto;
+  min-height: 200px;
+}
+
+/* Fix Quill editor borders for rounded corners */
+.ql-toolbar {
+  border: 1px solid #ccc;
+  border-bottom: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: #0000000d;
+}
+
+.ql-container {
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  resize: vertical;
+  overflow: auto;
+  min-height: 200px;
+}
+
+.ql-editor {
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+/* Paragraph styling with responsive font sizes */
+.ql-editor p {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin: 0.25em 0 !important;
+  color: inherit !important;
+}
+
+/* Medium screens and above */
+@media (min-width: 768px) {
+  .ql-editor p {
+    font-size: 16px !important;
+  }
+}
+
+/* List styling with responsive font sizes */
+.ql-editor ul,
+.ql-editor ol {
+  padding-left: 1.5em !important;
+  margin: 1em 0 !important;
+}
+
+.ql-editor li {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin: 0.25em 0 !important;
+  color: inherit !important;
+}
+
+/* Fix Quill bullet points - convert ol with data-list="bullet" to display as ul */
+.ql-editor ol[data-list='bullet'],
+.ql-editor ol li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Alternative approach - target the parent ol when it contains li with data-list="bullet" */
+.ql-editor ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+.ql-editor ol li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Ensure the ol itself displays as ul when it has bullet items */
+.ql-editor ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* More specific fix for Quill's structure - target ol that contains li with data-list="bullet" */
+.ql-editor ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* Target individual li elements with data-list="bullet" */
+.ql-editor li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Hide the ql-ui spans that might interfere with list display */
+.ql-editor .ql-ui {
+  display: none !important;
+}
+
+/* Medium screens and above for lists */
+@media (min-width: 768px) {
+  .ql-editor li {
+    font-size: 16px !important;
+  }
+}
+
+/* Override inline styles for headings in preview */
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+  background-color: transparent !important;
+  color: inherit !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+}
+
+.ql-editor h1 {
+  font-size: 2.25em !important;
+}
+
+.ql-editor h2 {
+  font-size: 1.875em !important;
+}
+
+.ql-editor h3 {
+  font-size: 1.5em !important;
+}
+
+.ql-editor h4 {
+  font-size: 1.25em !important;
+}
+
+.ql-editor h5 {
+  font-size: 1.125em !important;
+}
+
+.ql-editor h6 {
+  font-size: 1em !important;
+}
+
+/* Override inline styles for spans within headings */
+.ql-editor h1 span,
+.ql-editor h2 span,
+.ql-editor h3 span,
+.ql-editor h4 span,
+.ql-editor h5 span,
+.ql-editor h6 span {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Fix first element spacing - remove top margin/padding when starting with heading */
+.ql-editor > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.ql-editor h1:first-child,
+.ql-editor h2:first-child,
+.ql-editor h3:first-child,
+.ql-editor h4:first-child,
+.ql-editor h5:first-child,
+.ql-editor h6:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Code block styling */
+.ql-editor pre {
+  background-color: #f4f4f4 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  padding: 12px !important;
+  margin: 8px 0 !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  overflow-x: auto !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  color: #000000 !important;
+  /* Black text for code blocks */
+}
+
+.ql-editor pre.ql-syntax {
+  background-color: #f4f4f4 !important;
+  /* Light grey background */
+  color: #000000 !important;
+  /* Black text */
+  border: 1px solid #ddd !important;
+}
+
+/* Code block in toolbar */
+.ql-toolbar .ql-code-block {
+  width: 28px;
+  height: 24px;
+}
+
+.ql-toolbar .ql-code-block::before {
+  content: '</>';
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 16px;
+}
+
+/* Inline code styling */
+.ql-editor code {
+  background-color: #f4f4f4 !important;
+  color: #000000 !important;
+  /* Black text for inline code */
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 0.9em !important;
+}
+
+/* Ensure code blocks don't inherit text colors */
+.ql-editor pre code {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+}
+
+/* Preview-specific code block styling with higher specificity */
+.prose pre,
+.prose pre.ql-syntax,
+.prose .ql-editor pre,
+.prose .ql-editor pre.ql-syntax {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  overflow-x: auto !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
+.prose pre code,
+.prose pre.ql-syntax code,
+.prose .ql-editor pre code,
+.prose .ql-editor pre.ql-syntax code {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  border: none !important;
+}
+
+.prose code,
+.prose .ql-editor code {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 0.875em !important;
+  border: none !important;
+}
+
+/* Force override for any Quill classes in preview */
+.prose * {
+  box-sizing: border-box;
+}
+
+.prose pre[class*='ql-'],
+.prose code[class*='ql-'] {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+}
+
+/* Additional override for cleaned content */
+.prose pre {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  overflow-x: auto !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
+.prose pre code {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  border: none !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.prose code {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 0.875em !important;
+  border: none !important;
+}
+
+/* Specific handling for converted code blocks */
+.prose pre:has(code) {
+  background-color: #f5f5f5 !important;
+  color: #000000 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 6px !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  overflow-x: auto !important;
+}
+
+/* Heading styling for preview */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  margin-top: 2em !important;
+  margin-bottom: 1em !important;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+.prose h1 {
+  font-size: 2.25em !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.8888889em !important;
+}
+
+.prose h2 {
+  font-size: 1.5em !important;
+  margin-top: 2em !important;
+  margin-bottom: 1em !important;
+}
+
+.prose h3 {
+  font-size: 1.25em !important;
+  margin-top: 1.6em !important;
+  margin-bottom: 0.6em !important;
+}
+
+.prose h4 {
+  font-size: 1.125em !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+}
+
+.prose h1:first-child,
+.prose h2:first-child,
+.prose h3:first-child,
+.prose h4:first-child,
+.prose h5:first-child,
+.prose h6:first-child {
+  margin-top: 0 !important;
+}
+
+/* Fix Quill bullet points in prose/preview - convert ol with data-list="bullet" to display as ul */
+.prose ol[data-list='bullet'],
+.prose ol li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Alternative approach - target the parent ol when it contains li with data-list="bullet" */
+.prose ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+.prose ol li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Ensure the ol itself displays as ul when it has bullet items */
+.prose ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* More specific fix for Quill's structure - target ol that contains li with data-list="bullet" */
+.prose ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* Target individual li elements with data-list="bullet" */
+.prose li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Hide the ql-ui spans that might interfere with list display */
+.prose .ql-ui {
+  display: none !important;
+}
+
+/* Ensure proper heading display in preview */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-family: var(--font-inter), sans-serif !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  color: #111827 !important;
+  margin-top: 2em !important;
+  margin-bottom: 1em !important;
+}
+
+.prose h1 {
+  font-size: 2.25em !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.8888889em !important;
+}
+
+.prose h2 {
+  font-size: 1.5em !important;
+  margin-top: 2em !important;
+  margin-bottom: 1em !important;
+}
+
+.prose h3 {
+  font-size: 1.25em !important;
+  margin-top: 1.6em !important;
+  margin-bottom: 0.6em !important;
+}
+
+.prose h4 {
+  font-size: 1.125em !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+}
+
+.ql-toolbar .ql-undo,
+.ql-toolbar .ql-redo {
+  width: 28px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image formatting styles */
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.ql-editor img:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Image alignment classes */
+.ql-editor img.align-left {
+  float: left;
+  margin-right: 16px;
+  margin-bottom: 8px;
+}
+
+.ql-editor img.align-center {
+  display: block;
+  margin: 16px auto;
+  text-align: center;
+}
+
+.ql-editor img.align-right {
+  float: right;
+  margin-left: 16px;
+  margin-bottom: 8px;
+}
+
+/* Responsive images in preview */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 16px 0;
+  display: block;
+}
+
+/* Image format menu styling */
+.image-format-menu {
+  font-family: var(--font-inter), sans-serif;
+  color: #374151;
+}
+
+.image-format-menu button {
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.image-format-menu button:hover {
+  transform: translateY(-1px);
+}
+
+.image-format-menu input[type='number'] {
+  font-family: inherit;
+}
+
+.image-format-menu input[type='number']:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Image resizing overlay */
+.image-resize-overlay {
+  position: absolute;
+  border: 2px dashed #3b82f6;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.image-resize-container {
+  position: relative;
+  display: inline-block;
+  border: 2px dashed #3b82f6;
+  border-radius: 4px;
+  cursor: move;
+  margin: 8px 0;
+}
+
+.image-resize-container img {
+  display: block;
+  max-width: none;
+  margin: 0;
+  border-radius: 2px;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border: 1px solid white;
+  border-radius: 50%;
+  z-index: 1001;
+  opacity: 0.9;
+}
+
+.resize-handle.nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+
+.resize-handle.ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+
+.resize-handle.sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+
+.resize-handle.se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
+
+.resize-handle.n {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.resize-handle.s {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+.resize-handle.w {
+  top: 50%;
+  left: -4px;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+
+.resize-handle.e {
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.image-toolbar {
+  position: absolute;
+  top: -45px;
+  left: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  gap: 6px;
+  z-index: 1002;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.image-toolbar button {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 60px;
+}
+
+.image-toolbar button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.image-toolbar button.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.image-toolbar input {
+  width: 60px;
+  padding: 4px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.image-toolbar .size-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-left: 1px solid #e5e7eb;
+}
+
+.image-toolbar .size-controls span {
+  font-size: 11px;
+  color: #6b7280;
+}

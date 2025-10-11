@@ -111,7 +111,7 @@ const PromotionPage = () => {
 
       {activeTab === "promotions_cards" && (
         <div className="min-w-xl mx-auto ">
-                <h1>Under Development</h1>
+                {/* <h1>Under Development</h1> */}
 
           {/* <h2 className="darkText font-semibold mb-5">All Coupons</h2> */}
           <div className="grid grid-cols-1 lg:grid-cols-2  gap-4">
