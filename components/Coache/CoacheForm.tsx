@@ -629,9 +629,9 @@ const CoacheForm = ({
             {/* {isEditing &&  */}
             <div className="flex gap-4 pt-4">
               <Button
-                type="button"
+                type="submit"
                 className="flex-1 commonDarkBG text-white hover:bg-[#581770] transition-all duration-300"
-                disabled={!isEditing}
+                disabled={isSubmitting || (!!id && !isEditing)}
               >
                 {isSubmitting && id ? (
                   <ButtonLoader text="Updating..." />

@@ -156,4 +156,268 @@ body {
 }
 
 
+/* Rich text editor content styling */
+.rich-text-content {
+  max-width: none;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+/* Headings */
+.rich-text-content h1,
+.rich-text-content h2,
+.rich-text-content h3,
+.rich-text-content h4,
+.rich-text-content h5,
+.rich-text-content h6 {
+  color: #1f3d72;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+.rich-text-content h1 {
+  font-size: 1.875rem;
+}
+
+.rich-text-content h2 {
+  font-size: 1.5rem;
+}
+
+.rich-text-content h3 {
+  font-size: 1.25rem;
+}
+
+.rich-text-content h4 {
+  font-size: 1.125rem;
+}
+
+.rich-text-content h5 {
+  font-size: 1rem;
+}
+
+.rich-text-content h6 {
+  font-size: 0.875rem;
+}
+
+/* Paragraphs */
+.rich-text-content p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+/* Links */
+.rich-text-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+.rich-text-content a:hover {
+  color: #1e40af;
+}
+
+/* Lists */
+.rich-text-content ul,
+.rich-text-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+.rich-text-content ul {
+  list-style-type: disc;
+}
+
+.rich-text-content ol {
+  list-style-type: decimal;
+}
+
+/* Fix Quill bullet points - convert ol with data-list="bullet" to display as ul */
+.rich-text-content ol[data-list='bullet'],
+.rich-text-content ol li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Alternative approach - target the parent ol when it contains li with data-list="bullet" */
+.rich-text-content ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+.rich-text-content ol li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Ensure the ol itself displays as ul when it has bullet items */
+.rich-text-content ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* More specific fix for Quill's structure - target ol that contains li with data-list="bullet" */
+.rich-text-content ol:has(li[data-list='bullet']) {
+  list-style-type: disc !important;
+}
+
+/* Target individual li elements with data-list="bullet" */
+.rich-text-content li[data-list='bullet'] {
+  list-style-type: disc !important;
+}
+
+/* Hide the ql-ui spans that might interfere with list display */
+.rich-text-content .ql-ui {
+  display: none !important;
+}
+
+.rich-text-content ul > li,
+.rich-text-content ol > li {
+  margin-bottom: 0.5rem;
+}
+
+.rich-text-content ul ul,
+.rich-text-content ol ol,
+.rich-text-content ul ol,
+.rich-text-content ol ul {
+  margin-top: 0.5rem;
+}
+
+/* Blockquotes */
+.rich-text-content blockquote {
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #1f3d72;
+  background-color: #f9fafb;
+  font-style: italic;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+/* Code */
+.rich-text-content code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  padding-top: 0rem !important;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.rich-text-content pre {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  padding-top: 0rem !important;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  width: 100%;
+  white-space: pre;
+  word-wrap: normal;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.rich-text-content pre code {
+  background-color: transparent;
+  padding: 0;
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  white-space: pre;
+  word-wrap: normal;
+  min-width: max-content;
+}
+
+/* Images */
+.rich-text-content img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Horizontal Rule */
+.rich-text-content hr {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Tables - Dynamic width with proper scrolling */
+.rich-text-content table {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+  table-layout: auto;
+}
+
+/* Create scrollable container for tables */
+.rich-text-content table {
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.rich-text-content table thead,
+.rich-text-content table tbody {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.rich-text-content table tr {
+  display: table-row;
+  white-space: normal;
+}
+
+.rich-text-content table th,
+.rich-text-content table td {
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.rich-text-content th {
+  background-color: #f3f4f6;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  font-weight: 600;
+  text-align: left;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+.rich-text-content td {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+.rich-text-content tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Superscript & Subscript */
+.rich-text-content sup,
+.rich-text-content sub {
+  font-size: 0.875rem;
+}
+
+/* Last child margin reset */
+.rich-text-content *:last-child {
+  margin-bottom: 0;
+}
+
+/* Force font family override for all blog preview content */
+.rich-text-content,
+.rich-text-content * {
+  font-family: var(--font-inter), sans-serif !important;
+}
+
+
 /*        grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 */

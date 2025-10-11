@@ -2,13 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RefreshCcw, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { getAllUsers } from '@/api/user/user';
 import { createNotification } from '@/api/notification';
+import RichTextEditor from '../ui/rich-text-editor';
+import { getAllCoaches } from '@/api/coach';
+import { getAllPackages } from '@/api/package';
+import { getAllEvents } from '@/api/event';
+import { getAllLocations } from '@/api/location';
+import CategoryFilter from '../NewFilterForNotification';
 
 interface User {
   _id: string;
@@ -32,6 +37,26 @@ const NotificationForm = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [userFcmTokens, setUserFcmTokens] = useState<string[]>([]);
+  const [coaches, setCoaches] = useState<Array<{ id: string; name: string }>>([]);
+  const [packages, setPackages] = useState<Array<{ id: string; title: string }>>([]);
+  const [events, setEvents] = useState<Array<{ id: string; title: string }>>([]);
+  const [locations, setLocations] = useState<Array<{ id: string; title: string }>>([]);
+  const [selectedPackages, setSelectedPackages] = useState('all');
+  const [selectedCoaches, setSelectedCoaches] = useState('all');
+  const [selectedEvents, setSelectedEvents] = useState('all');
+  const [selectedLocations, setSelectedLocations] = useState('all');
+  
+  // Console log filtered data whenever filters change
+  useEffect(() => {
+    console.log('=== FILTERED DATA ===');
+    console.log('Selected Filters:', {
+      packages: selectedPackages,
+      coaches: selectedCoaches,
+      events: selectedEvents,
+      locations: selectedLocations
+    });
+
+  }, [selectedPackages, selectedCoaches, selectedEvents, selectedLocations]);
 
   const [formData, setFormData] = useState<NotificationFormData>({
     title: '',
@@ -48,8 +73,33 @@ const NotificationForm = () => {
       try {
         // Replace with your actual API call
         const usersData = await getAllUsers();
-        console.log({ usersData });
+        // console.log({ usersData });
         setUsers(usersData?.data);
+        const coachesData = await getAllCoaches();
+        const formattedCoaches = coachesData?.map((coach: any) => ({
+          id: coach._id,
+          name: coach.name,
+        }));
+        setCoaches(formattedCoaches);
+        const packagesData = await getAllPackages();
+        const formattedPackages = packagesData?.map((item: any) => ({
+          id: item?._id,
+          title: item?.title,
+        }));
+        setPackages(formattedPackages);
+        const eventsData = await getAllEvents();
+        const formattedEvents = eventsData
+          .map((event: any) => ({
+            id: event?._id,
+            title: event?.title,
+          }));
+        setEvents(formattedEvents);
+        const locationsData = await getAllLocations();
+        const formattedLocations = locationsData?.map((item: any) => ({
+          id: item?._id,
+          title: item?.title,
+        }));
+        setLocations(formattedLocations);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast.error('Failed to fetch users');
@@ -57,6 +107,7 @@ const NotificationForm = () => {
     };
     fetchUsers();
   }, []);
+
 
   // Fetch notification data if editing
   //   useEffect(() => {
@@ -160,7 +211,7 @@ const NotificationForm = () => {
     <div className="flex items-center justify-center py-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-4xl bg-white rounded-xl border p-2 sm:p-8 space-y-6"
+        className="w-full max-w-5xl bg-white rounded-xl border p-2 sm:p-4 xl:p-8 space-y-6"
       >
         <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">Notification Title</label>
@@ -178,7 +229,7 @@ const NotificationForm = () => {
           )}
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">Message</label>
           <Textarea
             value={formData.message}
@@ -193,6 +244,15 @@ const NotificationForm = () => {
               {formData.message.length}/500 characters
             </p>
           )}
+        </div> */}
+        <div className="space-y-2">
+        <label className="text-sm font-bold text-gray-700">Message</label>
+            <RichTextEditor
+              value={formData.message || ''}
+              onChange={(value) => setFormData(prev => ({ ...prev, message: value }))}
+              placeholder="Write your notification message here..."
+              height={400}
+            />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -210,32 +270,44 @@ const NotificationForm = () => {
               <SelectContent>
                 <SelectItem value="system">System</SelectItem>
                 <SelectItem value="reminder">Reminder</SelectItem>
-                <SelectItem value="marketing">Marketing</SelectItem>
+                {/* <SelectItem value="marketing">Marketing</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
-
-          {/* <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700">Link (Optional)</label>
-            <Input
-              type="url"
-              value={formData.link}
-              onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
-              placeholder="https://example.com"
-            />
-          </div> */}
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-bold text-gray-700">Recipients</label>
-            <div className="flex gap-2">
+          <div className="space-y-4">
+            {/* Responsive Filter Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+              <div className="w-full">
+                <CategoryFilter title="Packages" value={selectedPackages} onChange={setSelectedPackages} subscriptionOptions={packages} />
+              </div>
+              <div className="w-full">
+                <CategoryFilter title="Coaches" value={selectedCoaches} onChange={setSelectedCoaches} subscriptionOptions={coaches} />
+              </div>
+              <div className="w-full">
+                <CategoryFilter title="Events" value={selectedEvents} onChange={setSelectedEvents} subscriptionOptions={events} />
+              </div>
+              <div className="w-full">
+                <CategoryFilter title="Locations" value={selectedLocations} onChange={setSelectedLocations} subscriptionOptions={locations} />
+              </div>
+            </div>
+            
+            {/* Action Buttons - Responsive */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between">
+              <div>
+              <label htmlFor="" className='text-sm font-bold text-gray-700'>Recipients</label>
+
+              </div>
+              <div>
+
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAllUsers}
-                className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300"
+                className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300 w-full sm:w-auto"
               >
                 Select All (with tokens)
               </Button>
@@ -244,11 +316,13 @@ const NotificationForm = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleDeselectAllUsers}
-                className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300"
+                className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300 w-full sm:w-auto"
               >
                 Deselect All
               </Button>
             </div>
+            </div>
+            
           </div>
 
           <div className="border rounded-lg p-4 max-h-60 overflow-y-auto">
@@ -310,6 +384,7 @@ const NotificationForm = () => {
               </div>
             )}
           </div>
+
 
           {selectedUsers.length > 0 && (
             <p className="text-sm text-gray-600">
