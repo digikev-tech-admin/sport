@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -9,8 +9,14 @@ import { Label } from "../ui/label";
 import ReCloudinary from "../cloudinary/ReCloudinary";
 import { Plus, X, RefreshCcw, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { createCarouselCard } from "@/api/carouselCard";
 import toast from "react-hot-toast";
+import {
+  createCarouselCard,
+  getCarouselCardById,
+  updateCarouselCard,
+} from "@/api/promotion";
+import Loader from "../shared/Loader";
+import { useRouter } from "next/navigation";
 
 interface PromotionCardData {
   order: number;
@@ -22,7 +28,18 @@ interface PromotionCardData {
   isNews: boolean;
 }
 
-const PromotionCardForm = () => {
+const PromotionCardForm = ({
+  id,
+  isEditing,
+  setIsEditing,
+}: {
+  id: string;
+  isEditing: boolean;
+  setIsEditing?: (isEditing: boolean) => void;
+}) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [forms, setForms] = useState<PromotionCardData[]>([
     {
       order: 1,
@@ -34,6 +51,7 @@ const PromotionCardForm = () => {
       isNews: false,
     },
   ]);
+  const [isActive, setIsActive] = useState(true);
 
   const updateForm = (
     order: number,
@@ -46,6 +64,29 @@ const PromotionCardForm = () => {
       )
     );
   };
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+
+      const fetchPromotionCard = async () => {
+        try {
+          const response = await getCarouselCardById(id);
+          // console.log({response});
+
+          // Set the forms with the fetched data
+          if (response?.cards) {
+            setForms(response.cards);
+          }
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchPromotionCard();
+    }
+  }, [id]);
 
   const addNewForm = () => {
     if (forms.length < 3) {
@@ -81,7 +122,7 @@ const PromotionCardForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setIsSubmitting(true);
     // Validate minimum forms requirement
     if (forms.length < 2) {
       toast.error("Please create at least 2 promotion cards before saving");
@@ -94,20 +135,32 @@ const PromotionCardForm = () => {
       return;
     }
 
-    console.log("Promotion Card Data:", forms);
+    // console.log("Promotion Card Data:", forms);
 
     // Wrap the forms array in a cards property as expected by the controller
     const payload = {
       cards: forms,
+      isActive: isActive,
     };
 
     try {
-      const response = await createCarouselCard(payload);
-      console.log("Carousel Card Data:", response);
-      toast.success("Carousel Card created successfully");
+      if (id) {
+        const response = await updateCarouselCard(id, payload);
+        console.log("Carousel Card Data:", response);
+        toast.success("Carousel Card updated successfully");
+        setIsEditing?.(false);
+        router.push(`/promotion/editPromotionCard/${id}/#promotion-card-form`);
+      } else {
+        const response = await createCarouselCard(payload);
+        console.log("Carousel Card Data:", response);
+        toast.success("Carousel Card created successfully");
+        router.push(`/promotion?tab=promotions_cards`);
+      }
     } catch (error: any) {
       console.error("Error creating carousel card:", error);
       toast.error(error || "Failed to create carousel card. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -115,21 +168,17 @@ const PromotionCardForm = () => {
     return form.image && form.title && form.description;
   };
 
+  // console.log({forms});
+
   const allFormsValid = forms.every(isFormValid);
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create Promotion Cards
-          </h1>
-          <p className="text-lg text-gray-600">
-            Design and manage promotional content for your platform
-          </p>
-        </div>
+  if (loading) {
+    return <Loader />;
+  }
 
+  return (
+    <div id="promotion-card-form" className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit} className="space-y-8">
           {forms.map((form, index) => (
             <Card
@@ -151,6 +200,7 @@ const PromotionCardForm = () => {
                       type="button"
                       variant="ghost"
                       size="icon"
+                      disabled={forms.length === 1 || !isEditing}
                       onClick={() => removeForm(form.order)}
                       className="text-white hover:bg-white/20 hover:text-white"
                     >
@@ -186,6 +236,7 @@ const PromotionCardForm = () => {
                                 btnIcon={<RefreshCcw className="h-4 w-4" />}
                                 btnText=""
                                 isAlwaysBtn
+                                disabled={!isEditing}
                                 isImgPreview={false}
                               />
                               <Button
@@ -198,6 +249,7 @@ const PromotionCardForm = () => {
                                   e.stopPropagation();
                                   updateForm(form.order, "image", "");
                                 }}
+                                disabled={!isEditing}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -222,6 +274,7 @@ const PromotionCardForm = () => {
                         <ReCloudinary
                           id={`image-${form.order}`}
                           initialUrl={form.image}
+                          disabled={!isEditing}
                           onSuccess={(result) =>
                             handleImageUpload(form.order, result)
                           }
@@ -256,6 +309,7 @@ const PromotionCardForm = () => {
                         onChange={(e) =>
                           updateForm(form.order, "title", e.target.value)
                         }
+                        disabled={!isEditing}
                         placeholder="Enter promotion title"
                         className="w-full h-12 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg"
                       />
@@ -270,6 +324,7 @@ const PromotionCardForm = () => {
                       <Textarea
                         id={`description-${form.order}`}
                         value={form.description}
+                        disabled={!isEditing}
                         onChange={(e) =>
                           updateForm(form.order, "description", e.target.value)
                         }
@@ -300,6 +355,7 @@ const PromotionCardForm = () => {
                       <Input
                         id={`ctaTitle-${form.order}`}
                         value={form.ctaTitle}
+                        disabled={!isEditing}
                         onChange={(e) =>
                           updateForm(form.order, "ctaTitle", e.target.value)
                         }
@@ -321,6 +377,7 @@ const PromotionCardForm = () => {
                         id={`link-${form.order}`}
                         type="url"
                         value={form.link}
+                        disabled={!isEditing}
                         onChange={(e) =>
                           updateForm(form.order, "link", e.target.value)
                         }
@@ -340,6 +397,7 @@ const PromotionCardForm = () => {
                         onChange={(e) =>
                           updateForm(form.order, "isNews", e.target.checked)
                         }
+                        disabled={!isEditing}
                         className="h-5 w-5 text-[#742193] focus:ring-[#742193] border-gray-300 rounded"
                       />
                       <Label
@@ -358,6 +416,25 @@ const PromotionCardForm = () => {
             </Card>
           ))}
 
+          <div className="mt-5 border-gray-200">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={isActive}
+                disabled={!isEditing}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className="h-5 w-5 text-[#742193] focus:ring-[#742193] border-gray-300 rounded"
+              />
+              <Label
+                htmlFor="isActive"
+                className="text-sm font-semibold text-gray-700 cursor-pointer"
+              >
+                Active Status
+              </Label>
+            </div>
+          </div>
+
           {/* Add Another Form Button */}
           {forms.length < 3 && (
             <Card className="border-dashed border-2 border-gray-300 hover:border-[#742193] transition-all duration-300 hover:shadow-md bg-white">
@@ -367,6 +444,7 @@ const PromotionCardForm = () => {
                   variant="outline"
                   onClick={addNewForm}
                   className="flex items-center gap-3 h-14 px-8 text-[#742193] border-[#742193] hover:bg-[#742193] hover:text-white transition-all duration-300 font-semibold"
+                  disabled={!isEditing}
                 >
                   <Plus className="h-5 w-5" />
                   Add Another Form
@@ -377,27 +455,67 @@ const PromotionCardForm = () => {
 
           {/* Submit Section */}
           <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-center sm:text-left">
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  Ready to Save?
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {forms.length} of 3 forms •{" "}
-                  {forms.length < 2
-                    ? "Minimum 2 forms required"
-                    : allFormsValid
-                    ? "All forms are valid"
-                    : "Please fill required fields"}
-                </p>
-              </div>
+            <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 type="submit"
-                disabled={!allFormsValid || forms.length < 2}
-                className="bg-gradient-to-r from-[#742193] to-[#581770] hover:from-[#581770] hover:to-[#742193] text-white px-8 py-3 h-12 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  !allFormsValid || forms.length < 2 || loading || !isEditing
+                }
+                className="flex-1 bg-gradient-to-r from-[#742193] to-[#581770] hover:from-[#581770] hover:to-[#742193] text-white px-8 py-3 h-12 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Promotion Cards
+                {isSubmitting && id
+                  ? "Updating..."
+                  : isSubmitting
+                  ? "Submitting..."
+                  : isEditing && id
+                  ? "Update Promotion Cards"
+                  : "Save Promotion Cards"}
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
+                onClick={() => {
+                  if (isEditing && id) {
+                    if (setIsEditing) {
+                      setIsEditing(false);
+                      router.push(
+                        `/promotion/editPromotionCard/${id}?/#promotion-card-form`
+                      );
+                    }
+                    return;
+                  }
+                  setForms([
+                    {
+                      order: 1,
+                      image: "",
+                      title: "",
+                      description: "",
+                      ctaTitle: "",
+                      link: "",
+                      isNews: false,
+                    },
+                  ]);
+
+                  router.push(`/promotion?tab=promotions_cards`);
+                }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+            </div>
+            <div className="text-center sm:text-left mt-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                Ready to Save?
+              </h3>
+              <p className="text-sm text-gray-600">
+                {forms.length} of 3 forms •{" "}
+                {forms.length < 2
+                  ? "Minimum 2 forms required"
+                  : allFormsValid
+                  ? "All forms are valid"
+                  : "Please fill required fields"}
+              </p>
             </div>
           </div>
         </form>

@@ -37,7 +37,7 @@ const PromotionTable: React.FC = () => {
     setLoading(true);
     try {
       const response = await getAllPromotions();
-      console.log("Response:", response);
+      // console.log("Response:", response);
       setPromotions(Array.isArray(response) ? response : []);
     } catch (error: any) {
       toast.error(error || "Failed to fetch promotions");

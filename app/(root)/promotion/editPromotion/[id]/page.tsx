@@ -24,7 +24,7 @@ const Page = () => {
   const {id} = useParams<{id: string}>();
   const [isEditing, setIsEditing] = useState(false);
 
-  const router = useRouter();
+  // const router = useRouter();
   // console.log(id);
 
   

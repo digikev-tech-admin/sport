@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,13 +9,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 
 // import toast from "react-hot-toast";
 import Loader from "@/components/shared/Loader";
 import PromotionTable from "@/components/promotion/PromotionTable";
+import PromotionGroup from "@/components/promotion/PromotionGroup";
+import { getAllCarouselCards } from "@/api/promotion";
+import { PromotionGroup as PromotionGroupType } from "@/types/promotion";
 
 const Page = () => {
   return (
@@ -26,13 +29,41 @@ const Page = () => {
 };
 
 const PromotionPage = () => {
-  // console.log({coupons});
+  const [promotionGroups, setPromotionGroups] = useState<PromotionGroupType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<"promotions" | "promotions_cards">(
     "promotions"
   );
 
   const router = useRouter();
+
+  // Handle URL tab parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'promotions_cards') {
+      setActiveTab('promotions_cards');
+    } else if (tab === 'promotions') {
+      setActiveTab('promotions');
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        setLoading(true);
+        const groups = await getAllCarouselCards();
+        console.log(groups);
+        setPromotionGroups(groups);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPromotions();
+  }, []);
 
 
 
@@ -44,6 +75,12 @@ const PromotionPage = () => {
           : "/promotion/addPromotionCard"
       }`
     );
+  };
+
+  const handleEditGroup = (groupId: string) => {
+    // TODO: Implement edit group functionality
+    router.push(`/promotion/editPromotionCard/${groupId}`);
+    console.log("Edit group:", groupId);
   };
 
   return (
@@ -72,7 +109,10 @@ const PromotionPage = () => {
                   ? "border-b-2 border-[#742193] text-[#742193]"
                   : "text-black"
               }`}
-              onClick={() => setActiveTab("promotions")}
+              onClick={() => {
+                setActiveTab("promotions");
+                router.push("/promotion?tab=promotions");
+              }}
             >
               Promotions Table
             </button>
@@ -83,7 +123,10 @@ const PromotionPage = () => {
                   ? "border-b-2 border-[#742193] text-[#742193]"
                   : "text-black"
               }`}
-              onClick={() => setActiveTab("promotions_cards")}
+              onClick={() => {
+                setActiveTab("promotions_cards");
+                router.push("/promotion?tab=promotions_cards");
+              }}
             >
               Promotions Cards
             </button>
@@ -110,29 +153,29 @@ const PromotionPage = () => {
       )}
 
       {activeTab === "promotions_cards" && (
-        <div className="min-w-xl mx-auto ">
-                {/* <h1>Under Development</h1> */}
-
-          {/* <h2 className="darkText font-semibold mb-5">All Coupons</h2> */}
-          <div className="grid grid-cols-1 lg:grid-cols-2  gap-4">
-            {/* {coupons?.length > 0 ? (
-            coupons.map((coupon) => (
-              <CouponCard
-                key={coupon?._id}
-                title={coupon?.code}
-                discount={Number(coupon?.discountPercentage ?? "0")}
-                isActive={coupon?.isActive ?? false}
-                usedCount={coupon?.usedCount ?? 0}
-                maxUses={coupon?.maxUses ?? 0}
-                allowedModule={coupon?.allowedModule ?? "all"}
-                onEdit={() => handleEdit("coupon", coupon?._id ?? "")}
-                onDelete={() => handleDelete("coupon", coupon?._id ?? "")}
-              />
-            ))
+        <div className="min-w-xl mx-auto">
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader />
+            </div>
+          ) : promotionGroups.length > 0 ? (
+            <div className="space-y-6">
+              {promotionGroups.map((group) => (
+                <PromotionGroup
+                  key={group._id}
+                  group={group}
+                  onEditGroup={() => handleEditGroup(group._id)}
+                />
+              ))}
+            </div>
           ) : (
-            <p className="text-gray-500">No coupons found.</p>
-          )} */}
-          </div>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">No promotion groups found.</p>
+              <p className="text-gray-400 text-sm mt-2">
+                Create your first promotion group to get started.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </section>
