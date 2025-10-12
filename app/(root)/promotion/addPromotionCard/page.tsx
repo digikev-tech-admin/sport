@@ -33,8 +33,7 @@ const Promotion = () => {
       </div>
 
       <h1 className="h2 mt-2">Add Promotion Card</h1>
-      {/* <PromotionCardForm id={""} isEditing={true} /> */}
-      <PromotionCardForm />
+      <PromotionCardForm id={""} isEditing={true} />
 
     </section>
   )
