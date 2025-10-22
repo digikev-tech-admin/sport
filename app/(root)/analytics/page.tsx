@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useEffect, useState } from "react";
 import { getAllUsers } from "@/api/user/user";
-import { getUserStats } from "@/api/chartData";
+import { getUserStats } from "@/api/services";
 import { getAllPackages } from "@/api/package";
 import PackageChart from "@/components/dashboard/PackageChart";
 // Dummy data

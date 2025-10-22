@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import CoacheForm from "@/components/Coache/CoacheForm";
 import { deleteCoach } from "@/api/coach";
-import { loginAdmin } from "@/api/admin/admin";
+import { loginAdmin } from "@/api/user/user";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 // Icons are used inside EditDeleteActions; remove direct imports here

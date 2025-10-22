@@ -42,7 +42,7 @@ const NotificationTable = ({ notifications, onDelete }: NotificationTableProps) 
           <TableRow>
             <TableHead className="w-[80px] font-bold">Sr. No.</TableHead>
             <TableHead className="font-bold">Title</TableHead>
-            <TableHead className="font-bold">Message</TableHead>
+            {/* <TableHead className="font-bold">Message</TableHead> */}
             <TableHead className="font-bold">Notification Type</TableHead>
             <TableHead className="font-bold">Created At</TableHead>
             <TableHead className="text-center font-bold">Actions</TableHead>
@@ -57,11 +57,11 @@ const NotificationTable = ({ notifications, onDelete }: NotificationTableProps) 
                   ? `${notification?.title?.substring(0, 20)}...` 
                   : notification?.title}
               </TableCell>
-              <TableCell className="capitalize">
+              {/* <TableCell className="capitalize">
                 {notification?.message?.length > 25 
                   ? `${notification?.message?.substring(0, 25)}...` 
                   : notification?.message}
-              </TableCell>
+              </TableCell> */}
               <TableCell className="capitalize ">{notification?.notificationType}</TableCell>
               <TableCell>
               {notification?.createdAt

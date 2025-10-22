@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 import { useParams, useRouter } from 'next/navigation';
 import EditDeleteActions from '@/components/common/EditDeleteActions';
 import { getAdminData } from '@/config/token';
-import { loginAdmin } from '@/api/admin/admin';
+import { loginAdmin } from '@/api/user/user'; 
 
   const Page = () => {
   const {id} = useParams<{id: string}>();

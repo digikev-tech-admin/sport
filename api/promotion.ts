@@ -102,3 +102,109 @@ export const updateCarouselCard = async (id: string, data: any) => {
         throw error.response?.data?.error || "Deleting carousel card failed";
     }
 };
+
+
+
+
+
+// Create a plan
+export const createPlan = async (data: any) => {
+    try {
+        const response = await axiosInstance.post("/plans", data);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Plan creation failed";
+    }
+};
+
+// Get all plans
+export const getAllPlans = async () => {
+    try {
+        const response = await axiosInstance.get("/plans");
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Fetching plans failed";
+    }
+};
+
+// Get a plan by ID
+export const getPlanById = async (id: string) => {
+    try {
+        const response = await axiosInstance.get(`/plans/${id}`);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Fetching plan failed";
+    }
+};
+
+// Update a plan
+export const updatePlan = async (id: string, data: any) => {
+    try {
+        const response = await axiosInstance.put(`/plans/${id}`, data);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Updating plan failed";
+    }
+};
+
+// Delete a plan
+export const deletePlan = async (id: string) => {
+    try {
+        const response = await axiosInstance.delete(`/plans/${id}`);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Deleting plan failed";
+    }
+};
+
+
+
+// Create a coupon
+export const createCoupon = async (data: any) => {
+    try {
+        const response = await axiosInstance.post("/admin/coupons", data);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Coupon creation failed";
+    }
+};
+
+// Get all coupons
+export const getAllCoupons = async () => {
+    try {
+        const response = await axiosInstance.get("/admin/coupons");
+        return response?.data?.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Fetching coupons failed";
+    }
+};
+
+// Get a coupon by ID
+export const getCouponById = async (id: string) => {
+    try {
+        const response = await axiosInstance.get(`/admin/coupons/${id}`);
+        return response?.data?.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Fetching coupon failed";
+    }
+};
+
+// Update a coupon
+export const updateCoupon = async (id: string, data: any) => {
+    try {
+        const response = await axiosInstance.put(`/admin/coupons/${id}`, data);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Updating coupon failed";
+    }
+};
+
+// Delete a coupon
+export const deleteCoupon = async (id: string) => {
+    try {
+        const response = await axiosInstance.delete(`/admin/coupons/${id}`);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.message || "Deleting coupon failed";
+    }
+};

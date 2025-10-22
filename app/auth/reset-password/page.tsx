@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { resetPassword } from "@/api/admin/admin";
+import { resetPassword } from "@/api/user/user";
 import toast from "react-hot-toast";
 
 const ResetPasswordComponent = () => {

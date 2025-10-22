@@ -60,3 +60,43 @@ export const deleteNotification = async (id: string) => {
         throw error.response?.data?.error || "Deleting notification failed";
     }
 };
+
+
+
+
+export const getUsersByCoachId = async (coachId: string) => {
+    try {
+        const response = await axiosInstance.get(`/getUserByOrder/coach/${coachId}`);
+        return response?.data?.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || "Fetching users by coach id failed"; 
+    }
+};
+
+export const getUsersByEventId = async (eventId: string) => {
+    try {
+        const response = await axiosInstance.get(`/getUserByOrder/event/${eventId}`);
+        return response?.data?.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || "Fetching users by event id failed"; 
+    }
+};
+
+
+export const getUsersByLocationId = async (locationId: string) => {
+    try {
+        const response = await axiosInstance.get(`/getUserByOrder/location/${locationId}`);
+        return response?.data?.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || "Fetching users by location id failed"; 
+    }
+};
+
+export const getUsersByPackageId = async (packageId: string) => {
+    try {
+        const response = await axiosInstance.get(`/getUserByOrder/package/${packageId}`);
+        return response?.data?.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || "Fetching users by package id failed"; 
+    }
+};

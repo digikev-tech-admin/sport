@@ -1,4 +1,4 @@
-import { loginAdmin } from "@/api/admin/admin";
+import { loginAdmin } from "@/api/user/user";
 import { removeAdminData, removeToken, setAdminData, setToken } from "@/config/token";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
