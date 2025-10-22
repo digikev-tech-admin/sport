@@ -13,7 +13,7 @@ import { deletePackage } from '@/api/package';
 import toast from 'react-hot-toast';
 
 import { useParams, useRouter } from 'next/navigation';
-import { loginAdmin } from '@/api/admin/admin';
+import { loginAdmin } from '@/api/user/user'; 
 import { getAdminData } from '@/config/token';
 import EditDeleteActions from '@/components/common/EditDeleteActions';
 import { Button } from '@/components/ui/button';

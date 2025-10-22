@@ -10,7 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import { loginAdmin } from "@/api/admin/admin";
+import { loginAdmin } from "@/api/user/user";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 // Icons are used inside EditDeleteActions; remove direct imports here

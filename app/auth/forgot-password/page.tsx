@@ -1,5 +1,5 @@
 "use client";
-import { forgotPassword } from "@/api/admin/admin";
+import { forgotPassword } from "@/api/user/user";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";

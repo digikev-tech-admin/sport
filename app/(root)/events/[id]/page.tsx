@@ -15,7 +15,7 @@ import { useParams, useRouter } from 'next/navigation';
 // import { Button } from '@/components/ui/button';
 // import { Edit, Loader2, Trash2 } from 'lucide-react';
 import { getAdminData } from '@/config/token';
-import { loginAdmin } from '@/api/admin/admin';
+import { loginAdmin } from '@/api/user/user'; 
 import EditDeleteActions from '@/components/common/EditDeleteActions';
 
 const Page = () => {

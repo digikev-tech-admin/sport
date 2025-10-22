@@ -1,11 +1,6 @@
+import { createPlan, deletePlan, getAllPlans, getPlanById, updatePlan } from "@/api/promotion";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  createPlan,
-  getAllPlans,
-  getPlanById,
-  updatePlan,
-  deletePlan,
-} from "@/api/plan";
+
 import toast from "react-hot-toast";
 
 export interface PlanData {

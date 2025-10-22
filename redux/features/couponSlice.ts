@@ -5,7 +5,7 @@ import {
     getCouponById,
     updateCoupon,
     deleteCoupon,
-} from "@/api/coupon";
+} from "@/api/promotion";
 import toast from "react-hot-toast";
 import { ICoupon } from "@/types/coupon";
 
