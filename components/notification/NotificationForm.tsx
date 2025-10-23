@@ -150,15 +150,21 @@ const NotificationForm = () => {
           console.log("Location Users Response:", locationUsers);
 
           // Extract users from location response
-          if (locationUsers && locationUsers.length > 0) {
-            const users = locationUsers.map((item: any) => ({
-              _id: item.userId._id,
-              name: item.userId.name,
-              email: item.userId.email,
-              fcmToken: item.userId.fcmToken,
-            }));
-            extractedUsers = [...extractedUsers, ...users];
-            hasActiveFilter = true;
+          if (locationUsers) {
+            // Handle both single user object and array of users
+            const usersArray = Array.isArray(locationUsers) ? locationUsers : [locationUsers];
+            
+            if (usersArray.length > 0) {
+              const users = usersArray.map((item: any) => ({
+                _id: item._id,
+                name: item.name,
+                email: item.email,
+                fcmToken: item.fcmToken,
+              }));
+              console.log({users});
+              extractedUsers = [...extractedUsers, ...users];
+              hasActiveFilter = true;
+            }
           }
         }
 
@@ -223,12 +229,23 @@ const NotificationForm = () => {
           title: event?.title,
         }));
         setEvents(formattedEvents);
-        const locationsData = await getAllLocations();
-        const formattedLocations = locationsData?.map((item: any) => ({
-          id: item?._id,
-          title: item?.title,
+        // const locationsData = await getAllLocations();
+        const locationsData1= await getAllUsers();
+        // filter the locations data by the locationsData1 where userLocation is not null
+        const filterData = locationsData1?.data?.filter((item: any) => item.userLocation !== null);
+        const formattedLocations = filterData.map((item: any) => ({
+          id: item.id,
+          title: item?.userLocation?.city          ,
         }));
+        console.log({filterData});
+        console.log({formattedLocations});
         setLocations(formattedLocations);
+        // console.log({locationsData1});
+        // const formattedLocations = locationsData?.map((item: any) => ({
+        //   id: item?._id,
+        //   title: item?.title,
+        // }));
+        // setLocations(formattedLocations);
       } catch (error) {
         console.error("Error fetching users:", error);
         toast.error("Failed to fetch users");

@@ -85,7 +85,7 @@ export const getUsersByEventId = async (eventId: string) => {
 
 export const getUsersByLocationId = async (locationId: string) => {
     try {
-        const response = await axiosInstance.get(`/getUserByOrder/location/${locationId}`);
+        const response = await axiosInstance.get(`/users/${locationId}`);
         return response?.data?.data;
     } catch (error: any) {
         throw error.response?.data?.error || "Fetching users by location id failed"; 

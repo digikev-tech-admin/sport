@@ -222,18 +222,18 @@ import { Coach, Event } from "@/types/types";
 
 
 export const ageGroups = [
-  "all",  
-  "kids",
-  "teens",
-  "adults",
+  "All",  
+  "Kids",
+  "Teens",
+  "Adults",
 ];
 
 
 
 export const levels = [
-  {id: 1, name: "beginner"},
-  {id: 2, name: "intermediate"},
-  {id: 3, name: "advanced"},
+  {id: 1, name: "Beginner"},
+  {id: 2, name: "Intermediate"},
+  {id: 3, name: "Advanced"},
 ];
 
 
