@@ -1,15 +1,18 @@
 "use client";
 import Image from "next/image";
 import React from "react";
-import { LogOut } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { getToken, removeAdminData, removeToken } from "@/config/token";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 
 const Navbar = () => {
   const router = useRouter();
   const token = getToken();
+  const pathname = usePathname();
+
+  const isContactPage = pathname === "/contact";
 
   const logoutHandler = () => {
     removeToken();
@@ -17,6 +20,8 @@ const Navbar = () => {
     toast.success("Logout successfully");
     router.push("/");
   };
+
+  
   return (
     <>
       <nav className="w-full bg-[#7421931A]  h-16 flex  ">
@@ -46,6 +51,17 @@ const Navbar = () => {
               >
                 <LogOut size={20} className="text-white" />
                 <span className="font-sm font-semibold">Logout</span>
+              </Button>
+            )}
+            {isContactPage && (
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.push("/")}
+                className="flex items-center gap-2 border-none bg-[#742193] text-white hover:bg-[#5e176e] hover:text-white"
+              >
+                <LogIn size={20} className="text-white" />
+                <span className="font-sm font-semibold">Login</span>
               </Button>
             )}
           </div>

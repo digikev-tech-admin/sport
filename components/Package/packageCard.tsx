@@ -35,7 +35,7 @@ const PackageCard = ({ item }: PackageCardProps) => {
     onClick={handleCardClick}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap- truncate">
+        <div className="flex items-center ">
           {/* <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-200">
              <Trophy className="w-5 h-5 text-[#742193]"/>
           </div> */}
