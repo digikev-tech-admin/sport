@@ -383,12 +383,16 @@ const CoacheForm = ({
                     Phone Number
                   </label>
                   <Input
-                    type="tel"
+                    type="text"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setPhoneNumber(value);
+                    }}
                     placeholder="Enter phone number"
                     required
                     disabled={!isEditing}
+                    pattern="[0-9]*"
                   />
                 </div>
                 <div className="space-y-2">
@@ -396,12 +400,16 @@ const CoacheForm = ({
                     Emergency Contact
                   </label>
                   <Input
-                    type="tel"
+                    type="text"
                     value={emergencyContact}
-                    onChange={(e) => setEmergencyContact(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setEmergencyContact(value);
+                    }}
                     placeholder="Enter emergency contact number"
                     required
                     disabled={!isEditing}
+                    pattern="[0-9]*"
                   />
                 </div>
                 <div className="col-span-2">
