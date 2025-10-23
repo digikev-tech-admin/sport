@@ -83,6 +83,9 @@ const PromotionPage = () => {
     console.log("Edit group:", groupId);
   };
 
+  console.log({promotionGroups});
+  
+
   return (
     <section className="bg-[#f9f9f9] h-50 p-2 sm:p-4 xl:p-8">
       <div>
@@ -133,16 +136,18 @@ const PromotionPage = () => {
           </div>
         </div>
         <div>
-          <SectionHeader
-            buttonText={
-              activeTab === "promotions"
-                ? "Add New Promotion"
-                : "Add New Promotion Card"
-            }
-            onButtonClick={handleAddPromotion}
-            icon={<Plus />}
-            className="mb-4"
-          />
+          {!(activeTab === "promotions_cards" && promotionGroups.length === 1) && (
+            <SectionHeader
+              buttonText={
+                activeTab === "promotions"
+                  ? "Add New Promotion"
+                  : "Add New Promotion Card"
+              }
+              onButtonClick={handleAddPromotion}
+              icon={<Plus />}
+              className="mb-4"
+            />
+          )}
         </div>
       </div>
 
@@ -153,7 +158,7 @@ const PromotionPage = () => {
       )}
 
       {activeTab === "promotions_cards" && (
-        <div className="min-w-xl mx-auto">
+        <div className="min-w-xl mx-auto mt-7">
           {loading ? (
             <div className="flex justify-center items-center py-8">
               <Loader />
