@@ -7,9 +7,15 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import ReCloudinary from "../cloudinary/ReCloudinary";
-import { Plus, X, RefreshCcw, Trash2 } from "lucide-react";
+import { Plus, X, RefreshCcw, Trash2, Eye } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import {
   createCarouselCard,
   getCarouselCardById,
@@ -52,6 +58,8 @@ const PromotionCardForm = ({
     },
   ]);
   const [isActive, setIsActive] = useState(true);
+  const [previewForm, setPreviewForm] = useState<PromotionCardData | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const updateForm = (
     order: number,
@@ -120,12 +128,17 @@ const PromotionCardForm = ({
     updateForm(order, "image", result.url);
   };
 
+  const handlePreview = (form: PromotionCardData) => {
+    setPreviewForm(form);
+    setIsPreviewOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     // Validate minimum forms requirement
-    if (forms.length < 2) {
-      toast.error("Please create at least 2 promotion cards before saving");
+    if (forms.length < 1) {
+      toast.error("Please create at least 1 promotion card before saving");
       return;
     }
 
@@ -195,18 +208,30 @@ const PromotionCardForm = ({
                       Promotion Card {index + 1}
                     </CardTitle>
                   </div>
-                  {forms.length > 1 && (
+                  <div className="flex items-center gap-2">
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      disabled={forms.length === 1 || !isEditing}
-                      onClick={() => removeForm(form.order)}
+                      onClick={() => handlePreview(form)}
                       className="text-white hover:bg-white/20 hover:text-white"
+                      title="Preview Card"
                     >
-                      <X className="h-5 w-5" />
+                      <Eye className="h-5 w-5" />
                     </Button>
-                  )}
+                    {forms.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        disabled={forms.length === 1 || !isEditing}
+                        onClick={() => removeForm(form.order)}
+                        className="text-white hover:bg-white/20 hover:text-white"
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
 
@@ -459,7 +484,7 @@ const PromotionCardForm = ({
               <Button
                 type="submit"
                 disabled={
-                  !allFormsValid || forms.length < 2 || loading || !isEditing
+                  !allFormsValid || forms.length < 1 || loading || !isEditing
                 }
                 className="flex-1 bg-gradient-to-r from-[#742193] to-[#581770] hover:from-[#581770] hover:to-[#742193] text-white px-8 py-3 h-12 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -510,8 +535,8 @@ const PromotionCardForm = ({
               </h3>
               <p className="text-sm text-gray-600">
                 {forms.length} of 3 forms •{" "}
-                {forms.length < 2
-                  ? "Minimum 2 forms required"
+                {forms.length < 1
+                  ? "Minimum 1 form required"
                   : allFormsValid
                   ? "All forms are valid"
                   : "Please fill required fields"}
@@ -519,6 +544,83 @@ const PromotionCardForm = ({
             </div>
           </div>
         </form>
+
+        {/* Preview Modal */}
+        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+          <DialogContent className="!w-[90%] sm:!w-[40%]  h-[60vh]  overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-gray-800">
+                Preview Promotion Card
+              </DialogTitle>
+            </DialogHeader>
+            {previewForm && (
+              <div className="mt-4">
+                {/* Banner Preview */}
+                <div className="bg-[#f4b943] rounded-xl overflow-hidden shadow-lg">
+                  <div className="flex flex-row min-h-[200px] ">
+                    {/* Left Side - Content */}
+                   <div className="flex-1 p-4 flex flex-col justify-center">
+                      <div className="space-y-2">
+                        {/* Title */}
+                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 leading-tight">
+                          {previewForm.title || "Promotion Title"}
+                        </h2>
+                        
+                        {/* Description */}
+                        <p className="text-gray-700 text-xs sm:text-base lg:text-lg leading-relaxed">
+                          {previewForm.description || "Promotion description will appear here"}
+                        </p>
+                        
+                        {/* CTA Button */}
+                        {previewForm.ctaTitle && (
+                          <div className="pt-2">
+                            <a
+                              href={previewForm.link || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 bg-white text-gray-800 px-1 sm:px-4 py-2 sm:py-3 rounded-lg  text-sm sm:text-base font-semibold hover:bg-gray-50 transition-colors shadow-md"
+                            >
+                              {previewForm.ctaTitle}
+                              <span className="text-lg">→</span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Right Side - Image */}
+                    <div className=" w-[50%] overflow-hidden flex-shrink-0 p-2 sm:p-6  flex items-center justify-center">
+                      {previewForm.image ? (
+                        <div className="relative  w-ful overflow-hidden rounded-xl flex items-center justify-center">
+                          <Image
+                            src={previewForm.image}
+                            alt="Promotion Preview"
+                            width={300}
+                            height={200}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 lg:h-64 bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                          <div className="text-center text-gray-500">
+                            <div className="w-16 h-16 bg-gray-300 rounded-lg mx-auto mb-3 flex items-center justify-center">
+                              <span className="text-2xl">📷</span>
+                            </div>
+                            <p className="text-sm font-medium">No image uploaded</p>
+                            <p className="text-xs text-gray-400 mt-1">Upload an image to see preview</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                
+                 
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
