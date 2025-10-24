@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Edit, Trash2, ChevronRight, Check } from 'lucide-react';
+import {  ChevronRight, Zap } from 'lucide-react';
 import { PromotionCard as PromotionCardType } from '@/types/promotion';
 
 interface PromotionCardProps {
@@ -15,6 +15,7 @@ interface PromotionCardProps {
 const PromotionCard: React.FC<PromotionCardProps> = ({
   card,
 }) => {
+  console.log({card});
   return (
     <Card className="bg-yellow-400 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl border-0">
       <CardContent className="p-0">
@@ -26,22 +27,27 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 <h3 className="text-xl font-bold text-gray-800 leading-tight">
                   {card.title}
                 </h3>
-                {/* {card.isNews && (
-                  <Badge 
-                    className="bg-red-500 hover:bg-red-500 text-white text-xs px-2 py-1"
-                    variant="destructive"
-                  >
-                    News
-                  </Badge>
-                )} */}
+                
               </div>
               
               <p className="text-sm text-gray-700 leading-relaxed max-w-full">
                 {card.description}
               </p>
+              
             </div>
 
+
             <div className="space-y-3">
+              {card.isNews && (
+                <Badge 
+                  className="bg-white text-red-500 hover:bg-gray-50 text-sm px-3 py-1 font-semibold shadow-md flex items-center gap-1 w-fit"
+                  variant="secondary"
+                >
+                  <Zap className="h-3 w-3" />
+                  NEWS
+                </Badge>
+              )}
+              
               {card.ctaTitle && card.link && (
                 <Button
                   className="bg-white text-gray-800 hover:bg-gray-50 border-0 rounded-xl px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2 w-fit"
@@ -55,7 +61,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
           </div>
 
           {/* Right Section - Circular Image Container */}
-          <div className="w-30 flex items-center justify-center pr-6">
+          {card.image && <div className="w-30 flex items-center justify-center pr-6">
             <div className="relative">
               {/* Circular white container */}
               <div className="w-32 h-32  rounded-xl  overflow-hidden relative ">
@@ -73,6 +79,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
               </div> */}
             </div>
           </div>
+          }
         </div>
       </CardContent>
     </Card>
