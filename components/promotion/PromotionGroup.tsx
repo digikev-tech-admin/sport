@@ -47,9 +47,9 @@ const PromotionGroup: React.FC<PromotionGroupProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
-            <Badge variant={group.isActive ? "default" : "secondary"}>
+            {/* <Badge variant={group.isActive ? "default" : "secondary"}>
               {group.isActive ? "Active" : "Inactive"}
-            </Badge>
+            </Badge> */}
             <div className="flex items-center space-x-1">
               {onEditGroup && (
                 <Link href={`/promotion/editPromotionCard/${group._id}`}>
@@ -80,11 +80,11 @@ const PromotionGroup: React.FC<PromotionGroupProps> = ({
 
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <h4 className="text-lg font-medium text-gray-800">
               Cards ({group.cards.length})
             </h4>
-          </div>
+          </div> */}
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.cards
