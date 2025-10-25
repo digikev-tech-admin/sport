@@ -143,7 +143,7 @@ const Filters: React.FC<FiltersProps> = ({
               <SelectContent>
                 {clubs.map((club) => (
                   <SelectItem key={club} value={club} onClick={(e) => e.stopPropagation()}>
-                    {club}
+                    {club.charAt(0).toUpperCase() + club.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -161,7 +161,7 @@ const Filters: React.FC<FiltersProps> = ({
               <SelectContent>
                 {coaches.map((coach) => (
                   <SelectItem key={coach} value={coach} onClick={(e) => e.stopPropagation()}>
-                    {coach}
+                    {coach.charAt(0).toUpperCase() + coach.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>

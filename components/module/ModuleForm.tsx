@@ -22,6 +22,7 @@ import { ageGroups, dummyUsers, levels, sportsOptions } from "@/data/constants";
 import { format } from "date-fns";
 import ButtonLoader from "../shared/ButtonLoader";
 import PackageUserTable from "../Package/PackageUserTable";
+import { getUsersByEventId } from "@/api/notification";
 
 const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boolean, setIsEditing?: (isEditing: boolean) => void }) => {
   const router = useRouter();
@@ -43,7 +44,8 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   const [toDate, setToDate] = useState("");
   const [specializations, setSpecializations] = useState<string[]>([]);
   const [newSpecialization, setNewSpecialization] = useState("");
-
+  const [eventUsers, setEventUsers] = useState<any[]>([]);
+  const [dateError, setDateError] = useState(false);
   const handleAddSpecialization = () => {
     if (
       newSpecialization.trim() &&
@@ -56,6 +58,32 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
 
   const handleDeleteSpecialization = (index: number) => {
     setSpecializations(specializations.filter((_, i) => i !== index));
+  };
+
+  const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFromDate = e.target.value;
+    setFromDate(newFromDate);
+    
+    // If both dates are set, validate them
+    if (newFromDate && toDate && new Date(newFromDate) >= new Date(toDate)) {
+      toast.error("From Date must be earlier than To Date");
+      setDateError(true);
+    } else {
+      setDateError(false);
+    }
+  };
+
+  const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newToDate = e.target.value;
+    setToDate(newToDate);
+    
+    // If both dates are set, validate them
+    if (fromDate && newToDate && new Date(fromDate) >= new Date(newToDate)) {
+      toast.error("From Date must be earlier than To Date");
+      setDateError(true);
+    } else {
+      setDateError(false);
+    }
   };
   // console.log(level);
 
@@ -95,6 +123,25 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
           setCapacity(event?.capacity);
           setPhoto(event?.image);
           setSpecializations(event?.tags);
+          const eventUsers = await getUsersByEventId(id);
+          // console.log("Event Users Response:", eventUsers);
+          const users = eventUsers?.map((item: any, index: number) => ({
+            _id: item._id,
+            id: index + 1,
+            name: item.userId.name || "N/A",
+            email: item.userId.email || "N/A",
+            phone: item.userId.phone || "N/A",
+            avatar: item.userId.avatar || "https://github.com/shadcn.png",
+            status: item.userId.isActive || "N/A",
+            profileName: item?.profileId?.name || "N/A",
+            level: item?.eventId?.level || "N/A",
+            ageGroup: item?.eventId?.ageGroup || "N/A",
+            price: item?.amount || "N/A",
+            basePrice: item?.eventId?.ticketCost || "N/A",
+            paymentMethod: item?.paymentMethod || "N/A",
+          }));
+          // console.log("Event Users Response:", users);
+          setEventUsers(users);
           // console.log(event);
         } catch (error) {
           console.error("Error fetching event:", error);
@@ -146,10 +193,18 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
             : ticketCost === ""
             ? "Ticket Cost"
             : ""
-        } the fields`
+        } the field`
       );
       return;
     }
+
+    // Validate that From Date is earlier than To Date
+    if (fromDate && toDate && new Date(fromDate) >= new Date(toDate)) {
+      toast.error("From Date must be earlier than To Date");
+      setDateError(true);
+      return;
+    }
+    setDateError(false);
     const eventData = {
       title: eventName,
       description: about,
@@ -282,18 +337,25 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                 <Input
                   type="datetime-local"
                   value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  className="w-full"
+                  onChange={handleFromDateChange}
+                  className={`w-full ${dateError ? 'border-red-500 focus:border-red-500' : ''}`}
                   disabled={!isEditing}
+                  min={!id ? new Date().toISOString().slice(0, 16) : undefined}
                 />
                 <Input
                   type="datetime-local"
                   value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  className="w-full"
+                  onChange={handleToDateChange}
+                  className={`w-full ${dateError ? 'border-red-500 focus:border-red-500' : ''}`}
                   disabled={!isEditing}
+                  min={!id ? new Date().toISOString().slice(0, 16) : undefined}
                 />
               </div>
+              {dateError && (
+                <p className="text-red-500 text-sm mt-1">
+                  From Date must be earlier than To Date
+                </p>
+              )}
             </div>
 
             {/* <div className="space-y-2">
@@ -515,13 +577,18 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
               <h1 className="text-sm font-bold text-gray-700 mt-2">
                 Users Enrolled in this Event
               </h1>
-              <div className="mt-2">
+              <div className="mt-2"> {eventUsers.length > 0 ? (
                 <PackageUserTable
-                  users={dummyUsers}
+                  users={eventUsers || []}
                   onEdit={(id) => console.log(`Edit user ${id}`)}
                   onDelete={(id) => console.log(`Delete user ${id}`)}
                   disabled={!isEditing}
                 />
+              ) : (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">No users enrolled in this event</p>
+                </div>
+              )}
               </div>
             </>
           )}

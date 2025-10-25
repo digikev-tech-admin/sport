@@ -49,9 +49,9 @@ const NotificationTable = ({ notifications, onDelete }: NotificationTableProps) 
           </TableRow>
         </TableHeader>
         <TableBody>
-          {notifications.map((notification, idx) => (
+          {notifications.map((notification) => (
             <TableRow key={notification.id}>
-              <TableCell>{idx + 1}</TableCell>
+              <TableCell>{notification.index}</TableCell>
               <TableCell className="capitalize">
                 {notification?.title?.length > 20 
                   ? `${notification?.title?.substring(0, 20)}...` 

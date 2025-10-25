@@ -11,8 +11,7 @@ import {
 import PackageForm from '@/components/Package/packageForm';
 import { deletePackage } from '@/api/package';
 import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
-import { Edit, Loader2, Trash2 } from 'lucide-react';
+
 import { useRouter } from 'next/navigation';
 import { loginAdmin } from '@/api/user/user'; 
 import { getAdminData } from '@/config/token';

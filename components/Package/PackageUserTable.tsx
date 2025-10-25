@@ -23,6 +23,9 @@ interface PackageUserTableProps {
     avatar: string;
     price: string;
     status: string;
+    profileName: string;
+    basePrice: string;
+    paymentMethod: string;
   }>;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -33,7 +36,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(users.length / itemsPerPage);
-
+  // console.log("users", users);
   const paginatedUsers = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
@@ -43,11 +46,14 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
           <TableRow>
             <TableHead className="w-[80px] font-bold">Sr. No.</TableHead>
             <TableHead className="font-bold">Name</TableHead>
+            <TableHead className="font-bold">Profile Name</TableHead>
             {/* <TableHead className="font-bold">Email</TableHead> */}
             <TableHead className="font-bold">Phone</TableHead>
             <TableHead className="font-bold">Level</TableHead>
             <TableHead className="font-bold">Age Group</TableHead>
-            <TableHead className="font-bold">Price</TableHead>
+            <TableHead className="font-bold">Amount</TableHead>
+            <TableHead className="font-bold">Base Price</TableHead>
+            <TableHead className="font-bold">Payment Method</TableHead>
             <TableHead className="font-bold">Status</TableHead>
             {/* <TableHead className="text-center font-bold">Actions</TableHead> */}
           </TableRow>
@@ -61,18 +67,22 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback>{user.name}</AvatarFallback>
+          
                   </Avatar>
                   {user.name}
                 </div>
               </TableCell>
+              <TableCell>{user.profileName}</TableCell>
               {/* <TableCell>{user.email}</TableCell> */}
               <TableCell>{user.phone}</TableCell>
               <TableCell className="capitalize">{user.level}</TableCell>
               <TableCell className="capitalize">{user.ageGroup}</TableCell>
               <TableCell>{user.price}</TableCell>
+              <TableCell>{user.basePrice}</TableCell>
+              <TableCell>{user.paymentMethod}</TableCell>
               <TableCell>
-                <span className={`px-2 py-1 rounded-full text-xs ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {user.status}
+                <span className={`px-2 py-1 rounded-full text-xs ${user.status? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {user.status ? 'Active' : 'Inactive'}
                 </span>
               </TableCell>
               {/* <TableCell className="text-right">
