@@ -27,6 +27,7 @@ import NotificationTable from "@/components/notification/NotificationTable";
 
 interface Notification {
   id: string;
+  index: number;
   title: string;
   message: string;
   notificationType: string;
@@ -52,8 +53,9 @@ const Page = () => {
       // console.log({notifications});
     //   const {data} = notifications?.data;
       const formattedNotifications = notifications?.data?.map( 
-        (notification: any) => ({
+        (notification: any, index: number) => ({
           id: notification?._id,
+          index: index + 1,
           title: notification?.title,
           message: notification?.message,
           notificationType: notification?.notificationType,

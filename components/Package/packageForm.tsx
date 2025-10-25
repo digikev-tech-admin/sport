@@ -26,6 +26,7 @@ import { RefreshCcw, Trash2 } from "lucide-react";
 import { ReCloudinary } from "../cloudinary";
 import Image from "next/image";
 import PackageUserTable from "./PackageUserTable";
+import { getUsersByPackageId } from "@/api/notification";
 
 const PackageForm = ({
   id,
@@ -51,7 +52,8 @@ const PackageForm = ({
   const [sessionDates, setSessionDates] = useState<string[]>(["", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [users, setUsers] = useState<any[]>([]);
+  const [dateError, setDateError] = useState(false);
   const [price, setPrice] = useState({
     base: "",
     tax: "",
@@ -61,6 +63,34 @@ const PackageForm = ({
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>({});
 
   const today = new Date().toISOString().slice(0, 10);
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStartDate = e.target.value;
+    const newSessionDates = [newStartDate, sessionDates[1] || ""];
+    setSessionDates(newSessionDates);
+    
+    // If both dates are set, validate them
+    if (newStartDate && sessionDates[1] && new Date(newStartDate) >= new Date(sessionDates[1])) {
+      toast.error("Session Start Date must be earlier than Session End Date");
+      setDateError(true);
+    } else {
+      setDateError(false);
+    }
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEndDate = e.target.value;
+    const newSessionDates = [sessionDates[0] || "", newEndDate];
+    setSessionDates(newSessionDates);
+    
+    // If both dates are set, validate them
+    if (sessionDates[0] && newEndDate && new Date(sessionDates[0]) >= new Date(newEndDate)) {
+      toast.error("Session Start Date must be earlier than Session End Date");
+      setDateError(true);
+    } else {
+      setDateError(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -89,6 +119,25 @@ const PackageForm = ({
             res?.sessionDates[1] ? res.sessionDates[1].slice(0, 10) : "",
           ]);
           setWeeklySchedule(res?.weeklySchedule);
+          const packageUsers = await getUsersByPackageId(id);
+          console.log("Package Users Response:", packageUsers);
+          const users = packageUsers?.map((item: any, index: number) => ({
+            _id: item._id,
+            id: index + 1,
+            name: item.userId.name || "N/A",
+            email: item.userId.email || "N/A",
+            phone: item.userId.phone || "N/A",
+            avatar: item.userId.avatar || "https://github.com/shadcn.png",
+            status: item.userId.isActive || "N/A",
+            profileName: item?.profileId?.name || "N/A",
+            level: item?.packageId?.level || "N/A",
+            ageGroup: item?.packageId?.ageGroup || "N/A",
+            price: item?.amount || "N/A",
+            basePrice: item?.packageId?.price?.base || "N/A",
+            paymentMethod: item?.paymentMethod || "N/A",
+          }));
+          // console.log("Package Users Response:", users);
+          setUsers(users);
         } catch (error) {
           console.log("Error:", error);
         } finally {
@@ -101,6 +150,15 @@ const PackageForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that Session Start Date is earlier than Session End Date
+    if (sessionDates[0] && sessionDates[1] && new Date(sessionDates[0]) >= new Date(sessionDates[1])) {
+      toast.error("Session Start Date must be earlier than Session End Date");
+      setDateError(true);
+      return;
+    }
+    setDateError(false);
+    
     setIsSubmitting(true);
     const packageData = {
       coachId,
@@ -366,9 +424,8 @@ const PackageForm = ({
                 type="date"
                 value={sessionDates[0] || ""}
                 min={id ? undefined : today}
-                onChange={(e) =>
-                  setSessionDates([e.target.value, sessionDates[1] || ""])
-                }
+                onChange={handleStartDateChange}
+                className={dateError ? 'border-red-500 focus:border-red-500' : ''}
                 required
                 disabled={!isEditing}
               />
@@ -381,14 +438,18 @@ const PackageForm = ({
                 type="date"
                 value={sessionDates[1] || ""}
                 min={id ? undefined : today}
-                onChange={(e) =>
-                  setSessionDates([sessionDates[0] || "", e.target.value])
-                }
+                onChange={handleEndDateChange}
+                className={dateError ? 'border-red-500 focus:border-red-500' : ''}
                 required
                 disabled={!isEditing}
               />
             </div>
           </div>
+          {dateError && (
+            <p className="text-red-500 text-sm mt-1">
+              Session Start Date must be earlier than Session End Date
+            </p>
+          )}
           <div className="mt-6">
             <WeeklyScheduleComponent
               value={weeklySchedule}
@@ -446,14 +507,20 @@ const PackageForm = ({
               <h1 className="text-sm font-bold text-gray-700 mt-2">
                 Users Enrolled in this Package
               </h1>
-              <div className="mt-2">
-                <PackageUserTable
-                  users={dummyUsers}
-                  onEdit={(id) => console.log(`Edit user ${id}`)}
-                  onDelete={(id) => console.log(`Delete user ${id}`)}
-                  disabled={!isEditing}
-                />
-              </div>
+              {users.length === 0 ? (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">No users enrolled in this package</p>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <PackageUserTable
+                    users={users || []}
+                    onEdit={(id) => console.log(`Edit user ${id}`)}
+                    onDelete={(id) => console.log(`Delete user ${id}`)}
+                    disabled={!isEditing}
+                  />
+                </div>
+              )}
             </>
           )}
 

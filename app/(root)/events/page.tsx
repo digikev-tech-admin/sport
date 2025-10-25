@@ -129,7 +129,7 @@ const Page = () => {
       });
   }, [events, search, selectedCategory, sortBy, eventParamParts]);
 
-  const categories = ["all", ...new Set(events.map((e) => e.ageGroup))];
+  const categories = ["all", "Kids", "Teens", "Adults"];
 
   const sortOptions = [
     { value: "date", label: "Date" },

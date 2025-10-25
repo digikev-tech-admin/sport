@@ -33,6 +33,7 @@ interface Notification {
   userIds: string[];
   link?: string;
   createdAt: string;
+  deliveryMethod: "app" | "email" | "both";
 }
 
 const NotificationPage = ({ id }: { id: string }) => {
@@ -185,7 +186,7 @@ const NotificationPage = ({ id }: { id: string }) => {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Message</h3>
                 <p className="text-gray-700 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">
-                  {notification.message}
+                  <div dangerouslySetInnerHTML={{ __html: notification.message }} />
                 </p>
               </div>
 
@@ -279,6 +280,10 @@ const NotificationPage = ({ id }: { id: string }) => {
               <CardTitle className="text-lg">Quick Stats</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+                <span className="text-gray-600">Method:</span>
+                <span className="text-sm font-semibold">{notification?.deliveryMethod === "both" ? "Both App & Email" : notification?.deliveryMethod === "app" ? "App Only" : "Email Only"}</span>
+              </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Type:</span>
                 <Badge
@@ -333,7 +338,7 @@ const NotificationPage = ({ id }: { id: string }) => {
                   toast.success("Notification details copied to clipboard");
                 }}
               >
-                Copy Details
+                Copy Notification Details
               </Button>
             </CardContent>
           </Card>

@@ -7,7 +7,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import ReCloudinary from "../cloudinary/ReCloudinary";
-import { Plus, X, RefreshCcw, Trash2, Eye } from "lucide-react";
+import { Plus, X, RefreshCcw, Trash2, Eye, Zap } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import {
@@ -23,6 +23,7 @@ import {
 } from "@/api/promotion";
 import Loader from "../shared/Loader";
 import { useRouter } from "next/navigation";
+import { Badge } from "../ui/badge";
 
 interface PromotionCardData {
   order: number;
@@ -580,11 +581,7 @@ const PromotionCardForm = ({
                     <div className="flex-1 p-4 flex flex-col justify-center">
                       <div className="space-y-2">
                         {/* News Badge */}
-                        {previewForm.isNews && (
-                          <div className="inline-flex items-center px-2 py-1 bg-white/20 rounded-full text-white text-xs font-medium mb-2">
-                            📰 NEWS
-                          </div>
-                        )}
+                        
                         
                         {/* Title */}
                         <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 leading-tight">
@@ -595,6 +592,7 @@ const PromotionCardForm = ({
                         <p className="text-gray-700 text-xs sm:text-base lg:text-lg leading-relaxed">
                           {previewForm.description || (previewForm.isNews ? "News description will appear here" : "Promotion description will appear here")}
                         </p>
+                        
                         
                         {/* CTA Button - Only show if not news and has CTA title */}
                         {!previewForm.isNews && previewForm.ctaTitle && (
@@ -609,6 +607,15 @@ const PromotionCardForm = ({
                               <span className="text-lg">→</span>
                             </a>
                           </div>
+                        )}
+                        {previewForm.isNews && (
+                           <Badge 
+                           className="bg-white text-red-500 hover:bg-gray-50 text-sm px-3 py-1 font-semibold shadow-md flex items-center gap-1 w-fit"
+                           variant="secondary"
+                         >
+                           <Zap className="h-3 w-3" />
+                           NEWS
+                         </Badge>
                         )}
                       </div>
                     </div>

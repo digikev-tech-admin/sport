@@ -41,7 +41,7 @@ const PackageCard = ({ item }: PackageCardProps) => {
           </div> */}
           <span className="text-lg font-semibold text-gray-900 ">{item.title}</span>
         </div>
-        <span className={`${item.level === 'advanced' ? 'bg-red-600' : item.level === 'intermediate' ? 'bg-orange-400' : 'bg-green-400'} text-gray-900 font-semibold rounded-full px-4 py-1 text-sm shadow border border-gray-200`}>
+        <span className={`${item.level === 'advanced' || item.level === 'Advanced' ? 'bg-red-600'  : item.level === 'Intermediate' || item.level === 'intermediate' ? 'bg-orange-400' : 'bg-green-400'} text-gray-900 font-semibold rounded-full px-4 py-1 text-sm shadow border border-gray-200 `}>
           {item?.level}
         </span>
       </div>

@@ -88,7 +88,9 @@ const Page = () => {
 
   const categories = [
     "all",
-    ...Array.from(new Set(packages.map((pkg) => pkg.level))),
+    "Beginner",
+    "Intermediate",
+    "Advanced"
   ];
 
   const sports = [
@@ -98,9 +100,9 @@ const Page = () => {
 
   const ageGroups = [
     "all",
-    "kids",
-    "teens",
-    "adults"
+    "Kids",
+    "Teens",
+    "Adults"
   ];
 
   const clubs = [
