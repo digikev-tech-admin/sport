@@ -22,7 +22,6 @@ interface CloudinaryProps {
     isAlwaysBtn?: boolean;
     isImgPreview?: boolean;
     disabled?: boolean;
-    enableCropping?: boolean;
 }
 
 const ReCloudinary: React.FC<CloudinaryProps> = ({ 
@@ -37,8 +36,7 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
     isImgPreview = true, 
     isAlwaysBtn, 
     onSuccess,
-    disabled = false,
-    enableCropping = false
+    disabled = false
 }) => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(initialUrl ?? null)
 
@@ -53,42 +51,20 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || ""}
             onSuccess={(result) => {
                 if (result.info && typeof result.info === 'object' && 'secure_url' in result.info) {
-                    // If cropping was enabled and coordinates are returned, build a cropped URL
-                    let finalUrl = (result.info as any).secure_url as string
-                    const coords = (result.info as any).coordinates
-                    if (coords && Array.isArray(coords.custom) && coords.custom[0] && Array.isArray(coords.custom[0])) {
-                        const [x, y, width, height] = coords.custom[0]
-                        // Construct a derived URL using Cloudinary transformation with custom crop box
-                        // Insert transformation right after '/upload/'
-                        finalUrl = finalUrl.replace(
-                            '/upload/',
-                            `/upload/c_crop,x_${Math.round(x)},y_${Math.round(y)},w_${Math.round(width)},h_${Math.round(height)}/`
-                        )
-                    }
-
                     const formattedResult = {
                         ...result.info,
-                        url: finalUrl,
-                        fileId: (result.info as any).public_id
+                        url: result.info.secure_url,
+                        fileId: result.info.public_id
                     };
                     handleUploadSuccess(formattedResult);
                 }
             }}
             options={{
-                // Cropping works only with single uploads; force single when cropping is enabled
-                multiple: enableCropping ? false : isMultiple,
+                multiple: isMultiple,
                 resourceType: "image",
                 clientAllowedFormats: ["image", "jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "bmp", "tiff", "svg"],
                 maxFiles: isMultiple ? 10 : 1,
                 maxFileSize: 10485760, // 10MB limit
-                cropping: enableCropping, // Enable interactive cropping
-                croppingAspectRatio: 1, // Optional: lock aspect ratio (e.g., 1 = square)
-                // multiple: false, // Cropping only works for single uploads
-                showSkipCropButton: false, // Optional: force cropping before upload
-                croppingShowDimensions: true, // Shows crop box dimensions
-                croppingValidateDimensions: true, // Prevent too small crops
-                // folder: "uploads", // Optional folder
-                // sources: ["local", "camera", "url"], // Choose allowed sources
             }}
         >
             {({ open }) => (
@@ -133,4 +109,3 @@ const ReCloudinary: React.FC<CloudinaryProps> = ({
 }
 
 export default ReCloudinary 
-

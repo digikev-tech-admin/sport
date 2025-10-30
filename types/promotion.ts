@@ -6,6 +6,7 @@ export interface PromotionCard {
   ctaTitle: string;
   link: string;
   isNews: boolean;
+  bgColor?: string;
 }
 
 export interface PromotionGroup {
