@@ -6,7 +6,6 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import ReCloudinary from "../cloudinary/ReCloudinary";
 import { Plus, X, RefreshCcw, Trash2, Eye, Zap } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -24,6 +23,7 @@ import {
 import Loader from "../shared/Loader";
 import { useRouter } from "next/navigation";
 import { Badge } from "../ui/badge";
+import ReCloudinary from "../cloudinary/ReCloudinary";
 
 interface PromotionCardData {
   order: number;
@@ -33,6 +33,7 @@ interface PromotionCardData {
   ctaTitle: string;
   link: string;
   isNews: boolean;
+  bgColor?: string;
 }
 
 const PromotionCardForm = ({
@@ -56,6 +57,7 @@ const PromotionCardForm = ({
       ctaTitle: "",
       link: "",
       isNews: false,
+      bgColor: "#f4b943",
     },
   ]);
   const [isActive, setIsActive] = useState(true);
@@ -85,7 +87,13 @@ const PromotionCardForm = ({
 
           // Set the forms with the fetched data
           if (response?.cards) {
-            setForms(response.cards);
+            setForms(
+              response.cards.map((card: PromotionCardData, idx: number) => ({
+                ...card,
+                order: card.order ?? idx + 1,
+                bgColor: card.bgColor || "#f4b943",
+              }))
+            );
           }
         } catch (error) {
           console.log(error);
@@ -107,6 +115,7 @@ const PromotionCardForm = ({
         ctaTitle: "",
         link: "",
         isNews: false,
+        bgColor: "#f4b943",
       };
       setForms((prev) => [...prev, newForm]);
     }
@@ -163,7 +172,8 @@ const PromotionCardForm = ({
         console.log("Carousel Card Data:", response);
         toast.success("Carousel Card updated successfully");
         setIsEditing?.(false);
-        router.push(`/promotion/editPromotionCard/${id}/#promotion-card-form`);
+        router.push(`/promotion?tab=promotions_cards`);
+        // router.push(`/promotion/editPromotionCard/${id}/#promotion-card-form`);
       } else {
         const response = await createCarouselCard(payload);
         console.log("Carousel Card Data:", response);
@@ -255,10 +265,11 @@ const PromotionCardForm = ({
                               <ReCloudinary
                                 id={`image-${form.order}`}
                                 initialUrl={form.image}
+                                enableCropping
                                 onSuccess={(result) =>
                                   handleImageUpload(form.order, result)
                                 }
-                                btnClassName="bg-white/90 hover:bg-white hover:text-white text-gray-700 p-2 rounded-lg shadow-lg"
+                                btnClassName="bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg shadow-lg"
                                 btnIcon={<RefreshCcw className="h-4 w-4" />}
                                 btnText=""
                                 isAlwaysBtn
@@ -301,6 +312,7 @@ const PromotionCardForm = ({
                           id={`image-${form.order}`}
                           initialUrl={form.image}
                           disabled={!isEditing}
+                          enableCropping
                           onSuccess={(result) =>
                             handleImageUpload(form.order, result)
                           }
@@ -327,7 +339,7 @@ const PromotionCardForm = ({
                         htmlFor={`title-${form.order}`}
                         className="text-sm font-semibold text-gray-700 flex items-center"
                       >
-                        Title/Heading<span className="text-red-500">*</span>
+                        Title/Heading<span className="text-[#00aaff7b]">*</span>
                       </Label>
                       <Input
                         id={`title-${form.order}`}
@@ -361,6 +373,7 @@ const PromotionCardForm = ({
                   </div>
                 </div>
 
+               
                  {/* News Checkbox */}
                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
@@ -452,6 +465,71 @@ const PromotionCardForm = ({
                     </div>
                   </div>
 
+                   {/* Background Color Picker */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <Label className="text-sm font-semibold text-gray-700">
+                    Background Color
+                  </Label>
+                  <div className="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+                    {/* Preset Swatches */}
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "#f4b943",
+                        "#581770",
+                        "#0ea5e9",
+                        "#10b981",
+                        "#ef4444",
+                        "#111827",
+                      ].map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          title={color}
+                          disabled={!isEditing}
+                          onClick={() => updateForm(form.order, "bgColor", color)}
+                          className={`h-8 w-8 rounded-md border ${!isEditing? "cursor-not-allowed" : "cursor-pointer"}  ${
+                            form.bgColor === color
+                              ? "ring-2 ring-offset-2 ring-[#742193]"
+                              : ""
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Native Color Picker */}
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        id={`bgColor-${form.order}`}
+                        disabled={!isEditing}
+                        value={form.bgColor || "#f4b943"}
+                        onChange={(e) => updateForm(form.order, "bgColor", e.target.value)}
+                        className={`h-10 w-16 rounded ${!isEditing? "cursor-not-allowed" : "cursor-pointer"} border border-gray-300`}
+                      />
+                      <span className="text-xs text-gray-500">Pick a custom color</span>
+                    </div>
+
+                    {/* Hex Input */}
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id={`bgColorHex-${form.order}`}
+                        disabled={!isEditing}
+                        value={(form.bgColor || "#f4b943").toUpperCase()}
+                        onChange={(e) => updateForm(form.order, "bgColor", e.target.value)}
+                        placeholder="#FFFFFF"
+                        className="h-11 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg"
+                      />
+                      <div
+                        className="h-10 w-10 rounded-md border"
+                        style={{ backgroundColor: form.bgColor || "#f4b943" }}
+                        title="Selected color preview"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+
                  
                 </div>
               </CardContent>
@@ -536,6 +614,7 @@ const PromotionCardForm = ({
                       ctaTitle: "",
                       link: "",
                       isNews: false,
+                      bgColor: "#f4b943",
                     },
                   ]);
 
@@ -573,9 +652,10 @@ const PromotionCardForm = ({
             {previewForm && (
               <div className="mt-4">
                 {/* Banner Preview */}
-                <div className={`rounded-xl overflow-hidden shadow-lg ${
-                  previewForm.isNews ? "bg-[#f4b943]" : "bg-[#f4b943]"
-                }`}>
+                <div
+                  className={`rounded-xl overflow-hidden shadow-lg`}
+                  style={{ backgroundColor: previewForm.bgColor || "#f4b943" }}
+                >
                   <div className="flex flex-row min-h-[200px]">
                     {/* Left Side - Content */}
                     <div className="flex-1 p-4 flex flex-col justify-center">
@@ -584,12 +664,12 @@ const PromotionCardForm = ({
                         
                         
                         {/* Title */}
-                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 leading-tight">
+                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
                           {previewForm.title || (previewForm.isNews ? "News Title" : "Promotion Title")}
                         </h2>
                         
                         {/* Description */}
-                        <p className="text-gray-700 text-xs sm:text-base lg:text-lg leading-relaxed">
+                        <p className="text-white text-xs sm:text-base lg:text-lg leading-relaxed">
                           {previewForm.description || (previewForm.isNews ? "News description will appear here" : "Promotion description will appear here")}
                         </p>
                         

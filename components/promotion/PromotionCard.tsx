@@ -17,20 +17,23 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
 }) => {
   console.log({card});
   return (
-    <Card className="bg-yellow-400 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl border-0">
+    <Card
+      className="shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl border-0"
+      style={{ backgroundColor: card.bgColor || '#f4b943' }}
+    >
       <CardContent className="p-0">
         <div className="flex h-48">
           {/* Left Section - Text Content */}
           <div className="flex-1 flex flex-col justify-between p-4 pr-8 max-w-[70%]">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gray-800 leading-tight">
+                <h3 className="text-xl font-bold text-white leading-tight">
                   {card.title}
                 </h3>
                 
               </div>
               
-              <p className="text-sm text-gray-700 leading-relaxed max-w-full">
+              <p className="text-sm text-white leading-relaxed max-w-full">
                 {card.description}
               </p>
               
