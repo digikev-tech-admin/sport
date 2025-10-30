@@ -9,12 +9,7 @@ import { Label } from "../ui/label";
 import { Plus, X, RefreshCcw, Trash2, Eye, Zap } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import {
   createCarouselCard,
   getCarouselCardById,
@@ -61,7 +56,9 @@ const PromotionCardForm = ({
     },
   ]);
   const [isActive, setIsActive] = useState(true);
-  const [previewForm, setPreviewForm] = useState<PromotionCardData | null>(null);
+  const [previewForm, setPreviewForm] = useState<PromotionCardData | null>(
+    null
+  );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const updateForm = (
@@ -373,41 +370,39 @@ const PromotionCardForm = ({
                   </div>
                 </div>
 
-               
-                 {/* News Checkbox */}
-                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        id={`news-${form.order}`}
-                        checked={form.isNews}
-                        onChange={(e) => {
-                          const isNews = e.target.checked;
-                          updateForm(form.order, "isNews", isNews);
-                          // Clear CTA Title and Link when news is selected
-                          if (isNews) {
-                            updateForm(form.order, "ctaTitle", "");
-                            updateForm(form.order, "link", "");
-                          }
-                        }}
-                        disabled={!isEditing}
-                        className="h-5 w-5 text-[#742193] focus:ring-[#742193] border-gray-300 rounded cursor-pointer"
-                      />
-                      <Label
-                        htmlFor={`news-${form.order}`}
-                        className="text-sm font-semibold text-gray-700 cursor-pointer"
-                      >
-                        Make this as news
-                      </Label>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1 ml-8">
-                      Check this box if you want to display this as a news item
-                    </p>
+                {/* News Checkbox */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id={`news-${form.order}`}
+                      checked={form.isNews}
+                      onChange={(e) => {
+                        const isNews = e.target.checked;
+                        updateForm(form.order, "isNews", isNews);
+                        // Clear CTA Title and Link when news is selected
+                        if (isNews) {
+                          updateForm(form.order, "ctaTitle", "");
+                          updateForm(form.order, "link", "");
+                        }
+                      }}
+                      disabled={!isEditing}
+                      className="h-5 w-5 text-[#742193] focus:ring-[#742193] border-gray-300 rounded cursor-pointer"
+                    />
+                    <Label
+                      htmlFor={`news-${form.order}`}
+                      className="text-sm font-semibold text-gray-700 cursor-pointer"
+                    >
+                      Make this as news
+                    </Label>
                   </div>
+                  <p className="text-xs text-gray-500 mt-1 ml-8">
+                    Check this box if you want to display this as a news item
+                  </p>
+                </div>
 
                 {/* Additional Fields */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
-                
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* CTA Title */}
                     <div className="space-y-3">
@@ -429,7 +424,11 @@ const PromotionCardForm = ({
                         onChange={(e) =>
                           updateForm(form.order, "ctaTitle", e.target.value)
                         }
-                        placeholder={form.isNews ? "Not applicable for news items" : "Enter call-to-action title"}
+                        placeholder={
+                          form.isNews
+                            ? "Not applicable for news items"
+                            : "Enter call-to-action title"
+                        }
                         className={`w-full h-11 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg ${
                           form.isNews ? "bg-gray-100 cursor-not-allowed" : ""
                         }`}
@@ -444,9 +443,11 @@ const PromotionCardForm = ({
                           form.isNews ? "text-gray-400" : "text-gray-700"
                         }`}
                       >
-                        <span className={`w-2 h-2 rounded-full ${
-                          form.isNews ? "bg-gray-400" : "bg-green-500"
-                        }`}></span>
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            form.isNews ? "bg-gray-400" : "bg-green-500"
+                          }`}
+                        ></span>
                         Link
                       </Label>
                       <Input
@@ -457,7 +458,11 @@ const PromotionCardForm = ({
                         onChange={(e) =>
                           updateForm(form.order, "link", e.target.value)
                         }
-                        placeholder={form.isNews ? "Not applicable for news items" : "https://example.com"}
+                        placeholder={
+                          form.isNews
+                            ? "Not applicable for news items"
+                            : "https://example.com"
+                        }
                         className={`w-full h-11 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg ${
                           form.isNews ? "bg-gray-100 cursor-not-allowed" : ""
                         }`}
@@ -465,72 +470,83 @@ const PromotionCardForm = ({
                     </div>
                   </div>
 
-                   {/* Background Color Picker */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <Label className="text-sm font-semibold text-gray-700">
-                    Background Color
-                  </Label>
-                  <div className="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
-                    {/* Preset Swatches */}
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        "#f4b943",
-                        "#581770",
-                        "#0ea5e9",
-                        "#10b981",
-                        "#ef4444",
-                        "#111827",
-                      ].map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          title={color}
+                  {/* Background Color Picker */}
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <Label className="text-sm font-semibold text-gray-700">
+                      Background Color
+                    </Label>
+                    <div className="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+                      {/* Preset Swatches */}
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "#f4b943",
+                          "#581770",
+                          "#0ea5e9",
+                          "#10b981",
+                          "#ef4444",
+                          "#111827",
+                        ].map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            title={color}
+                            disabled={!isEditing}
+                            onClick={() =>
+                              updateForm(form.order, "bgColor", color)
+                            }
+                            className={`h-8 w-8 rounded-md border ${
+                              !isEditing
+                                ? "cursor-not-allowed"
+                                : "cursor-pointer"
+                            }  ${
+                              form.bgColor === color
+                                ? "ring-2 ring-offset-2 ring-[#742193]"
+                                : ""
+                            }`}
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Native Color Picker */}
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          id={`bgColor-${form.order}`}
                           disabled={!isEditing}
-                          onClick={() => updateForm(form.order, "bgColor", color)}
-                          className={`h-8 w-8 rounded-md border ${!isEditing? "cursor-not-allowed" : "cursor-pointer"}  ${
-                            form.bgColor === color
-                              ? "ring-2 ring-offset-2 ring-[#742193]"
-                              : ""
-                          }`}
-                          style={{ backgroundColor: color }}
+                          value={form.bgColor || "#f4b943"}
+                          onChange={(e) =>
+                            updateForm(form.order, "bgColor", e.target.value)
+                          }
+                          className={`h-10 w-16 rounded ${
+                            !isEditing ? "cursor-not-allowed" : "cursor-pointer"
+                          } border border-gray-300`}
                         />
-                      ))}
-                    </div>
+                        <span className="text-xs text-gray-500">
+                          Pick a custom color
+                        </span>
+                      </div>
 
-                    {/* Native Color Picker */}
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="color"
-                        id={`bgColor-${form.order}`}
-                        disabled={!isEditing}
-                        value={form.bgColor || "#f4b943"}
-                        onChange={(e) => updateForm(form.order, "bgColor", e.target.value)}
-                        className={`h-10 w-16 rounded ${!isEditing? "cursor-not-allowed" : "cursor-pointer"} border border-gray-300`}
-                      />
-                      <span className="text-xs text-gray-500">Pick a custom color</span>
-                    </div>
-
-                    {/* Hex Input */}
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id={`bgColorHex-${form.order}`}
-                        disabled={!isEditing}
-                        value={(form.bgColor || "#f4b943").toUpperCase()}
-                        onChange={(e) => updateForm(form.order, "bgColor", e.target.value)}
-                        placeholder="#FFFFFF"
-                        className="h-11 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg"
-                      />
-                      <div
-                        className="h-10 w-10 rounded-md border"
-                        style={{ backgroundColor: form.bgColor || "#f4b943" }}
-                        title="Selected color preview"
-                      />
+                      {/* Hex Input */}
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id={`bgColorHex-${form.order}`}
+                          disabled={!isEditing}
+                          value={(form.bgColor || "#f4b943").toUpperCase()}
+                          onChange={(e) =>
+                            updateForm(form.order, "bgColor", e.target.value)
+                          }
+                          placeholder="#FFFFFF"
+                          className="h-11 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg"
+                        />
+                        <div
+                          className="h-10 w-10 rounded-md border"
+                          style={{ backgroundColor: form.bgColor || "#f4b943" }}
+                          title="Selected color preview"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-
-
-                 
                 </div>
               </CardContent>
             </Card>
@@ -661,19 +677,23 @@ const PromotionCardForm = ({
                     <div className="flex-1 p-4 flex flex-col justify-center">
                       <div className="space-y-2">
                         {/* News Badge */}
-                        
-                        
+
                         {/* Title */}
                         <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
-                          {previewForm.title || (previewForm.isNews ? "News Title" : "Promotion Title")}
+                          {previewForm.title ||
+                            (previewForm.isNews
+                              ? "News Title"
+                              : "Promotion Title")}
                         </h2>
-                        
+
                         {/* Description */}
                         <p className="text-white text-xs sm:text-base lg:text-lg leading-relaxed">
-                          {previewForm.description || (previewForm.isNews ? "News description will appear here" : "Promotion description will appear here")}
+                          {previewForm.description ||
+                            (previewForm.isNews
+                              ? "News description will appear here"
+                              : "Promotion description will appear here")}
                         </p>
-                        
-                        
+
                         {/* CTA Button - Only show if not news and has CTA title */}
                         {!previewForm.isNews && previewForm.ctaTitle && (
                           <div className="pt-2">
@@ -689,24 +709,28 @@ const PromotionCardForm = ({
                           </div>
                         )}
                         {previewForm.isNews && (
-                           <Badge 
-                           className="bg-white text-red-500 hover:bg-gray-50 text-sm px-3 py-1 font-semibold shadow-md flex items-center gap-1 w-fit"
-                           variant="secondary"
-                         >
-                           <Zap className="h-3 w-3" />
-                           NEWS
-                         </Badge>
+                          <Badge
+                            className="bg-white text-red-500 hover:bg-gray-50 text-sm px-3 py-1 font-semibold shadow-md flex items-center gap-1 w-fit"
+                            variant="secondary"
+                          >
+                            <Zap className="h-3 w-3" />
+                            NEWS
+                          </Badge>
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Right Side - Image */}
                     <div className="w-[50%] overflow-hidden flex-shrink-0 p-2 sm:p-6 flex items-center justify-center">
                       {previewForm.image ? (
                         <div className="relative w-full overflow-hidden rounded-xl flex items-center justify-center">
                           <Image
                             src={previewForm.image}
-                            alt={previewForm.isNews ? "News Preview" : "Promotion Preview"}
+                            alt={
+                              previewForm.isNews
+                                ? "News Preview"
+                                : "Promotion Preview"
+                            }
                             width={300}
                             height={200}
                             className="max-w-full max-h-full object-contain"
@@ -718,9 +742,13 @@ const PromotionCardForm = ({
                             <div className="w-16 h-16 bg-gray-300 rounded-lg mx-auto mb-3 flex items-center justify-center">
                               <span className="text-2xl">📷</span>
                             </div>
-                            <p className="text-sm font-medium">No image uploaded</p>
+                            <p className="text-sm font-medium">
+                              No image uploaded
+                            </p>
                             <p className="text-xs text-gray-400 mt-1">
-                              {previewForm.isNews ? "Image is optional for news items" : "Upload an image to see preview"}
+                              {previewForm.isNews
+                                ? "Image is optional for news items"
+                                : "Upload an image to see preview"}
                             </p>
                           </div>
                         </div>
@@ -728,9 +756,6 @@ const PromotionCardForm = ({
                     </div>
                   </div>
                 </div>
-                
-                
-                 
               </div>
             )}
           </DialogContent>
