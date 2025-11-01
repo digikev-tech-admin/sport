@@ -326,6 +326,7 @@ const LocationForm = ({
                   btnIcon={<RefreshCcw />}
                   btnText=""
                   isAlwaysBtn
+                  enableCropping={true}
                   isImgPreview={false}
                   disabled={!isEditing}
                 />

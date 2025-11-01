@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Coach } from "@/types/types";
 // import { coaches as initialCoaches } from "@/data/constants";
-import Filters from "@/components/AllFilters";
+// import Filters from "@/components/AllFilters";
 import { Frown, Plus } from "lucide-react";
 import SectionHeader from "@/components/SectionHeader";
 import { useRouter } from "next/navigation";
