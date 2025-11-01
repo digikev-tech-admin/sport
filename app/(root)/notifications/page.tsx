@@ -191,7 +191,7 @@ const Page = () => {
 
           <SectionHeader
             title="Notifications"
-            buttonText="Add Notification"
+            buttonText="Send Notification"
             onButtonClick={handleAddNotification}
             icon={<Plus />}
             className="mb-4"

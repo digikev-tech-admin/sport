@@ -18,11 +18,22 @@ import { LocationDropdown } from "../shared/LocationDropdown";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 // import { formatDateTime } from "@/lib/utils";
-import { ageGroups, dummyUsers, levels, sportsOptions } from "@/data/constants";
+import { ageGroups, levels, paymentMethodOptions, sportsOptions } from "@/data/constants";
 import { format } from "date-fns";
 import ButtonLoader from "../shared/ButtonLoader";
 import PackageUserTable from "../Package/PackageUserTable";
 import { getUsersByEventId } from "@/api/notification";
+import { MultiSelect } from "../Coache/ClubMultiSelect";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boolean, setIsEditing?: (isEditing: boolean) => void }) => {
   const router = useRouter();
@@ -46,6 +57,20 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   const [newSpecialization, setNewSpecialization] = useState("");
   const [eventUsers, setEventUsers] = useState<any[]>([]);
   const [dateError, setDateError] = useState(false);
+  const [showLiveEventWarning, setShowLiveEventWarning] = useState(false);
+  const [hasCheckedLiveStatus, setHasCheckedLiveStatus] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
+
+
+
+  const calculateDurationInMinutes = (fromISO: string, toISO: string) => {
+    const start = new Date(fromISO);
+    const end = new Date(toISO);
+    const diffMs = end.getTime() - start.getTime();
+    if (Number.isNaN(diffMs) || diffMs <= 0) return "";
+    const minutes = Math.ceil(diffMs / (1000 * 60));
+    return minutes.toString();
+  };
   const handleAddSpecialization = () => {
     if (
       newSpecialization.trim() &&
@@ -68,8 +93,12 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
     if (newFromDate && toDate && new Date(newFromDate) >= new Date(toDate)) {
       toast.error("From Date must be earlier than To Date");
       setDateError(true);
+      setDuration("");
     } else {
       setDateError(false);
+      if (newFromDate && toDate && new Date(newFromDate) < new Date(toDate)) {
+        setDuration(calculateDurationInMinutes(newFromDate, toDate));
+      }
     }
   };
 
@@ -81,8 +110,12 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
     if (fromDate && newToDate && new Date(fromDate) >= new Date(newToDate)) {
       toast.error("From Date must be earlier than To Date");
       setDateError(true);
+      setDuration("");
     } else {
       setDateError(false);
+      if (fromDate && newToDate && new Date(fromDate) < new Date(newToDate)) {
+        setDuration(calculateDurationInMinutes(fromDate, newToDate));
+      }
     }
   };
   // console.log(level);
@@ -93,6 +126,41 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   //     setDateInput("");
   //   }
   // };
+
+
+
+
+  // Handle editing state change - show warning if event is live
+  useEffect(() => {
+    // Only check when isEditing becomes true and we haven't checked yet
+    if (id && isEditing && fromDate && !hasCheckedLiveStatus) {
+      // Check if event is live (start date has been reached)
+      const eventStartDate = new Date(fromDate);
+      const eventEndDate = toDate ? new Date(toDate) : null;
+      const now = new Date();
+      const isLive = eventEndDate 
+        ? (now >= eventStartDate && now <= eventEndDate)
+        : now >= eventStartDate;
+      
+      if (isLive) {
+        // Event is live and user is trying to edit - show warning
+        setShowLiveEventWarning(true);
+        // Temporarily prevent editing
+        if (setIsEditing) {
+          setIsEditing(false);
+        }
+      } else {
+        // Event is not live, allow editing without warning
+        setHasCheckedLiveStatus(true);
+      }
+    }
+    
+    // Reset check status when editing is turned off
+    if (!isEditing) {
+      setHasCheckedLiveStatus(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, fromDate, toDate, id, hasCheckedLiveStatus]);
 
   useEffect(() => {
     if (id) {
@@ -123,8 +191,9 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
           setCapacity(event?.capacity);
           setPhoto(event?.image);
           setSpecializations(event?.tags);
+          setPaymentMethods(event?.paymentMethods || []);
           const eventUsers = await getUsersByEventId(id);
-          // console.log("Event Users Response:", eventUsers);
+          console.log("Event Users Response:", eventUsers);
           const users = eventUsers?.map((item: any, index: number) => ({
             _id: item._id,
             id: index + 1,
@@ -132,13 +201,14 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
             email: item.userId.email || "N/A",
             phone: item.userId.phone || "N/A",
             avatar: item.userId.avatar || "https://github.com/shadcn.png",
-            status: item.userId.isActive || "N/A",
-            profileName: item?.profileId?.name || "N/A",
-            level: item?.eventId?.level || "N/A",
-            ageGroup: item?.eventId?.ageGroup || "N/A",
-            price: item?.amount || "N/A",
-            basePrice: item?.eventId?.ticketCost || "N/A",
-            paymentMethod: item?.paymentMethod || "N/A",
+            status: item.status || "N/A",
+            fcmToken: item.userId.fcmToken || "N/A",
+            profileName: item?.profileId?.name || item.userId.name || "N/A",
+            level:  event?.level || "N/A",
+            ageGroup:  event?.ageGroup || "N/A",
+            price: item?.amount || "0",
+            basePrice: (event?.ticketCost ?? 0).toString(),
+            paymentMethod: item?.paymentMethod || "Credit Card",
           }));
           // console.log("Event Users Response:", users);
           setEventUsers(users);
@@ -151,6 +221,22 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
       fetchEvent();
     }
   }, [id]);
+
+  // Handle warning dialog confirmation
+  const handleConfirmEdit = () => {
+    setShowLiveEventWarning(false);
+    // Set flag first to prevent re-checking when isEditing becomes true
+    setHasCheckedLiveStatus(true);
+    // Now enable editing - useEffect won't trigger warning because hasCheckedLiveStatus is true
+    if (setIsEditing) {
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setShowLiveEventWarning(false);
+    setHasCheckedLiveStatus(false);
+  };
 
   // const handleRemoveSessionDate = (idx: number) => {
   //   setSessionDates((prev) => prev.filter((_, i) => i !== idx));
@@ -219,6 +305,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
       ticketCost: parseInt(ticketCost),
       capacity: parseInt(capacity),
       tags: specializations,
+      paymentMethods: paymentMethods,
     };
 
     console.log("Event Data:", eventData);
@@ -245,10 +332,34 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
     }
   };
 
-  console.log({ dates: toDate, fromDate });
+  const handleUserUpdate = (id: string, updates: any) => {
+    setEventUsers(prev => prev.map(u => u._id === id ? { ...u, ...updates } : u));
+  };
+
+  // console.log({ dates: toDate, fromDate });
 
   return (
     <div id="event" className="flex items-center justify-center p-1 sm:p-4">
+      <AlertDialog open={showLiveEventWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Warning: Event is Live</AlertDialogTitle>
+            <AlertDialogDescription>
+              {eventName} is already live. Are you sure you want to change the details?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelEdit}>No</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmEdit}
+              className="commonDarkBG text-white hover:bg-[#581770]"
+            >
+              Yes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {loading && id ? (
         <Loader />
       ) : (
@@ -283,6 +394,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                       isAlwaysBtn
                       isImgPreview={false}
                       disabled={!isEditing}
+                      enableCropping={true}
                     />
                     <Button
                       type="button"
@@ -329,11 +441,11 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">
-                From - To Date and Time
-              </label>
-              <div className="flex flex-col sm:flex-row gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">
+                  From Date & Time
+                </label>
                 <Input
                   type="datetime-local"
                   value={fromDate}
@@ -342,6 +454,11 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   disabled={!isEditing}
                   min={!id ? new Date().toISOString().slice(0, 16) : undefined}
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">
+                  To Date & Time
+                </label>
                 <Input
                   type="datetime-local"
                   value={toDate}
@@ -352,65 +469,15 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                 />
               </div>
               {dateError && (
-                <p className="text-red-500 text-sm mt-1">
-                  From Date must be earlier than To Date
-                </p>
-              )}
-            </div>
-
-            {/* <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-700">
-            Upload Photo
-          </label>
-          <div className="flex items-center gap-4">
-            <div className="w-full border h-10 rounded-md flex items-center px-4">
-              <p className="text-sm font-bold text-gray-700 opacity-70 max-w-md line-clamp-1">
-                {photo
-                  ? photo.split("/").pop()
-                  : "Select a file"}
-              </p>
-            </div>
-
-            <div className="flex gap-1">
-              {photo && (    
-                <div className="w-10 h-10 rounded-md overflow-hidden border">
-                  <Image
-                    src={photo}
-                    alt="Uploaded photo"
-                    className="w-full h-full object-cover"
-                    width={100}
-                    height={100}
-                  />
+                <div className="md:col-span-2">
+                  <p className="text-red-500 text-sm mt-1">
+                    From Date must be earlier than To Date
+                  </p>
                 </div>
               )}
-              <ReCloudinary
-                id="profilePic"
-                initialUrl={photo} 
-                onSuccess={(res) => {
-                  const imgUrl = res.url;
-                  setPhoto(imgUrl);
-                }}
-                btnClassName="border border-[#c858ba] bg-[#7421931A] text-sm !px-4  text-[#742193] p-1 rounded-lg"
-                btnIcon={""}
-                btnText="Choose File"
-                isAlwaysBtn
-                isImgPreview={false}
-              />
-              {photo && (
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="border border-[#c858ba] bg-[#7421931A] text-sm  text-[#742193] p-1 rounded-lg"
-                  onClick={() => {
-                    setPhoto("");
-                  }}
-                >
-                  <Trash2 />
-                </Button>
-              )}
             </div>
-          </div>
-        </div> */}
+
+          {/* Keeping upload section commented as-is */}
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">
@@ -420,8 +487,9 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                 type="number"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="Enter duration in minutes"
+                placeholder="Auto-calculated from dates (editable)"
                 min={1}
+                step={1}
                 required
                 disabled={!isEditing}
               />
@@ -572,6 +640,25 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
               </div>
             </div>
 
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Payment Methods
+                </label>
+                <MultiSelect
+                  options={paymentMethodOptions}
+                  value={paymentMethods}
+                  onChange={setPaymentMethods}
+                  placeholder="Select payment methods"
+                  searchPlaceholder="Search payment methods..."
+                  disabled={!isEditing}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Select one or more payment methods that will be accepted for this event
+                </p>
+              </div>
+            </div>
+
             {id && !isEditing && (
             <>
               <h1 className="text-sm font-bold text-gray-700 mt-2">
@@ -583,7 +670,8 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   onEdit={(id) => console.log(`Edit user ${id}`)}
                   onDelete={(id) => console.log(`Delete user ${id}`)}
                   disabled={!isEditing}
-                />
+                  onUserUpdate={handleUserUpdate}
+                                  />
               ) : (
                 <div className="mt-2">
                   <p className="text-sm text-gray-500">No users enrolled in this event</p>
@@ -633,6 +721,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   setTicketCost("");
                   setDuration("");
                   setCapacity("");
+                  setPaymentMethods([]);
                  
                   router.back();
                 }}

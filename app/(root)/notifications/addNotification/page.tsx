@@ -27,13 +27,13 @@ const Page = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Add Notification</BreadcrumbPage>
+              <BreadcrumbPage>Send Notification</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
 
-      <h1 className="h2 mt-2">Add Notification</h1> 
+      <h1 className="h2 mt-2">Send Notification</h1> 
       <div>
       <NotificationForm /> 
       </div>

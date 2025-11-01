@@ -19,6 +19,13 @@ import Loader from "../shared/Loader";
 import { useRouter } from "next/navigation";
 import { Badge } from "../ui/badge";
 import ReCloudinary from "../cloudinary/ReCloudinary";
+import { getAllEvents } from "@/api/event";
+import { getAllCoaches } from "@/api/coach";
+import { getAllPackages } from "@/api/package";
+import EventSelectModal from "./SelectModalforEvent";
+import PackageSelectModal from "./SelecrModalForPackage";
+import CoachSelectModal from "./SelectModalForCoach";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface PromotionCardData {
   order: number;
@@ -29,6 +36,7 @@ interface PromotionCardData {
   link: string;
   isNews: boolean;
   bgColor?: string;
+  linkType: "internal" | "external";
 }
 
 const PromotionCardForm = ({
@@ -53,6 +61,7 @@ const PromotionCardForm = ({
       link: "",
       isNews: false,
       bgColor: "#f4b943",
+      linkType: "internal",
     },
   ]);
   const [isActive, setIsActive] = useState(true);
@@ -60,6 +69,22 @@ const PromotionCardForm = ({
     null
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [allowedModule, setAllowedModule] = useState<
+    "event" | "package" | "coach"
+  >("event");
+  const readOnly = !isEditing;
+  const [packageModalOpen, setPackageModalOpen] = useState(false);
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [coachModalOpen, setCoachModalOpen] = useState(false);
+
+  const [events, setEvents] = useState<any[]>([]);
+  const [packages, setPackages] = useState<any[]>([]);
+  const [coaches, setCoaches] = useState<any[]>([]);
+  // New states for per-card selection
+  const [currentOrder, setCurrentOrder] = useState<number | undefined>(
+    undefined
+  );
+  const [initialForModal, setInitialForModal] = useState<string>("");
 
   const updateForm = (
     order: number,
@@ -89,6 +114,11 @@ const PromotionCardForm = ({
                 ...card,
                 order: card.order ?? idx + 1,
                 bgColor: card.bgColor || "#f4b943",
+                linkType: card.link?.startsWith("http")
+                  ? "external"
+                  : card.link
+                  ? "internal"
+                  : "internal", // default to internal
               }))
             );
           }
@@ -113,6 +143,7 @@ const PromotionCardForm = ({
         link: "",
         isNews: false,
         bgColor: "#f4b943",
+        linkType: "internal",
       };
       setForms((prev) => [...prev, newForm]);
     }
@@ -184,6 +215,67 @@ const PromotionCardForm = ({
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    const fetchAllowedModules = async () => {
+      setLoading(true);
+      try {
+        const eventsData = await getAllEvents();
+        // console.log({ eventsData });
+        const formattedEvents = eventsData?.map((event: any) => ({
+          id: event?._id,
+          title: event?.title,
+          imageUrl: event?.image
+            ? event?.image
+            : "https://github.com/shadcn.png",
+          toDate: event?.toDate,
+          fromDate: event?.fromDate,
+          location: event?.locationId?.title ? event?.locationId?.title : "N/A",
+          //   sport: event?.sport,
+          ageGroup: event?.ageGroup,
+        }));
+        // console.log({ formattedEvents });
+        setEvents(formattedEvents);
+
+        const packagesData = await getAllPackages();
+        // console.log("Packages fetched:", packagesData);
+        const formattedPackages = packagesData?.map((item: any) => ({
+          id: item?._id,
+          title: item?.title,
+          imageUrl: item?.image ? item?.image : "https://github.com/shadcn.png",
+          sport: item?.sport,
+          level: item?.level,
+          ageGroup: item?.ageGroup,
+          duration: item?.duration,
+          startDate: item?.sessionDates?.[0],
+          endDate: item?.sessionDates?.[1],
+          coachName: item?.coachId?.name || "unknown",
+
+          price: item?.price?.base,
+          seats: item?.seatsCount,
+          enrolled: item?.enrolledCount,
+          locationId: item?.locationId?._id,
+          clubs: item?.locationId?.title,
+        }));
+        // console.log("Formatted packages:", formattedPackages);
+        setPackages(formattedPackages);
+        const coachesData = await getAllCoaches();
+        // console.log("Coaches fetched:", coachesData);
+        const formattedCoaches = coachesData?.map((item: any) => ({
+          id: item?._id,
+          name: item?.name,
+          imageUrl: item?.image ? item?.image : "https://github.com/shadcn.png",
+        }));
+        // console.log("Formatted coaches:", formattedCoaches);
+        setCoaches(formattedCoaches);
+      } catch (error) {
+        console.error("Error fetching allowed modules:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllowedModules();
+  }, []);
 
   const isFormValid = (form: PromotionCardData) => {
     return form.title && form.description;
@@ -401,6 +493,151 @@ const PromotionCardForm = ({
                   </p>
                 </div>
 
+                {/* Link Type Selector */}
+                {/* <div className="grid gap-2 mt-5">
+                  <Label className="text-sm font-medium">Link Type</Label>
+                  <select
+                    value={form.linkType}
+                    onChange={(e) => {
+                      const newType = e.target.value as "internal" | "external";
+                      updateForm(form.order, "linkType", newType);
+                      if (newType === "external") {
+                        updateForm(form.order, "link", ""); // clear internal link
+                      } else {
+                        updateForm(form.order, "link", ""); // clear external URL
+                      }
+                    }}
+                    disabled={!isEditing || form.isNews}
+                    className="w-full h-11 px-3 text-base border-gray-300 rounded-lg focus:border-[#742193] focus:ring-[#742193] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="internal">
+                      Internal (Event / Package / Coach)
+                    </option>
+                    <option value="external">External URL</option>
+                  </select>
+                </div> */}
+
+<div className="grid gap-2 mt-5">
+  <Label className="text-sm font-medium">Link Type</Label>
+
+  <Select
+    value={form.linkType}
+    disabled={!isEditing || form.isNews}
+    onValueChange={(newType: "internal" | "external") => {
+      updateForm(form.order, "linkType", newType);
+
+      // clear the opposite link
+      if (newType === "external") {
+        updateForm(form.order, "link", "");   // clear internal id
+      } else {
+        updateForm(form.order, "link", "");   // clear external URL
+      }
+    }}
+  >
+    <SelectTrigger
+      className={`
+        w-full h-11 text-base
+        data-[state=open]:border-[#742193] data-[state=open]:ring-[#742193]
+        disabled:bg-gray-100 disabled:cursor-not-allowed
+      `}
+    >
+      <SelectValue placeholder="Select link type" />
+    </SelectTrigger>
+
+    <SelectContent>
+      <SelectItem value="internal">
+        Internal (Event / Package / Coach)
+      </SelectItem>
+      <SelectItem value="external">External URL</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
+                {/* Conditionally show Apply To only if internal */}
+                {form.linkType === "internal" && (
+                  <div className="grid gap-2 mt-5">
+                    <label className="text-sm font-medium">Apply To</label>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        className="commonDarkBG hover:bg-[#581770] hover:text-white transition-all duration-300 text-white"
+                        variant={
+                          allowedModule === "event" ? "default" : "outline"
+                        }
+                        // onClick={() => { if (!readOnly) { setAllowedModule('event'); setEventModalOpen(true); } }}
+                        onClick={() => {
+                          if (!readOnly && !form.isNews) {
+                            const link = form.link || "";
+                            const parts = link.split("/");
+                            const init =
+                              parts[0] === "event" && parts[1] ? parts[1] : "";
+                            setInitialForModal(init);
+                            setAllowedModule("event");
+                            setCurrentOrder(form.order);
+                            setEventModalOpen(true);
+                          }
+                        }}
+                        disabled={readOnly || form.isNews}
+                      >
+                        Set Event
+                      </Button>
+                      <Button
+                        type="button"
+                        className="commonDarkBG hover:bg-[#581770] hover:text-white transition-all duration-300 text-white"
+                        variant={
+                          allowedModule === "package" ? "default" : "outline"
+                        }
+                        // onClick={() => { if (!readOnly) { setAllowedModule('package'); setPackageModalOpen(true); } }}
+                        disabled={readOnly || form.isNews}
+                        onClick={() => {
+                          if (!readOnly && !form.isNews) {
+                            const link = form.link || "";
+                            const parts = link.split("/");
+                            const init =
+                              parts[0] === "package" && parts[1]
+                                ? parts[1]
+                                : "";
+                            setInitialForModal(init);
+                            setAllowedModule("package");
+                            setCurrentOrder(form.order);
+                            setPackageModalOpen(true);
+                          }
+                        }}
+                      >
+                        Set Package
+                      </Button>
+
+                      <Button
+                        type="button"
+                        className="commonDarkBG hover:bg-[#581770] hover:text-white transition-all duration-300 text-white"
+                        variant={
+                          allowedModule === "coach" ? "default" : "outline"
+                        }
+                        // onClick={() => { if (!readOnly) { setAllowedModule('coach'); setCoachModalOpen(true); } }}
+                        // disabled={readOnly}
+                        onClick={() => {
+                          if (!readOnly && !form.isNews) {
+                            const link = form.link || "";
+                            const parts = link.split("/");
+                            const init =
+                              parts[0] === "coach" && parts[1] ? parts[1] : "";
+                            setInitialForModal(init);
+                            setAllowedModule("coach");
+                            setCurrentOrder(form.order);
+                            setCoachModalOpen(true);
+                          }
+                        }}
+                        disabled={readOnly || form.isNews}
+                      >
+                        Set Coach
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Choose which area this promotional card links to.
+                    </p>
+                  </div>
+                )}
+
                 {/* Additional Fields */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -448,7 +685,7 @@ const PromotionCardForm = ({
                             form.isNews ? "bg-gray-400" : "bg-green-500"
                           }`}
                         ></span>
-                        Link
+                        {form.linkType === "external" ? "External URL" : "Link"}
                       </Label>
                       <Input
                         id={`link-${form.order}`}
@@ -466,6 +703,7 @@ const PromotionCardForm = ({
                         className={`w-full h-11 text-base border-gray-300 focus:border-[#742193] focus:ring-[#742193] rounded-lg ${
                           form.isNews ? "bg-gray-100 cursor-not-allowed" : ""
                         }`}
+                        readOnly={form.linkType === "internal"}
                       />
                     </div>
                   </div>
@@ -631,6 +869,7 @@ const PromotionCardForm = ({
                       link: "",
                       isNews: false,
                       bgColor: "#f4b943",
+                      linkType: "internal",
                     },
                   ]);
 
@@ -761,6 +1000,64 @@ const PromotionCardForm = ({
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* <EventSelectModal
+        open={eventModalOpen}
+        onOpenChange={setEventModalOpen}
+        events={events}
+        selectedIds={selectedEventIds}
+        setSelectedIds={setSelectedEventIds}
+      />
+      <PackageSelectModal
+        open={packageModalOpen}
+        onOpenChange={setPackageModalOpen}
+        packages={packages as any}
+        selectedIds={selectedPackageIds}
+        setSelectedIds={setSelectedPackageIds}
+      />
+      <CoachSelectModal
+        open={coachModalOpen}
+        onOpenChange={setCoachModalOpen}
+        coaches={coaches as any}
+        selectedIds={selectedCoachIds}
+        setSelectedIds={setSelectedCoachIds}
+      /> */}
+      <EventSelectModal
+        open={eventModalOpen}
+        onOpenChange={setEventModalOpen}
+        events={events}
+        initialId={initialForModal}
+        onSave={(id) => {
+          if (currentOrder && id) {
+            updateForm(currentOrder, "link", `event/${id}`);
+          }
+          setCurrentOrder(undefined);
+        }}
+      />
+      <PackageSelectModal
+        open={packageModalOpen}
+        onOpenChange={setPackageModalOpen}
+        packages={packages as any}
+        initialId={initialForModal}
+        onSave={(id) => {
+          if (currentOrder && id) {
+            updateForm(currentOrder, "link", `package/${id}`);
+          }
+          setCurrentOrder(undefined);
+        }}
+      />
+      <CoachSelectModal
+        open={coachModalOpen}
+        onOpenChange={setCoachModalOpen}
+        coaches={coaches as any}
+        initialId={initialForModal}
+        onSave={(id) => {
+          if (currentOrder && id) {
+            updateForm(currentOrder, "link", `coach/${id}`);
+          }
+          setCurrentOrder(undefined);
+        }}
+      />
     </div>
   );
 };

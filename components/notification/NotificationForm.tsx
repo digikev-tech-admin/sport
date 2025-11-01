@@ -27,7 +27,7 @@ import RichTextEditor from "../ui/rich-text-editor";
 import { getAllCoaches } from "@/api/coach";
 import { getAllPackages } from "@/api/package";
 import { getAllEvents } from "@/api/event";
-import { getAllLocations } from "@/api/location";
+// import { getAllLocations } from "@/api/location";
 import CategoryFilter from "../NewFilterForNotification";
 
 interface User {
@@ -370,10 +370,10 @@ const NotificationForm = () => {
   };
 
   const handleSelectAllUsers = () => {
-    const usersWithTokens = users.filter((user) => user.fcmToken);
-    setSelectedUsers(usersWithTokens.map((user) => user._id));
+    // const usersWithTokens = users.filter((user) => user.fcmToken );
+    setSelectedUsers(users.map((user) => user._id));
     setUserFcmTokens(
-      usersWithTokens
+      users
         .map((user) => user.fcmToken!)
         .filter((token) => token !== null && token !== "")
     );
@@ -534,6 +534,59 @@ const NotificationForm = () => {
         )}
 
         <div className="space-y-4">
+                      {/* Action Buttons - Responsive */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between  mb-5">
+              <div>
+                <label htmlFor="" className="text-sm font-bold text-gray-700">
+                Filter by:{" "}
+                  {isFiltered && `(Filtered: ${filteredUsers.length} users)`}
+                </label>
+                {isFiltered && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    Showing users from selected filters. Clear filters to see
+                    all users.
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                {isFiltered && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedPackages("all");
+                      setSelectedCoaches("all");
+                      setSelectedEvents("all");
+                      setSelectedLocations("all");
+                      setFilteredUsers([]);
+                      setIsFiltered(false);
+                    }}
+                    className="text-xs bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 transition-all duration-300 w-full sm:w-auto"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAllUsers}
+                  className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300 w-full sm:w-auto"
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeselectAllUsers}
+                  className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300 w-full sm:w-auto"
+                >
+                  Deselect All
+                </Button>
+              </div>
+            </div>
           <div className="space-y-4">
             {/* Responsive Filter Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
@@ -571,59 +624,7 @@ const NotificationForm = () => {
               </div>
             </div>
 
-            {/* Action Buttons - Responsive */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between">
-              <div>
-                <label htmlFor="" className="text-sm font-bold text-gray-700">
-                  Recipients{" "}
-                  {isFiltered && `(Filtered: ${filteredUsers.length} users)`}
-                </label>
-                {isFiltered && (
-                  <p className="text-xs text-blue-600 mt-1">
-                    Showing users from selected filters. Clear filters to see
-                    all users.
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                {isFiltered && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedPackages("all");
-                      setSelectedCoaches("all");
-                      setSelectedEvents("all");
-                      setSelectedLocations("all");
-                      setFilteredUsers([]);
-                      setIsFiltered(false);
-                    }}
-                    className="text-xs bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 transition-all duration-300 w-full sm:w-auto"
-                  >
-                    Clear Filters
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSelectAllUsers}
-                  className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300 w-full sm:w-auto"
-                >
-                  Select All (with tokens)
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDeselectAllUsers}
-                  className="text-xs commonDarkBG text-white hover:bg-[#581770] hover:text-white transition-all duration-300 w-full sm:w-auto"
-                >
-                  Deselect All
-                </Button>
-              </div>
-            </div>
+
           </div>
 
           <div className="border rounded-lg p-4 max-h-60 overflow-y-auto">

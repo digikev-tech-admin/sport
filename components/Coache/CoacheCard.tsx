@@ -1,5 +1,5 @@
 import React from "react";
-import {  Trophy, UserRoundCog  } from "lucide-react";
+import {  Trophy, UserRoundCog ,ShieldPlus  } from "lucide-react";
 import Image from "next/image";
 import { Coach } from "@/types/types";
 import { useRouter } from "next/navigation";
@@ -116,6 +116,19 @@ const CoachCard = ({ coach, onDelete }: CoachCardProps) => {
             </div>
           </div>
         </div>
+       {coach.specializations.length > 0 && <div className="flex flex-wrap items-center gap-1 mt-2">
+          <ShieldPlus  className="w-5 h-5 text-[#581770] flex-shrink-0" />
+          {coach.specializations.map((sport) => (
+            <Badge
+              key={sport}
+              variant="secondary"
+              className="rounded-full px-2 lg:px-3 py-1 text-[12px] whitespace-nowrap"
+            >
+              {sport}
+            </Badge>
+          ))}
+        </div>
+        }
         <div className="flex flex-wrap items-center gap-1 mt-2">
           <Trophy className="w-5 h-5 text-[#581770] flex-shrink-0" />
           {coach.sports.map((sport) => (

@@ -301,3 +301,13 @@ export const dummyUsers = [
   },
 
 ];
+
+
+
+
+export const paymentMethodOptions = [
+  { id: 1, name: "Cash" }, 
+  { id: 2, name: "Card" },
+  { id: 3, name: "Auto Debit (Monthly Direct Debit)" },
+];
+

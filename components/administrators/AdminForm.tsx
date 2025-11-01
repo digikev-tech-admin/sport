@@ -117,6 +117,7 @@ const AdminForm = () => {
                     btnText=""
                     isAlwaysBtn
                     isImgPreview={false}
+                    enableCropping={true}
                   />
                   <Button
                     variant="secondary"

@@ -26,3 +26,14 @@ export const getInActiveUsers = async () => {
         throw error.response?.data?.error || "Fetching in active users failed"; 
     }
 };
+
+
+
+export const updateOrder = async (id: string, data: any) => {
+    try {
+        const response = await axiosInstance.put(`/getUserByOrder/order/${id}`, data);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || "Updating order failed";
+    }
+};

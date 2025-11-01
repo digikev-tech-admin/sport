@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { SingleSelect } from "../shared/singleChooseDropdown";
-import { ageGroups, dummyUsers, levels, sportsOptions } from "@/data/constants";
+import { ageGroups, dummyUsers, levels, paymentMethodOptions, sportsOptions } from "@/data/constants";
 import { LocationDropdown } from "../shared/LocationDropdown";
 import { SingleCoachDropdown } from "../shared/SingleCoachDropDown";
 import { Textarea } from "../ui/textarea";
@@ -27,6 +27,7 @@ import { ReCloudinary } from "../cloudinary";
 import Image from "next/image";
 import PackageUserTable from "./PackageUserTable";
 import { getUsersByPackageId } from "@/api/notification";
+import { MultiSelect } from "../Coache/ClubMultiSelect";
 
 const PackageForm = ({
   id,
@@ -61,8 +62,22 @@ const PackageForm = ({
   });
 
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>({});
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
+
+  // Payment method options
+
 
   const today = new Date().toISOString().slice(0, 10);
+
+  const calculateDurationInMonths = (startISO: string, endISO: string) => {
+    const start = new Date(startISO);
+    const end = new Date(endISO);
+    const diffMs = end.getTime() - start.getTime();
+    if (Number.isNaN(diffMs) || diffMs <= 0) return "";
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const monthsDecimal = diffDays / 30; // approx months with decimals
+    return monthsDecimal.toFixed(1);
+  };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
@@ -73,8 +88,15 @@ const PackageForm = ({
     if (newStartDate && sessionDates[1] && new Date(newStartDate) >= new Date(sessionDates[1])) {
       toast.error("Session Start Date must be earlier than Session End Date");
       setDateError(true);
+      setDuration("");
     } else {
       setDateError(false);
+      // Auto-calculate duration in months when both dates are valid
+      if (newStartDate && newSessionDates[1] && new Date(newStartDate) < new Date(newSessionDates[1])) {
+        setDuration(calculateDurationInMonths(newStartDate, newSessionDates[1]));
+      } else {
+        setDuration("");
+      }
     }
   };
 
@@ -87,8 +109,15 @@ const PackageForm = ({
     if (sessionDates[0] && newEndDate && new Date(sessionDates[0]) >= new Date(newEndDate)) {
       toast.error("Session Start Date must be earlier than Session End Date");
       setDateError(true);
+      setDuration("");
     } else {
       setDateError(false);
+      // Auto-calculate duration in months when both dates are valid
+      if (newSessionDates[0] && newEndDate && new Date(newSessionDates[0]) < new Date(newEndDate)) {
+        setDuration(calculateDurationInMonths(newSessionDates[0], newEndDate));
+      } else {
+        setDuration("");
+      }
     }
   };
 
@@ -119,6 +148,7 @@ const PackageForm = ({
             res?.sessionDates[1] ? res.sessionDates[1].slice(0, 10) : "",
           ]);
           setWeeklySchedule(res?.weeklySchedule);
+          setPaymentMethods(res?.paymentMethods || []);
           const packageUsers = await getUsersByPackageId(id);
           console.log("Package Users Response:", packageUsers);
           const users = packageUsers?.map((item: any, index: number) => ({
@@ -128,13 +158,13 @@ const PackageForm = ({
             email: item.userId.email || "N/A",
             phone: item.userId.phone || "N/A",
             avatar: item.userId.avatar || "https://github.com/shadcn.png",
-            status: item.userId.isActive || "N/A",
-            profileName: item?.profileId?.name || "N/A",
-            level: item?.packageId?.level || "N/A",
-            ageGroup: item?.packageId?.ageGroup || "N/A",
+            status: item.status || "pending",
+            profileName: item?.profileId?.name || item.userId.name || "N/A",
+            level: item?.packageId?.level ||  res?.level|| "N/A",
+            ageGroup: item?.packageId?.ageGroup ||  res?.ageGroup|| "N/A",
             price: item?.amount || "N/A",
-            basePrice: item?.packageId?.price?.base || "N/A",
-            paymentMethod: item?.paymentMethod || "N/A",
+            basePrice: item?.packageId?.price?.base || res?.price?.base || "N/A",
+            paymentMethod: item?.paymentMethod || "Credit Card",
           }));
           // console.log("Package Users Response:", users);
           setUsers(users);
@@ -178,6 +208,7 @@ const PackageForm = ({
       description,
       weeklySchedule,
       image: profileImage || "https://github.com/shadcn.png",
+      paymentMethods: paymentMethods,
     };
     // console.log("Package Data:", packageData);
 
@@ -223,7 +254,12 @@ const PackageForm = ({
     setWeeklySchedule({});
     setTotalSeats("");
     setProfileImage(null);
+    setPaymentMethods([]);
     router.back();
+  };
+
+  const handleUserUpdate = (id: string, updates: any) => {
+    setUsers(prev => prev.map(u => u._id === id ? { ...u, ...updates } : u));
   };
 
   return (
@@ -260,6 +296,7 @@ const PackageForm = ({
                     isAlwaysBtn
                     isImgPreview={false}
                     disabled={!isEditing}
+                    enableCropping={true}
                   />
                   <Button
                     type="button"
@@ -399,21 +436,6 @@ const PackageForm = ({
                 disabled={!isEditing}
               />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">
-                Duration (in months)
-              </label>
-              <Input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="e.g. 30"
-                min={1}
-                required
-                disabled={!isEditing}
-              />
-            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -441,6 +463,22 @@ const PackageForm = ({
                 onChange={handleEndDateChange}
                 className={dateError ? 'border-red-500 focus:border-red-500' : ''}
                 required
+                disabled={!isEditing}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700">
+                Duration (in months)
+              </label>
+              <Input
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="Auto-calculated from dates (editable)"
+                step={0.1}
+                min={0.1}
                 disabled={!isEditing}
               />
             </div>
@@ -502,6 +540,25 @@ const PackageForm = ({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700">
+                Payment Methods
+              </label>
+              <MultiSelect
+                options={paymentMethodOptions}
+                value={paymentMethods}
+                onChange={setPaymentMethods}
+                placeholder="Select payment methods"
+                searchPlaceholder="Search payment methods..."
+                disabled={!isEditing}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Select one or more payment methods that will be accepted for this package
+              </p>
+            </div>
+          </div>
+
           {id && !isEditing && (
             <>
               <h1 className="text-sm font-bold text-gray-700 mt-2">
@@ -518,6 +575,7 @@ const PackageForm = ({
                     onEdit={(id) => console.log(`Edit user ${id}`)}
                     onDelete={(id) => console.log(`Delete user ${id}`)}
                     disabled={!isEditing}
+                    onUserUpdate={handleUserUpdate}
                   />
                 </div>
               )}

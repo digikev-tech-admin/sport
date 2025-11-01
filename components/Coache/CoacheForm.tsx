@@ -346,6 +346,7 @@ const CoacheForm = ({
                       isAlwaysBtn
                       isImgPreview={false}
                       disabled={!isEditing}
+                      enableCropping={true}
                     />
                     <Button
                       type="button"
