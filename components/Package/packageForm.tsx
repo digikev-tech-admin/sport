@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { SingleSelect } from "../shared/singleChooseDropdown";
-import { ageGroups, dummyUsers, levels, paymentMethodOptions, sportsOptions } from "@/data/constants";
+import { ageGroups, formatPaymentLabel, levels, paymentMethodOptions, sportsOptions } from "@/data/constants";
 import { LocationDropdown } from "../shared/LocationDropdown";
 import { SingleCoachDropdown } from "../shared/SingleCoachDropDown";
 import { Textarea } from "../ui/textarea";
@@ -28,6 +28,7 @@ import Image from "next/image";
 import PackageUserTable from "./PackageUserTable";
 import { getUsersByPackageId } from "@/api/notification";
 import { MultiSelect } from "../Coache/ClubMultiSelect";
+import { format } from "date-fns";
 
 const PackageForm = ({
   id,
@@ -61,9 +62,18 @@ const PackageForm = ({
     discount: "",
   });
 
+
+  const [filterName, setFilterName] = useState("");
+const [filterPayment, setFilterPayment] = useState("");
+const [filterDate, setFilterDate] = useState("");
+
+
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>({});
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
-
+  const [paymentDueDate, setPaymentDueDate] = useState("");
+  const [filterPaymentOptions, setFilterPaymentOptions] = useState<string[]>(
+    []
+  );
   // Payment method options
 
 
@@ -149,11 +159,17 @@ const PackageForm = ({
           ]);
           setWeeklySchedule(res?.weeklySchedule);
           setPaymentMethods(res?.paymentMethods || []);
+          setPaymentDueDate(
+            res?.paymentDueDate
+              ? format(new Date(res.paymentDueDate), "yyyy-MM-dd'T'HH:mm")
+              : ""
+          );
           const packageUsers = await getUsersByPackageId(id);
           console.log("Package Users Response:", packageUsers);
           const users = packageUsers?.map((item: any, index: number) => ({
             _id: item._id,
             id: index + 1,
+            date: item?.createdAt,
             name: item.userId.name || "N/A",
             email: item.userId.email || "N/A",
             phone: item.userId.phone || "N/A",
@@ -209,6 +225,8 @@ const PackageForm = ({
       weeklySchedule,
       image: profileImage || "https://github.com/shadcn.png",
       paymentMethods: paymentMethods,
+      paymentDueDate: paymentDueDate,
+
     };
     // console.log("Package Data:", packageData);
 
@@ -260,6 +278,39 @@ const PackageForm = ({
 
   const handleUserUpdate = (id: string, updates: any) => {
     setUsers(prev => prev.map(u => u._id === id ? { ...u, ...updates } : u));
+  };
+
+
+
+  useEffect(() => {
+    const uniquePaymentMethods = Array.from(
+      new Set(users.map((u: any) => u.paymentMethod))
+    );
+  
+    // Optional: sort alphabetically
+    uniquePaymentMethods.sort();
+  
+    setFilterPaymentOptions(uniquePaymentMethods);
+    if (!filterPayment) {
+      setFilterPayment("all");
+    }
+  }, [users]);
+  
+
+  const getFilteredUsers = () => {
+    return users
+      .filter((u) => u.name?.toLowerCase().includes(filterName.toLowerCase()))
+      .filter((u) =>
+        filterPayment && filterPayment !== "all"
+          ? u.paymentMethod === filterPayment
+          : true
+      )
+
+      .filter((u) =>
+        filterDate
+          ? new Date(u.date).toISOString().slice(0, 10) === filterDate
+          : true
+      );
   };
 
   return (
@@ -540,8 +591,8 @@ const PackageForm = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="">
               <label className="text-sm font-bold text-gray-700">
                 Payment Methods
               </label>
@@ -557,6 +608,23 @@ const PackageForm = ({
                 Select one or more payment methods that will be accepted for this package
               </p>
             </div>
+            <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">
+                Payment due date
+                </label>
+                <Input
+    type="datetime-local"
+    value={paymentDueDate}
+    onChange={(e) => setPaymentDueDate(e.target.value)}
+    min={!id ? new Date().toISOString().slice(0, 16) : undefined}
+    required
+    disabled={!isEditing}
+  />
+  <p className="text-xs text-gray-500 mt-1">
+    Users must complete payment before this deadline
+  </p>
+              </div>
+            
           </div>
 
           {id && !isEditing && (
@@ -564,6 +632,70 @@ const PackageForm = ({
               <h1 className="text-sm font-bold text-gray-700 mt-2">
                 Users Enrolled in this Package
               </h1>
+
+
+ {/* Filter Section */}
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:sm:grid-cols-4  gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+                  {/* Filter by Name */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">
+                      Filter by Name
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Search name..."
+                      value={filterName}
+                      onChange={(e) => setFilterName(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Filter by Payment Method */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">
+                      Payment Method
+                    </label>
+                    <Select
+                      value={filterPayment}
+                      onValueChange={setFilterPayment}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All methods" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+
+                        {filterPaymentOptions.map((method) => (
+                          <SelectItem key={method} value={method}>
+                            {formatPaymentLabel(method)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filter by Joining Date */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">Join Date</label>
+                    <Input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="text-sm mt-7 bg-[#742193] hover:!bg-[#57176e] text-[#ffffff]"
+                    onClick={() => {
+                      setFilterName("");
+                      setFilterPayment("all");
+                      setFilterDate("");
+                    }}
+                  >
+                    Reset Filters
+                  </Button>
+                </div>
+
               {users.length === 0 ? (
                 <div className="mt-2">
                   <p className="text-sm text-gray-500">No users enrolled in this package</p>
@@ -571,7 +703,8 @@ const PackageForm = ({
               ) : (
                 <div className="mt-2">
                   <PackageUserTable
-                    users={users || []}
+                    users={getFilteredUsers()}
+                    
                     onEdit={(id) => console.log(`Edit user ${id}`)}
                     onDelete={(id) => console.log(`Delete user ${id}`)}
                     disabled={!isEditing}

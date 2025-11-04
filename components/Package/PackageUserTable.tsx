@@ -221,6 +221,15 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
     await updateOrder(id, { status });
     onUserUpdate?.(id, { status });
   };
+
+  if (users.length === 0) {
+    return (
+      <div className="text-center py-6 text-sm text-gray-500">
+        No users match the applied filters
+      </div>
+    );
+  }
+  
   return (
     <div className="w-full min-w-xl bg-white rounded-2xl border overflow-hidden space-y-6">
       <Table>
@@ -275,10 +284,17 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
                 <TableCell>
                   <EditableCell
                     value={user.paymentMethod  === "credit_card" ? "Credit Card" : user.paymentMethod}
-                    options={paymentMethodOptions.map((o) => ({
-                      value: normalizePaymentMethod(o.name),
-                      label: o.name,
-                    }))}
+                    // options={paymentMethodOptions.map((o) => ({
+                    //   value: normalizePaymentMethod(o.name),
+                    //   label: o.name,
+                    // }))}
+                    options={paymentMethodOptions
+                      .filter((o) => o.name !== "Credit Card")
+                      .map((o) => ({
+                        value: normalizePaymentMethod(o.name),
+                        label: o.name,
+                      }))
+                    }
                     onSave={(newVal) => updatePaymentMethod(user._id, newVal)}
                     display={displayPayment}
                   />

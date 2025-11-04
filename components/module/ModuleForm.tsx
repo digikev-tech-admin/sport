@@ -18,7 +18,13 @@ import { LocationDropdown } from "../shared/LocationDropdown";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 // import { formatDateTime } from "@/lib/utils";
-import { ageGroups, levels, paymentMethodOptions, sportsOptions } from "@/data/constants";
+import {
+  ageGroups,
+  formatPaymentLabel,
+  levels,
+  paymentMethodOptions,
+  sportsOptions,
+} from "@/data/constants";
 import { format } from "date-fns";
 import ButtonLoader from "../shared/ButtonLoader";
 import PackageUserTable from "../Package/PackageUserTable";
@@ -35,7 +41,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boolean, setIsEditing?: (isEditing: boolean) => void }) => {
+
+
+
+const EventForm = ({
+  id,
+  isEditing,
+  setIsEditing,
+}: {
+  id: string;
+  isEditing: boolean;
+  setIsEditing?: (isEditing: boolean) => void;
+}) => {
   const router = useRouter();
   const [eventName, setEventName] = useState("");
   const [about, setAbout] = useState("");
@@ -60,8 +77,13 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   const [showLiveEventWarning, setShowLiveEventWarning] = useState(false);
   const [hasCheckedLiveStatus, setHasCheckedLiveStatus] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
-
-
+  const [paymentDueDate, setPaymentDueDate] = useState("");
+  const [filterName, setFilterName] = useState("");
+  const [filterPayment, setFilterPayment] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [filterPaymentOptions, setFilterPaymentOptions] = useState<string[]>(
+    []
+  );
 
   const calculateDurationInMinutes = (fromISO: string, toISO: string) => {
     const start = new Date(fromISO);
@@ -88,7 +110,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFromDate = e.target.value;
     setFromDate(newFromDate);
-    
+
     // If both dates are set, validate them
     if (newFromDate && toDate && new Date(newFromDate) >= new Date(toDate)) {
       toast.error("From Date must be earlier than To Date");
@@ -105,7 +127,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newToDate = e.target.value;
     setToDate(newToDate);
-    
+
     // If both dates are set, validate them
     if (fromDate && newToDate && new Date(fromDate) >= new Date(newToDate)) {
       toast.error("From Date must be earlier than To Date");
@@ -127,9 +149,6 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   //   }
   // };
 
-
-
-
   // Handle editing state change - show warning if event is live
   useEffect(() => {
     // Only check when isEditing becomes true and we haven't checked yet
@@ -138,10 +157,10 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
       const eventStartDate = new Date(fromDate);
       const eventEndDate = toDate ? new Date(toDate) : null;
       const now = new Date();
-      const isLive = eventEndDate 
-        ? (now >= eventStartDate && now <= eventEndDate)
+      const isLive = eventEndDate
+        ? now >= eventStartDate && now <= eventEndDate
         : now >= eventStartDate;
-      
+
       if (isLive) {
         // Event is live and user is trying to edit - show warning
         setShowLiveEventWarning(true);
@@ -154,13 +173,15 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
         setHasCheckedLiveStatus(true);
       }
     }
-    
+
     // Reset check status when editing is turned off
     if (!isEditing) {
       setHasCheckedLiveStatus(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, fromDate, toDate, id, hasCheckedLiveStatus]);
+
+  
 
   useEffect(() => {
     if (id) {
@@ -192,11 +213,18 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
           setPhoto(event?.image);
           setSpecializations(event?.tags);
           setPaymentMethods(event?.paymentMethods || []);
+          setPaymentDueDate(
+            event?.paymentDueDate
+              ? format(new Date(event.paymentDueDate), "yyyy-MM-dd'T'HH:mm")
+              : ""
+          );
+
           const eventUsers = await getUsersByEventId(id);
           console.log("Event Users Response:", eventUsers);
           const users = eventUsers?.map((item: any, index: number) => ({
             _id: item._id,
             id: index + 1,
+            date: item?.createdAt,
             name: item.userId.name || "N/A",
             email: item.userId.email || "N/A",
             phone: item.userId.phone || "N/A",
@@ -204,8 +232,8 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
             status: item.status || "N/A",
             fcmToken: item.userId.fcmToken || "N/A",
             profileName: item?.profileId?.name || item.userId.name || "N/A",
-            level:  event?.level || "N/A",
-            ageGroup:  event?.ageGroup || "N/A",
+            level: event?.level || "N/A",
+            ageGroup: event?.ageGroup || "N/A",
             price: item?.amount || "0",
             basePrice: (event?.ticketCost ?? 0).toString(),
             paymentMethod: item?.paymentMethod || "Credit Card",
@@ -291,6 +319,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
       return;
     }
     setDateError(false);
+
     const eventData = {
       title: eventName,
       description: about,
@@ -305,6 +334,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
       ticketCost: parseInt(ticketCost),
       capacity: parseInt(capacity),
       tags: specializations,
+      paymentDueDate: paymentDueDate,
       paymentMethods: paymentMethods,
     };
 
@@ -314,8 +344,8 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
       if (id) {
         const response = await updateEvent(id, eventData);
         toast.success("Event updated successfully");
-          setIsEditing?.(false);
-        
+        setIsEditing?.(false);
+
         router.push(`/events/${id}/#event`);
         console.log("Event updated:", response);
       } else {
@@ -333,10 +363,43 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
   };
 
   const handleUserUpdate = (id: string, updates: any) => {
-    setEventUsers(prev => prev.map(u => u._id === id ? { ...u, ...updates } : u));
+    setEventUsers((prev) =>
+      prev.map((u) => (u._id === id ? { ...u, ...updates } : u))
+    );
   };
 
   // console.log({ dates: toDate, fromDate });
+
+  useEffect(() => {
+    const uniquePaymentMethods = Array.from(
+      new Set(eventUsers.map((u: any) => u.paymentMethod))
+    );
+  
+    // Optional: sort alphabetically
+    uniquePaymentMethods.sort();
+  
+    setFilterPaymentOptions(uniquePaymentMethods);
+    if (!filterPayment) {
+      setFilterPayment("all");
+    }
+  }, [eventUsers]);
+  
+
+  const getFilteredUsers = () => {
+    return eventUsers
+      .filter((u) => u.name?.toLowerCase().includes(filterName.toLowerCase()))
+      .filter((u) =>
+        filterPayment && filterPayment !== "all"
+          ? u.paymentMethod === filterPayment
+          : true
+      )
+
+      .filter((u) =>
+        filterDate
+          ? new Date(u.date).toISOString().slice(0, 10) === filterDate
+          : true
+      );
+  };
 
   return (
     <div id="event" className="flex items-center justify-center p-1 sm:p-4">
@@ -345,7 +408,8 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
           <AlertDialogHeader>
             <AlertDialogTitle>Warning: Event is Live</AlertDialogTitle>
             <AlertDialogDescription>
-              {eventName} is already live. Are you sure you want to change the details?
+              {eventName} is already live. Are you sure you want to change the
+              details?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -450,7 +514,9 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   type="datetime-local"
                   value={fromDate}
                   onChange={handleFromDateChange}
-                  className={`w-full ${dateError ? 'border-red-500 focus:border-red-500' : ''}`}
+                  className={`w-full ${
+                    dateError ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   disabled={!isEditing}
                   min={!id ? new Date().toISOString().slice(0, 16) : undefined}
                 />
@@ -463,7 +529,9 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   type="datetime-local"
                   value={toDate}
                   onChange={handleToDateChange}
-                  className={`w-full ${dateError ? 'border-red-500 focus:border-red-500' : ''}`}
+                  className={`w-full ${
+                    dateError ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   disabled={!isEditing}
                   min={!id ? new Date().toISOString().slice(0, 16) : undefined}
                 />
@@ -477,7 +545,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
               )}
             </div>
 
-          {/* Keeping upload section commented as-is */}
+            {/* Keeping upload section commented as-is */}
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">
@@ -640,8 +708,8 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="">
                 <label className="text-sm font-bold text-gray-700">
                   Payment Methods
                 </label>
@@ -654,32 +722,116 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   disabled={!isEditing}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Select one or more payment methods that will be accepted for this event
+                  Select one or more payment methods that will be accepted for
+                  this event
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Payment due date
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={paymentDueDate}
+                  onChange={(e) => setPaymentDueDate(e.target.value)}
+                  min={!id ? new Date().toISOString().slice(0, 16) : undefined}
+                  required
+                  disabled={!isEditing}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Users must complete payment before this deadline
                 </p>
               </div>
             </div>
 
             {id && !isEditing && (
-            <>
-              <h1 className="text-sm font-bold text-gray-700 mt-2">
-                Users Enrolled in this Event
-              </h1>
-              <div className="mt-2"> {eventUsers.length > 0 ? (
-                <PackageUserTable
-                  users={eventUsers || []}
-                  onEdit={(id) => console.log(`Edit user ${id}`)}
-                  onDelete={(id) => console.log(`Delete user ${id}`)}
-                  disabled={!isEditing}
-                  onUserUpdate={handleUserUpdate}
-                                  />
-              ) : (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500">No users enrolled in this event</p>
+              <>
+                <h1 className="text-sm font-bold text-gray-700 mt-2">
+                  Users Enrolled in this Event
+                </h1>
+
+                {/* Filter Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:sm:grid-cols-4  gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+                  {/* Filter by Name */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">
+                      Filter by Name
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Search name..."
+                      value={filterName}
+                      onChange={(e) => setFilterName(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Filter by Payment Method */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">
+                      Payment Method
+                    </label>
+                    <Select
+                      value={filterPayment}
+                      onValueChange={setFilterPayment}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All methods" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+
+                        {filterPaymentOptions.map((method) => (
+                          <SelectItem key={method} value={method}>
+                            {formatPaymentLabel(method)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filter by Joining Date */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">Join Date</label>
+                    <Input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="text-sm mt-7 bg-[#742193] hover:!bg-[#57176e] text-[#ffffff]"
+                    onClick={() => {
+                      setFilterName("");
+                      setFilterPayment("all");
+                      setFilterDate("");
+                    }}
+                  >
+                    Reset Filters
+                  </Button>
                 </div>
-              )}
-              </div>
-            </>
-          )}
+
+                <div className="mt-2">
+                  {" "}
+                  {eventUsers.length > 0 ? (
+                    <PackageUserTable
+                      users={getFilteredUsers()}
+                      onEdit={(id) => console.log(`Edit user ${id}`)}
+                      onDelete={(id) => console.log(`Delete user ${id}`)}
+                      disabled={!isEditing}
+                      onUserUpdate={handleUserUpdate}
+                    />
+                  ) : (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        No users enrolled in this event
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
             <div className="flex gap-4 pt-4">
               <Button
                 type="submit"
@@ -702,11 +854,11 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                 className="flex-1 hover:bg-orange-50 border-orange-200 text-orange-500 transition-all duration-300"
                 onClick={() => {
                   if (id && isEditing) {
-                  if (setIsEditing) {
-                    setIsEditing(false);
-                    router.push(`/events/${id}?/#event`);
-                    return;
-                  }
+                    if (setIsEditing) {
+                      setIsEditing(false);
+                      router.push(`/events/${id}?/#event`);
+                      return;
+                    }
                   }
                   setEventName("");
                   setAbout("");
@@ -722,7 +874,7 @@ const EventForm = ({ id, isEditing, setIsEditing }: { id: string; isEditing: boo
                   setDuration("");
                   setCapacity("");
                   setPaymentMethods([]);
-                 
+
                   router.back();
                 }}
                 disabled={isSubmitting}

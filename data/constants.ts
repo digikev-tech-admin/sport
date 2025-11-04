@@ -311,3 +311,12 @@ export const paymentMethodOptions = [
   { id: 3, name: "Auto Debit (Monthly Direct Debit)" },
 ];
 
+
+
+
+export const formatPaymentLabel = (value: string) => {
+  if (!value) return value;
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
