@@ -10,28 +10,46 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Button } from "@/components/ui/button";
 // import { Eye, Trash2 } from "lucide-react";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 import { Loader2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { updateOrder } from "@/api/services";
 
-
 export const paymentMethodOptions = [
-  { id: 1, name: "Cash" }, 
+  { id: 1, name: "Cash" },
   { id: 2, name: "Card" },
   { id: 3, name: "Auto Debit (Monthly Direct Debit)" },
   { id: 4, name: "Credit Card" },
-] as const; 
-
+] as const;
 
 const normalizePaymentMethod = (str: string): string => {
   return str
     .toLowerCase()
-    .replace(/\s+/g, "_")     // replace spaces with _
-    .replace(/[()]/g, "");   // ← REMOVE PARENTHESIS
+    .replace(/\s+/g, "_") // replace spaces with _
+    .replace(/[()]/g, ""); // ← REMOVE PARENTHESIS
 };
 
-type UserStatus = 'booked' | 'pending' | 'reserved' | 'paid' | 'failed' | 'refunded' | 'expired';
+type UserStatus =
+  | "booked"
+  | "pending"
+  | "reserved"
+  | "paid"
+  | "failed"
+  | "refunded"
+  | "expired";
 
 const statusOptions: { value: UserStatus; label: string }[] = [
   { value: "booked", label: "Booked" },
@@ -43,47 +61,49 @@ const statusOptions: { value: UserStatus; label: string }[] = [
   { value: "expired", label: "Expired" },
 ];
 
-const getStatusStyles = (status: UserStatus): { className: string; label: string } => {
+const getStatusStyles = (
+  status: UserStatus
+): { className: string; label: string } => {
   switch (status) {
-    case 'booked':
+    case "booked":
       return {
-        className: 'bg-blue-100 text-blue-800 border border-blue-200',
-        label: 'Booked'
+        className: "bg-blue-100 text-blue-800 border border-blue-200",
+        label: "Booked",
       };
-    case 'pending':
+    case "pending":
       return {
-        className: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-        label: 'Pending'
+        className: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+        label: "Pending",
       };
-      case 'reserved':
-        return {
-          className: 'bg-green-100 text-green-800 border border-green-200',
-          label: 'Reserved'
-        };
-    case 'paid':
+    case "reserved":
       return {
-        className: 'bg-green-100 text-green-800 border border-green-200',
-        label: 'Paid'
+        className: "bg-green-100 text-green-800 border border-green-200",
+        label: "Reserved",
       };
-    case 'failed':
+    case "paid":
       return {
-        className: 'bg-red-100 text-red-800 border border-red-200',
-        label: 'Failed'
+        className: "bg-green-100 text-green-800 border border-green-200",
+        label: "Paid",
       };
-    case 'refunded':
+    case "failed":
       return {
-        className: 'bg-orange-100 text-orange-800 border border-orange-200',
-        label: 'Refunded'
+        className: "bg-red-100 text-red-800 border border-red-200",
+        label: "Failed",
       };
-    case 'expired':
+    case "refunded":
       return {
-        className: 'bg-gray-100 text-gray-800 border border-gray-200',
-        label: 'Expired'
+        className: "bg-orange-100 text-orange-800 border border-orange-200",
+        label: "Refunded",
+      };
+    case "expired":
+      return {
+        className: "bg-gray-100 text-gray-800 border border-gray-200",
+        label: "Expired",
       };
     default:
       return {
-        className: 'bg-gray-100 text-gray-800 border border-gray-200',
-        label: status
+        className: "bg-gray-100 text-gray-800 border border-gray-200",
+        label: status,
       };
   }
 };
@@ -91,7 +111,9 @@ const getStatusStyles = (status: UserStatus): { className: string; label: string
 const StatusBadge: React.FC<{ status: UserStatus }> = ({ status }) => {
   const statusConfig = getStatusStyles(status);
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.className}`}>
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.className}`}
+    >
       {statusConfig.label}
     </span>
   );
@@ -116,9 +138,11 @@ interface PackageUserTableProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   disabled: boolean;
-  onUserUpdate?: (id: string, updates: { paymentMethod?: string; status?: UserStatus }) => void;
+  onUserUpdate?: (
+    id: string,
+    updates: { paymentMethod?: string; status?: UserStatus }
+  ) => void;
 }
-
 
 // ---------------------------------------------------------------------
 // 3. Editable cell (generic)
@@ -202,15 +226,21 @@ function EditableCell<T extends string>({
   );
 }
 
-const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDelete, disabled, onUserUpdate }) => {
-  
-  
+const PackageUserTable: React.FC<PackageUserTableProps> = ({
+  users,
+  onEdit,
+  onDelete,
+  disabled,
+  onUserUpdate,
+}) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(users.length / itemsPerPage);
   // console.log("users", users);
-  const paginatedUsers = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
+  const paginatedUsers = users.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const updatePaymentMethod = async (id: string, method: string) => {
     await updateOrder(id, { paymentMethod: method });
@@ -229,7 +259,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
       </div>
     );
   }
-  
+
   return (
     <div className="w-full min-w-xl bg-white rounded-2xl border overflow-hidden space-y-6">
       <Table>
@@ -261,7 +291,9 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
 
             return (
               <TableRow key={user._id || user.id}>
-                <TableCell>{(currentPage - 1) * itemsPerPage + idx + 1}</TableCell>
+                <TableCell>
+                  {(currentPage - 1) * itemsPerPage + idx + 1}
+                </TableCell>
 
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -283,7 +315,11 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
                 {/* ---- PAYMENT METHOD ---- */}
                 <TableCell>
                   <EditableCell
-                    value={user.paymentMethod  === "credit_card" ? "Credit Card" : user.paymentMethod}
+                    value={
+                      user.paymentMethod === "credit_card"
+                        ? "Credit Card"
+                        : user.paymentMethod
+                    }
                     // options={paymentMethodOptions.map((o) => ({
                     //   value: normalizePaymentMethod(o.name),
                     //   label: o.name,
@@ -293,8 +329,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
                       .map((o) => ({
                         value: normalizePaymentMethod(o.name),
                         label: o.name,
-                      }))
-                    }
+                      }))}
                     onSave={(newVal) => updatePaymentMethod(user._id, newVal)}
                     display={displayPayment}
                   />
@@ -361,7 +396,9 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
         </TableBody> */}
       </Table>
       <Pagination className="mt-4">
-        <PaginationPrevious onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} />
+        <PaginationPrevious
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        />
         <PaginationContent>
           {Array.from({ length: totalPages }, (_, index) => (
             <PaginationItem key={index}>
@@ -374,7 +411,11 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({ users, onEdit, onDe
             </PaginationItem>
           ))}
         </PaginationContent>
-        <PaginationNext onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} />
+        <PaginationNext
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+        />
       </Pagination>
     </div>
   );

@@ -9,7 +9,13 @@ import {
   SelectValue,
 } from "../ui/select";
 import { SingleSelect } from "../shared/singleChooseDropdown";
-import { ageGroups, formatPaymentLabel, levels, paymentMethodOptions, sportsOptions } from "@/data/constants";
+import {
+  ageGroups,
+  formatPaymentLabel,
+  levels,
+  paymentMethodOptions,
+  sportsOptions,
+} from "@/data/constants";
 import { LocationDropdown } from "../shared/LocationDropdown";
 import { SingleCoachDropdown } from "../shared/SingleCoachDropDown";
 import { Textarea } from "../ui/textarea";
@@ -62,11 +68,9 @@ const PackageForm = ({
     discount: "",
   });
 
-
   const [filterName, setFilterName] = useState("");
-const [filterPayment, setFilterPayment] = useState("");
-const [filterDate, setFilterDate] = useState("");
-
+  const [filterPayment, setFilterPayment] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>({});
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
@@ -75,7 +79,6 @@ const [filterDate, setFilterDate] = useState("");
     []
   );
   // Payment method options
-
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -93,17 +96,27 @@ const [filterDate, setFilterDate] = useState("");
     const newStartDate = e.target.value;
     const newSessionDates = [newStartDate, sessionDates[1] || ""];
     setSessionDates(newSessionDates);
-    
+
     // If both dates are set, validate them
-    if (newStartDate && sessionDates[1] && new Date(newStartDate) >= new Date(sessionDates[1])) {
+    if (
+      newStartDate &&
+      sessionDates[1] &&
+      new Date(newStartDate) >= new Date(sessionDates[1])
+    ) {
       toast.error("Session Start Date must be earlier than Session End Date");
       setDateError(true);
       setDuration("");
     } else {
       setDateError(false);
       // Auto-calculate duration in months when both dates are valid
-      if (newStartDate && newSessionDates[1] && new Date(newStartDate) < new Date(newSessionDates[1])) {
-        setDuration(calculateDurationInMonths(newStartDate, newSessionDates[1]));
+      if (
+        newStartDate &&
+        newSessionDates[1] &&
+        new Date(newStartDate) < new Date(newSessionDates[1])
+      ) {
+        setDuration(
+          calculateDurationInMonths(newStartDate, newSessionDates[1])
+        );
       } else {
         setDuration("");
       }
@@ -114,16 +127,24 @@ const [filterDate, setFilterDate] = useState("");
     const newEndDate = e.target.value;
     const newSessionDates = [sessionDates[0] || "", newEndDate];
     setSessionDates(newSessionDates);
-    
+
     // If both dates are set, validate them
-    if (sessionDates[0] && newEndDate && new Date(sessionDates[0]) >= new Date(newEndDate)) {
+    if (
+      sessionDates[0] &&
+      newEndDate &&
+      new Date(sessionDates[0]) >= new Date(newEndDate)
+    ) {
       toast.error("Session Start Date must be earlier than Session End Date");
       setDateError(true);
       setDuration("");
     } else {
       setDateError(false);
       // Auto-calculate duration in months when both dates are valid
-      if (newSessionDates[0] && newEndDate && new Date(newSessionDates[0]) < new Date(newEndDate)) {
+      if (
+        newSessionDates[0] &&
+        newEndDate &&
+        new Date(newSessionDates[0]) < new Date(newEndDate)
+      ) {
         setDuration(calculateDurationInMonths(newSessionDates[0], newEndDate));
       } else {
         setDuration("");
@@ -176,10 +197,11 @@ const [filterDate, setFilterDate] = useState("");
             avatar: item.userId.avatar || "https://github.com/shadcn.png",
             status: item.status || "pending",
             profileName: item?.profileId?.name || item.userId.name || "N/A",
-            level: item?.packageId?.level ||  res?.level|| "N/A",
-            ageGroup: item?.packageId?.ageGroup ||  res?.ageGroup|| "N/A",
+            level: item?.packageId?.level || res?.level || "N/A",
+            ageGroup: item?.packageId?.ageGroup || res?.ageGroup || "N/A",
             price: item?.amount || "N/A",
-            basePrice: item?.packageId?.price?.base || res?.price?.base || "N/A",
+            basePrice:
+              item?.packageId?.price?.base || res?.price?.base || "N/A",
             paymentMethod: item?.paymentMethod || "Credit Card",
           }));
           // console.log("Package Users Response:", users);
@@ -196,15 +218,19 @@ const [filterDate, setFilterDate] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate that Session Start Date is earlier than Session End Date
-    if (sessionDates[0] && sessionDates[1] && new Date(sessionDates[0]) >= new Date(sessionDates[1])) {
+    if (
+      sessionDates[0] &&
+      sessionDates[1] &&
+      new Date(sessionDates[0]) >= new Date(sessionDates[1])
+    ) {
       toast.error("Session Start Date must be earlier than Session End Date");
       setDateError(true);
       return;
     }
     setDateError(false);
-    
+
     setIsSubmitting(true);
     const packageData = {
       coachId,
@@ -226,7 +252,6 @@ const [filterDate, setFilterDate] = useState("");
       image: profileImage || "https://github.com/shadcn.png",
       paymentMethods: paymentMethods,
       paymentDueDate: paymentDueDate,
-
     };
     // console.log("Package Data:", packageData);
 
@@ -242,7 +267,6 @@ const [filterDate, setFilterDate] = useState("");
         router.push("/packages");
         handleCancel();
       }
-      
     } catch (error) {
       console.log("Error:", error);
       toast.error("Failed to create package");
@@ -253,11 +277,11 @@ const [filterDate, setFilterDate] = useState("");
 
   const handleCancel = () => {
     if (id && isEditing) {
-    if (setIsEditing) {
-      window.location.href = `/packages/${id}?/#package`;
-      setIsEditing(false);
-      return;
-    }
+      if (setIsEditing) {
+        window.location.href = `/packages/${id}?/#package`;
+        setIsEditing(false);
+        return;
+      }
     }
     setSport("");
     setTitle("");
@@ -277,25 +301,24 @@ const [filterDate, setFilterDate] = useState("");
   };
 
   const handleUserUpdate = (id: string, updates: any) => {
-    setUsers(prev => prev.map(u => u._id === id ? { ...u, ...updates } : u));
+    setUsers((prev) =>
+      prev.map((u) => (u._id === id ? { ...u, ...updates } : u))
+    );
   };
-
-
 
   useEffect(() => {
     const uniquePaymentMethods = Array.from(
       new Set(users.map((u: any) => u.paymentMethod))
     );
-  
+
     // Optional: sort alphabetically
     uniquePaymentMethods.sort();
-  
+
     setFilterPaymentOptions(uniquePaymentMethods);
     if (!filterPayment) {
       setFilterPayment("all");
     }
   }, [users]);
-  
 
   const getFilteredUsers = () => {
     return users
@@ -498,7 +521,9 @@ const [filterDate, setFilterDate] = useState("");
                 value={sessionDates[0] || ""}
                 min={id ? undefined : today}
                 onChange={handleStartDateChange}
-                className={dateError ? 'border-red-500 focus:border-red-500' : ''}
+                className={
+                  dateError ? "border-red-500 focus:border-red-500" : ""
+                }
                 required
                 disabled={!isEditing}
               />
@@ -512,7 +537,9 @@ const [filterDate, setFilterDate] = useState("");
                 value={sessionDates[1] || ""}
                 min={id ? undefined : today}
                 onChange={handleEndDateChange}
-                className={dateError ? 'border-red-500 focus:border-red-500' : ''}
+                className={
+                  dateError ? "border-red-500 focus:border-red-500" : ""
+                }
                 required
                 disabled={!isEditing}
               />
@@ -592,7 +619,7 @@ const [filterDate, setFilterDate] = useState("");
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="">
+            <div className="">
               <label className="text-sm font-bold text-gray-700">
                 Payment Methods
               </label>
@@ -605,26 +632,26 @@ const [filterDate, setFilterDate] = useState("");
                 disabled={!isEditing}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Select one or more payment methods that will be accepted for this package
+                Select one or more payment methods that will be accepted for
+                this package
               </p>
             </div>
             <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">
+              <label className="text-sm font-bold text-gray-700">
                 Payment due date
-                </label>
-                <Input
-    type="datetime-local"
-    value={paymentDueDate}
-    onChange={(e) => setPaymentDueDate(e.target.value)}
-    min={!id ? new Date().toISOString().slice(0, 16) : undefined}
-    required
-    disabled={!isEditing}
-  />
-  <p className="text-xs text-gray-500 mt-1">
-    Users must complete payment before this deadline
-  </p>
-              </div>
-            
+              </label>
+              <Input
+                type="datetime-local"
+                value={paymentDueDate}
+                onChange={(e) => setPaymentDueDate(e.target.value)}
+                min={!id ? new Date().toISOString().slice(0, 16) : undefined}
+                required
+                disabled={!isEditing}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Users must complete payment before this deadline
+              </p>
+            </div>
           </div>
 
           {id && !isEditing && (
@@ -633,78 +660,78 @@ const [filterDate, setFilterDate] = useState("");
                 Users Enrolled in this Package
               </h1>
 
-
- {/* Filter Section */}
- <div className="grid grid-cols-1 sm:grid-cols-2 md:sm:grid-cols-4  gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
-                  {/* Filter by Name */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold">
-                      Filter by Name
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="Search name..."
-                      value={filterName}
-                      onChange={(e) => setFilterName(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Filter by Payment Method */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold">
-                      Payment Method
-                    </label>
-                    <Select
-                      value={filterPayment}
-                      onValueChange={setFilterPayment}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="All methods" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-
-                        {filterPaymentOptions.map((method) => (
-                          <SelectItem key={method} value={method}>
-                            {formatPaymentLabel(method)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Filter by Joining Date */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold">Join Date</label>
-                    <Input
-                      type="date"
-                      value={filterDate}
-                      onChange={(e) => setFilterDate(e.target.value)}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="text-sm mt-7 bg-[#742193] hover:!bg-[#57176e] text-[#ffffff]"
-                    onClick={() => {
-                      setFilterName("");
-                      setFilterPayment("all");
-                      setFilterDate("");
-                    }}
-                  >
-                    Reset Filters
-                  </Button>
+              {/* Filter Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:sm:grid-cols-4  gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+                {/* Filter by Name */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold">
+                    Filter by Name
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Search name..."
+                    value={filterName}
+                    onChange={(e) => setFilterName(e.target.value)}
+                  />
                 </div>
+
+                {/* Filter by Payment Method */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold">
+                    Payment Method
+                  </label>
+                  <Select
+                    value={filterPayment}
+                    onValueChange={setFilterPayment}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All methods" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+
+                      {filterPaymentOptions.map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {formatPaymentLabel(method)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter by Joining Date */}
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold">Join Date</label>
+                  <Input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="text-sm mt-7 bg-[#742193] hover:!bg-[#57176e] text-[#ffffff]"
+                  onClick={() => {
+                    setFilterName("");
+                    setFilterPayment("all");
+                    setFilterDate("");
+                  }}
+                >
+                  Reset Filters
+                </Button>
+              </div>
 
               {users.length === 0 ? (
                 <div className="mt-2">
-                  <p className="text-sm text-gray-500">No users enrolled in this package</p>
+                  <p className="text-sm text-gray-500">
+                    No users enrolled in this package
+                  </p>
                 </div>
               ) : (
                 <div className="mt-2">
                   <PackageUserTable
                     users={getFilteredUsers()}
-                    
                     onEdit={(id) => console.log(`Edit user ${id}`)}
                     onDelete={(id) => console.log(`Delete user ${id}`)}
                     disabled={!isEditing}
