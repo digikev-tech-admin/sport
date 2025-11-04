@@ -261,20 +261,20 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
   }
 
   return (
-    <div className="w-full min-w-xl bg-white rounded-2xl border overflow-hidden space-y-6">
+    <div className="w-full min-w-2xl bg-white rounded-2xl border overflow-hidden space-y-6">
       <Table>
         <TableHeader className="bg-[#7421931A]">
           <TableRow>
-            <TableHead className="w-[80px] font-bold">Sr. No.</TableHead>
+            <TableHead className="!min-w-[70px] font-bold px-2">Sr. No.</TableHead>
             <TableHead className="font-bold">Name</TableHead>
             <TableHead className="font-bold">Profile Name</TableHead>
-            {/* <TableHead className="font-bold">Email</TableHead> */}
+            <TableHead className="font-bold">Email</TableHead>
             <TableHead className="font-bold">Phone</TableHead>
             <TableHead className="font-bold">Level</TableHead>
             <TableHead className="font-bold">Age Group</TableHead>
             <TableHead className="font-bold">Amount</TableHead>
             <TableHead className="font-bold">Base Price</TableHead>
-            <TableHead className="font-bold">Payment Method</TableHead>
+            <TableHead className="font-bold !min-w-[150px]">Payment Method</TableHead>
             <TableHead className="font-bold">Status</TableHead>
             {/* <TableHead className="text-center font-bold">Actions</TableHead> */}
           </TableRow>
@@ -306,6 +306,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                 </TableCell>
 
                 <TableCell>{user.profileName}</TableCell>
+                <TableCell>{user.email}</TableCell>
                 <TableCell>{user.phone}</TableCell>
                 <TableCell className="capitalize">{user.level}</TableCell>
                 <TableCell className="capitalize">{user.ageGroup}</TableCell>
@@ -313,7 +314,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                 <TableCell>{user.basePrice}</TableCell>
 
                 {/* ---- PAYMENT METHOD ---- */}
-                <TableCell>
+                <TableCell className="text-center">
                   <EditableCell
                     value={
                       user.paymentMethod === "credit_card"

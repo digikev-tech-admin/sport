@@ -137,17 +137,15 @@ export default function Dashboard() {
     const fetchEvents = async () => {
       try {
         const eventsData = await getAllEvents();
+        console.log({eventsData});
+        
         
         const formattedEvents = eventsData
           .map((event: any) => ({
             id: event?._id,
             title: event?.title,
             location:  event?.locationId ?
-              event?.locationId?.address +
-              ", " +
-              event?.locationId?.city +
-              ", " +
-              event?.locationId?.state :"N/A",
+              event?.locationId?.title :"N/A",
             sport: event?.sport,
             interested: event?.enrolledCount,
           }))
@@ -181,7 +179,7 @@ export default function Dashboard() {
             startDate: item?.sessionDates?.[0] || "N/A",
             duration: item?.duration || "N/A",
             price: item?.price?.base || "N/A",
-            clubs:  item?.locationId ? item?.locationId?.address + ", " + item?.locationId?.city : "N/A",
+            clubs:  item?.locationId ? item?.locationId?.title : "N/A",
           }))
           .filter(
             (pkg: { startDate: string }) => new Date(pkg.startDate) >= today
@@ -212,7 +210,7 @@ export default function Dashboard() {
             imageUrl: coach?.image,
             sports: coach?.sports,
             clubs: coach?.locationIds ? coach?.locationIds?.map(
-              (location: any) => location?.address + " , " + location?.city
+              (location: any) => location?.title
             ) : [],
             rating: 3,
             // averageRating: coach.averageRating,
