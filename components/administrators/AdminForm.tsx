@@ -27,7 +27,7 @@ const formSchema = z.object({
   isActive: z.boolean().default(true),
   emergencyContact: z.string().min(10, "Emergency contact must be at least 10 digits").optional(),
   sports: z.array(z.string()),
-  level: z.enum(["daily", "weekly", "monthly", "occasionally"]),
+  level: z.enum(["daily", "weekly", "monthly", "occasionally"]).optional(),
   avatar: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
@@ -54,6 +54,7 @@ const AdminForm = () => {
     defaultValues: {
       sports: [],
       isActive: true,
+      level: "daily",
       role: "admin",
       avatar: "https://github.com/shadcn.png",
     },
@@ -78,7 +79,11 @@ const AdminForm = () => {
       if (registerUser.fulfilled.match(result)) {
         toast.success("Admin added successfully!");
         router.push("/administrator");
-        reset();
+        setTimeout(() => {
+          reset();
+          // window.location.reload();
+        }, 1000);
+        
       } else {
         throw result.payload;
       }
@@ -146,35 +151,6 @@ const AdminForm = () => {
                     <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
                   )}
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone" className="text-[#2E2E2E] font-bold">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      {...register("phone")}
-                      placeholder="Enter your phone number"
-                      className="mt-1 text-[#2E2E2E]"
-                    />
-                    {errors.phone && (
-                      <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="email" className="text-[#2E2E2E] font-bold">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...register("email")}
-                      placeholder="Enter your email"
-                      className="mt-1 text-[#2E2E2E]"
-                    />
-                    {errors.email && (
-                      <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-                    )}
-                  </div>
-                </div>
-
                 <div>
                   <Label htmlFor="password" className="text-[#2E2E2E] font-bold">Password</Label>
                   <div className="relative">
@@ -206,6 +182,36 @@ const AdminForm = () => {
                     <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
                   )}
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone" className="text-[#2E2E2E] font-bold">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      {...register("phone")}
+                      placeholder="Enter your phone number"
+                      className="mt-1 text-[#2E2E2E]"
+                    />
+                    {errors.phone && (
+                      <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="text-[#2E2E2E] font-bold">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      {...register("email")}
+                      placeholder="Enter your email"
+                      className="mt-1 text-[#2E2E2E]"
+                    />
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                
               </div>
             </div>
 
@@ -285,7 +291,7 @@ const AdminForm = () => {
             </div>
 
             {/* Level Selection */}
-            <div>
+            {/* <div>
               <Label htmlFor="level" className="text-[#2E2E2E] font-bold">Subscription Level</Label>
               <Select onValueChange={(value) => setValue("level", value as "daily" | "weekly" | "monthly" | "occasionally")}>
                 <SelectTrigger className="w-full">
@@ -301,8 +307,8 @@ const AdminForm = () => {
               </Select>
               {errors.level && (
                 <p className="mt-1 text-sm text-red-500">{errors.level.message}</p>
-              )}
-            </div>
+              )} */}
+            {/* </div> */}
 
             {/* Active Status */}
             <div className="flex items-center space-x-3">

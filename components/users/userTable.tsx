@@ -27,13 +27,15 @@ import { useRouter } from "next/navigation";
 interface UserTableProps {
   users: IUser[];
   onDelete: (id: string) => void;
+  usersType: 'user' | 'administrator';
+  startIndex?: number;
 }
 
-const UserTable = ({ users, onDelete }: UserTableProps) => {
+const UserTable = ({ users, onDelete, usersType, startIndex = 0 }: UserTableProps) => {
   const router = useRouter()
 
   const handleViewDetails = (user: IUser) => {
-    router.push(`/administrator/${user?._id}`)
+    router.push(`/${usersType}/${user?._id}`)
   };
 
   return (
@@ -43,28 +45,37 @@ const UserTable = ({ users, onDelete }: UserTableProps) => {
           <TableRow>
             <TableHead className="w-[80px] font-bold">Sr. No.</TableHead>
             <TableHead className="font-bold">Name</TableHead>
+           
+            <TableHead className="font-bold">Email</TableHead>
+            <TableHead className="font-bold">Phone</TableHead>
             <TableHead className="font-bold">Gender</TableHead>
-            <TableHead className="font-bold">Level</TableHead>
             <TableHead className="font-bold">Status</TableHead>
             <TableHead className="font-bold">Join Date</TableHead>
             <TableHead className="text-center font-bold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user, idx) => (
-            <TableRow key={user._id}>
-              <TableCell>{idx + 1}</TableCell>
+          {users?.length > 0 && users?.map((user, idx) => (
+            <TableRow key={user?._id}>
+              <TableCell>{startIndex + idx + 1}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>{user?.name}</AvatarFallback>
+                    <AvatarImage src={user?.avatar || 'https://github.com/shadcn.png'} />
+                    <AvatarFallback>{user?.name || 'N/A'}</AvatarFallback>
                   </Avatar>
-                  {user.name}
+                  {user?.name || 'N/A'}
                 </div>
               </TableCell>
-              <TableCell className="capitalize">{user?.gender}</TableCell>
-              <TableCell className="capitalize">{user?.level}</TableCell>
+             
+              <TableCell className="capitalize">
+                {user?.email || 'N/A'}
+             
+                </TableCell>
+                <TableCell className="capitalize">
+                {user?.phone || 'N/A'}
+                </TableCell>
+                <TableCell className="capitalize">{user?.gender || 'N/A'  }</TableCell>
               <TableCell>
                 <span className={`px-2 py-1 rounded-full text-xs ${user?.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                   {user?.isActive ? 'Active' : 'Inactive'}

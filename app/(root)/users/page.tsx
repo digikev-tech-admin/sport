@@ -27,6 +27,9 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchUsers, removeUser } from "@/redux/features/userSlice";
 import { RootState } from "@/redux/store";
 import toast from "react-hot-toast";
+import SectionHeader from "@/components/SectionHeader";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 // import { formatUserData } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 5;
@@ -39,10 +42,12 @@ const subscriptionOptions = [
 ];
 
 const Page = () => {
+  const route = useRouter();
   const dispatch = useAppDispatch();
   const { users: allUsers, status } = useAppSelector(
     (state: RootState) => state.user
   );
+  console.log({allUsers})
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("id_asc");
@@ -57,6 +62,7 @@ const Page = () => {
   // Filter and sort users
   const filteredUsers = Array.isArray(allUsers)
     ? allUsers
+        .filter((user) => user.role?.toLowerCase() !== "admin")
         .filter((user) => {
           const matchesSearch = user.name
             .toLowerCase()
@@ -110,6 +116,10 @@ const Page = () => {
     }
   };
 
+  const handleAddUser = () => {
+    route.push(`/users/addUser`);
+  };
+
   return (
     <section className="h-auto   p-2 sm:p-7">
       <div className="container mx-auto">
@@ -126,21 +136,33 @@ const Page = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <h1 className="h1 mb-4 mt-4">Users</h1>
 
-        <div className="grid gap-4 md:grid-cols-3 mb-6 ">
+        <SectionHeader
+          title="Users"
+          buttonText="Add User"
+          onButtonClick={handleAddUser}
+          icon={<Plus />}
+          className="mb-4"
+        />
+
+        <div className="grid gap-4 md:grid-cols-2 mb-6 ">
           <SearchBar value={search} onChange={setSearch} />
-          <CategoryFilter
+          {/* <CategoryFilter
             value={category}
             onChange={setCategory}
             subscriptionOptions={subscriptionOptions}
-          />
+          /> */}
           <SortSelect value={sortBy} onChange={setSortBy} />
         </div>
 
         {/* <UserTable users={paginatedUsers} onDelete={handleDelete} /> */}
         {typeof window !== "undefined" && (
-          <UserTable users={paginatedUsers} onDelete={handleDelete} />
+          <UserTable
+            users={paginatedUsers}
+            onDelete={handleDelete}
+            usersType="user"
+            startIndex={startIndex}
+          />
         )}
 
         <div className="mt-4">

@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchUserById, modifyUser } from "@/redux/features/userSlice";
+import { fetchUserById, modifyUser, registerUser } from "@/redux/features/userSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
@@ -14,43 +14,70 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { ReCloudinary } from "../cloudinary";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { getProfilesByUserId } from "@/api/user/user";
 
-const PersonalDetails = ({ id }: { id: string }) => {
+const PersonalDetails = ({ id }: { id?: string }) => {
   const dispatch = useAppDispatch();
+  const [profiles, setProfiles] = useState([]);
+  console.log('profiles:', profiles);
   const { userById: user } = useAppSelector((state: RootState) => state.user);
-  console.log('user:', user);
+  // console.log('user:', user);
   const [image, setImage] = useState('');
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
     phone: "",
     dob: "",
     gender: "",
     emergencyContact: "",
     sports: [] as string[],
     level: "",
-    avatar: ""
+    avatar: "https://github.com/shadcn.png"
   });
   const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(true);
+  const [loaded, setLoaded] = useState(!!id);
   const router = useRouter()
 
   const sportsOptions = ["football", "basketball", "cricket", "tennis", "swimming"];
-  const levelOptions = [ "daily","weekly","monthly","occasionally"];
+  // const levelOptions = [ "daily","weekly","monthly","occasionally"];
 
 
-  useEffect(() => {
-    if (!image && user?.avatar) {
-      setImage(user?.avatar ?? "https://github.com/shadcn.png")
+
+  useEffect(()=>{
+    const fetchProfiles = async () => {
+      try {
+          const profiles = await getProfilesByUserId(id ?? '');
+          console.log('profiles:', profiles);
+          const formattedProfiles = profiles.map((profile: any) => ({
+            id: profile?._id,
+            name: profile?.name || 'N/A',
+            relation: profile?.relation || 'N/A',
+          }));
+          setProfiles(formattedProfiles);
+      } catch (error) {
+        console.error('Error fetching profiles:', error);
+      }
     }
-  }, [user?.avatar, image]);
+    fetchProfiles();
+  },[id])
+
 
   useEffect(() => {
-    if (user) {
+    if (user?.avatar) {
+      setImage(user.avatar);
+    } else if (!id) {
+      setImage("https://github.com/shadcn.png");
+    }
+  }, [user?.avatar, id]);
+
+  useEffect(() => {
+    if (user  ) {
       setFormData({
         name: user?.name ?? "",
         email: user?.email ?? "",
         phone: user?.phone ?? "",
+        password:  "",
         dob: user?.dob ? new Date(user.dob).toISOString().split('T')[0] : "",
         gender: user?.gender ?? "",
         emergencyContact: user?.emergencyContact ?? "",
@@ -87,17 +114,35 @@ const PersonalDetails = ({ id }: { id: string }) => {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (id && !user) return;
 
-    const payload = { ...formData, avatar: image ?? formData.avatar };
+    const { password, ...rest } = formData;
+    const basePayload = { ...rest, avatar: image || formData.avatar, role: 'user' };
     setLoading(true)
     try {
-      const result = await dispatch(modifyUser({ userId: user._id, userData: payload }));
-      if (modifyUser.fulfilled.match(result)) {
-        toast.success("User updated successfully!");
-        router.back();
+    if (id) {
+        const userId = user?._id;
+        if (!userId) {
+          toast.error("User details not loaded yet.");
+          return;
+        }
+        const result = await dispatch(modifyUser({ userId, userData: basePayload }));
+        if (modifyUser.fulfilled.match(result)) {
+          // toast.success("User updated successfully!");
+          router.back();
+        } else {
+          throw result.payload;
+        }
       } else {
-        throw result.payload;
+        const result = await dispatch(registerUser({ ...basePayload, password }));
+        if (registerUser.fulfilled.match(result)) {
+          toast.success("User registered successfully!");
+          setTimeout(() => {
+            router.push("/users");
+          }, 1000);
+        } else {
+          throw result.payload;
+        }
       }
     } catch (error: any) {
       toast.error(error?.message || "Failed to update user");
@@ -151,10 +196,24 @@ const PersonalDetails = ({ id }: { id: string }) => {
               <Input
                 id="name"
                 value={formData.name}
+                placeholder="Enter your name"
                 className="mt-1 text-[#2E2E2E]"
                 onChange={handleChange}
               />
             </div>
+            {!id && (
+              <div>
+              <Label htmlFor="password" className="text-[#2E2E2E] font-bold">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                placeholder="Enter your password"
+                className="mt-1 text-[#2E2E2E]"
+                onChange={handleChange}
+              />
+            </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -162,6 +221,7 @@ const PersonalDetails = ({ id }: { id: string }) => {
                 <Input
                   id="phone"
                   value={formData.phone}
+                  placeholder="Enter your phone number"
                   className="mt-1 text-[#2E2E2E]"
                   onChange={handleChange}
                 />
@@ -172,6 +232,7 @@ const PersonalDetails = ({ id }: { id: string }) => {
                   id="email"
                   type="email"
                   value={formData.email}
+                  placeholder="Enter your email"
                   className="mt-1 text-[#2E2E2E]"
                   onChange={handleChange}
                 />
@@ -187,6 +248,7 @@ const PersonalDetails = ({ id }: { id: string }) => {
               id="dob"
               type="date"
               value={formData.dob}
+              placeholder="Select your date of birth"
               className="mt-1 text-[#2E2E2E]"
               onChange={handleChange}
             />
@@ -195,7 +257,7 @@ const PersonalDetails = ({ id }: { id: string }) => {
             <Label htmlFor="gender" className="text-[#2E2E2E] font-bold">Gender</Label>
             <Select value={formData.gender} onValueChange={(value) => handleSelectChange('gender', value)}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select gender" />
+                <SelectValue placeholder="Select your gender" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
@@ -211,13 +273,14 @@ const PersonalDetails = ({ id }: { id: string }) => {
           <Input
             id="emergencyContact"
             value={formData.emergencyContact}
+            placeholder="Enter your emergency contact"
             className="mt-1 text-[#2E2E2E]"
             onChange={handleChange}
           />
         </div>
 
         <div>
-          <Label className="text-[#2E2E2E] font-bold">Sports</Label>
+          <Label className="text-[#2E2E2E] font-bold">Select Sports</Label>
           <div className="flex flex-wrap gap-2 mt-2">
             {sportsOptions.map((sport) => (
               <Button
@@ -232,11 +295,11 @@ const PersonalDetails = ({ id }: { id: string }) => {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <Label htmlFor="level" className="text-[#2E2E2E] font-bold">Subscription Level</Label>
           <Select value={formData.level} onValueChange={(value) => handleSelectChange('level', value)}>
             <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Select level" />
+              <SelectValue placeholder="Select your subscription level" />
             </SelectTrigger>
             <SelectContent>
               {levelOptions.map((level) => (
@@ -246,7 +309,28 @@ const PersonalDetails = ({ id }: { id: string }) => {
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
+      </div>
+
+      {/* Profiles Section */}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold text-[#2E2E2E]">Profiles</h3>
+        {profiles.length > 0 ? (
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {profiles.map((profile: any) => (
+              <div
+                key={profile.id}
+                className="rounded-lg border border-[#7421931A] bg-[#F9F5FC] p-4 shadow-sm"
+              >
+                <p className="text-sm font-medium text-[#742193]">{profile.relation}</p>
+                <p className="mt-1 text-base font-semibold text-[#2E2E2E]">{profile.name}</p>
+                <p className="mt-2 text-xs text-[#6B6B6B]">Profile ID: {profile.id}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-[#6B6B6B]">No profiles linked to this user yet.</p>
+        )}
       </div>
 
       <div className="flex space-x-4  mt-5">
@@ -256,7 +340,7 @@ const PersonalDetails = ({ id }: { id: string }) => {
           className="bg-[#742193] hover:bg-[#57176e] text-white py-2 px-10 rounded-md transition-colors duration-200 disabled:opacity-50"
           disabled={loading}
         >
-          {loading ? <Loader className="animate-spin" /> : "Save Details"}
+          {loading ? <Loader className="animate-spin" /> : id ? "Update User" : "Register User"}
         </Button>
       </div>
     </div>

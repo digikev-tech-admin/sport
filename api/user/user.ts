@@ -125,4 +125,13 @@ export const registerAdmin = async (adminData: any) => {
       throw error.response?.data?.message || "reset failed";
     }
   };
+
+  export const getProfilesByUserId = async (userId:string) => {
+    try {
+      const response = await axiosInstance.get(`/profiles/user/${userId}`);
+      return response.data?.data;
+    } catch (error: any) {
+      throw error.response?.data?.message || "fetching failed";
+    }
+  };
   
