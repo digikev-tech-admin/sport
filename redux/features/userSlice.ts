@@ -33,7 +33,7 @@ export const registerUser = createAsyncThunk(
   async (userData: any, { rejectWithValue }) => {
     try {
       const data = await createUser(userData);
-      toast.success("User registered successfully!");
+      // toast.success("User registered successfully!");
       return data;
     } catch (error: any) {
       return rejectWithValue(error);
@@ -46,7 +46,7 @@ export const registerUser = createAsyncThunk(
 export const fetchUsers = createAsyncThunk("user/fetchAll", async (_, { rejectWithValue }) => {
   try {
     const data = await getAllUsers();
-    console.log('data:', data);
+    // console.log('data:', data);
     return data;
   } catch (error: any) {
     return rejectWithValue(error);
@@ -72,7 +72,7 @@ export const modifyUser = createAsyncThunk(
   async ({ userId, userData }: { userId: string; userData: any }, { rejectWithValue }) => {
     try {
       const data = await updateUser(userId, userData);
-      toast.success("User updated successfully!");
+      // toast.success("User updated successfully!");
       return data;
     } catch (error: any) {
       return rejectWithValue(error);

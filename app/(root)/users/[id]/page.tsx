@@ -40,7 +40,8 @@ export default function Page() {
 
       <div className="mt-5">
         <div className="min-w-xl mx-auto">
-          <Tabs defaultValue="personal" className="w-full">
+        <PersonalDetails id={id ?? ''} />
+          {/* <Tabs defaultValue="personal" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8 gap-3">
               <TabsTrigger
                 value="personal"
@@ -61,7 +62,7 @@ export default function Page() {
             <TabsContent value="subscription">
               <SubscriptionDetails />
             </TabsContent>
-          </Tabs>
+          </Tabs> */}
         </div>
       </div>
     </section>

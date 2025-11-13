@@ -41,12 +41,13 @@ const subscriptionOptions = [
 ];
 
 const Page = () => {
+  
   const dispatch = useAppDispatch();
   const route = useRouter();
-  const { users: allUsers, status } = useAppSelector(
+  const { users: allUsers } = useAppSelector(
     (state: RootState) => state.user
   );
-  console.log({allUsers})
+  // console.log({allUsers})
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -54,10 +55,8 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (status === "idle" && !allUsers.length) {
-      dispatch(fetchUsers());
-    }
-  }, [dispatch, allUsers, status]);
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
   // Filter and sort users
   const filteredUsers = Array.isArray(allUsers)
@@ -145,19 +144,24 @@ const Page = () => {
           className="mb-4"
         />
 
-        <div className="grid gap-4 md:grid-cols-3 mb-6 ">
+        <div className="grid gap-4 md:grid-cols-2 mb-6 ">
           <SearchBar value={search} onChange={setSearch} />
-          <CategoryFilter
+          {/* <CategoryFilter
             value={category}
             onChange={setCategory}
             subscriptionOptions={subscriptionOptions}
-          />
+          /> */}
           <SortSelect value={sortBy} onChange={setSortBy} />
         </div>
 
         {/* <UserTable users={paginatedUsers} onDelete={handleDelete} /> */}
         {typeof window !== "undefined" && (
-          <UserTable users={paginatedUsers} onDelete={handleDelete} />
+          <UserTable
+            users={paginatedUsers}
+            onDelete={handleDelete}
+            usersType="administrator"
+            startIndex={startIndex}
+          />
         )}
 
         <div className="mt-4">

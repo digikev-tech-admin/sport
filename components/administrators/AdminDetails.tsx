@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 const AdminDetails = ({ id }: { id: string }) => {
   const dispatch = useAppDispatch();
   const { userById: user } = useAppSelector((state: RootState) => state.user);
-  console.log('user:', user);
+  // console.log('user:', user);
   const [image, setImage] = useState('');
   const [formData, setFormData] = useState({
     name: "",
@@ -28,7 +28,7 @@ const AdminDetails = ({ id }: { id: string }) => {
     gender: "",
     emergencyContact: "",
     sports: [] as string[],
-    level: "",
+    level: "occasionally",
     avatar: ""
   });
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const AdminDetails = ({ id }: { id: string }) => {
   const router = useRouter()
 
   const sportsOptions = ["football", "basketball", "cricket", "tennis", "swimming"];
-  const levelOptions = [ "daily","weekly","monthly","occasionally"];
+  // const levelOptions = [ "daily","weekly","monthly","occasionally"];
 
 
   useEffect(() => {
@@ -89,13 +89,15 @@ const AdminDetails = ({ id }: { id: string }) => {
   const handleSubmit = async () => {
     if (!user) return;
 
-    const payload = { ...formData, avatar: image ?? formData.avatar };
+    const payload = { ...formData, avatar: image ?? formData.avatar, role: 'admin' };
     setLoading(true)
     try {
       const result = await dispatch(modifyUser({ userId: user._id, userData: payload }));
       if (modifyUser.fulfilled.match(result)) {
         toast.success("User updated successfully!");
-        router.back();
+        // setTimeout(() => {
+          router.push("/administrator");
+        // }, 1000);
       } else {
         throw result.payload;
       }
@@ -232,7 +234,7 @@ const AdminDetails = ({ id }: { id: string }) => {
           </div>
         </div>
 
-        <div>
+        {/* <div>
           <Label htmlFor="level" className="text-[#2E2E2E] font-bold">Subscription Level</Label>
           <Select value={formData.level} onValueChange={(value) => handleSelectChange('level', value)}>
             <SelectTrigger className="mt-1">
@@ -246,7 +248,7 @@ const AdminDetails = ({ id }: { id: string }) => {
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex space-x-4  mt-5">

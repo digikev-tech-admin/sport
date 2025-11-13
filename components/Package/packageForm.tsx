@@ -97,8 +97,24 @@ const PackageForm = ({
     const numericDiff = parseFloat(diff);
     return Number.isNaN(numericDiff) ? null : numericDiff;
   }, [sessionDates]);
-  
-  const canEditPaymentMethods = (sessionDurationInMonths === null || sessionDurationInMonths > 2);
+
+  const canEditPaymentMethods =
+    sessionDurationInMonths === null || sessionDurationInMonths > 2;
+
+  const availablePaymentMethodOptions = useMemo(() => {
+    if (canEditPaymentMethods) return paymentMethodOptions;
+    return paymentMethodOptions.filter(
+      (option) => option.name !== "Monthly Mandate"
+    );
+  }, [canEditPaymentMethods]);
+
+  useEffect(() => {
+    if (!canEditPaymentMethods && paymentMethods.includes("Monthly Mandate")) {
+      setPaymentMethods((prev) =>
+        prev.filter((method) => method !== "Monthly Mandate")
+      );
+    }
+  }, [canEditPaymentMethods, paymentMethods]);
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
@@ -677,25 +693,25 @@ const PackageForm = ({
                 Payment Methods
               </label>
               <MultiSelect
-                options={paymentMethodOptions}
+                options={availablePaymentMethodOptions}
                 value={paymentMethods}
                 onChange={setPaymentMethods}
                 placeholder="Select payment methods"
                 searchPlaceholder="Search payment methods..."
-                disabled={!canEditPaymentMethods}
+                disabled={!isEditing}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Select one or more payment methods that will be accepted for this
                 package
               </p>
-              {isEditing &&
+              {/* {isEditing &&
                 sessionDurationInMonths !== null &&
                 sessionDurationInMonths <= 2 && (
                   <p className="text-xs text-orange-500 mt-1">
-                    Payment methods can be updated only when the session duration is
+                    Monthly Mandate is available only when the session duration is
                     longer than 2 months.
                   </p>
-                )}
+                )} */}
             </div>
             {/* <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">
@@ -813,6 +829,7 @@ const PackageForm = ({
                     users={getFilteredUsers()}
                     onEdit={(id) => console.log(`Edit user ${id}`)}
                     disabled={!canEditPaymentMethods}
+                    availablePaymentMethodOptions={availablePaymentMethodOptions}
                     onUserUpdate={handleUserUpdate}
                   />
                 </div>

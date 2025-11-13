@@ -111,6 +111,21 @@ const EventForm = ({
   }, [fromDate, toDate]);
   const canEditPaymentMethods =
     sessionDurationInMonths === null || sessionDurationInMonths > 2;
+
+  const availablePaymentMethodOptions = useMemo(() => {
+    if (canEditPaymentMethods) return paymentMethodOptions;
+    return paymentMethodOptions.filter(
+      (option) => option.name !== "Monthly Mandate"
+    );
+  }, [canEditPaymentMethods]);
+
+  useEffect(() => {
+    if (!canEditPaymentMethods && paymentMethods.includes("Monthly Mandate")) {
+      setPaymentMethods((prev) =>
+        prev.filter((method) => method !== "Monthly Mandate")
+      );
+    }
+  }, [canEditPaymentMethods, paymentMethods]);
   const handleAddSpecialization = () => {
     if (
       newSpecialization.trim() &&
@@ -776,7 +791,7 @@ const EventForm = ({
                   Payment Methods
                 </label>
                 <MultiSelect
-                  options={paymentMethodOptions}
+                  options={availablePaymentMethodOptions}
                   value={paymentMethods}
                   onChange={setPaymentMethods}
                   placeholder="Select payment methods"
@@ -785,7 +800,7 @@ const EventForm = ({
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Select one or more payment methods that will be accepted for
-                  this event
+                  this event.
                 </p>
               </div>
               {/* <div className="space-y-2">
@@ -902,6 +917,7 @@ const EventForm = ({
                       onEdit={(id) => console.log(`Edit user ${id}`)}
                       disabled={!canEditPaymentMethods}
                       onUserUpdate={handleUserUpdate}
+                      availablePaymentMethodOptions={availablePaymentMethodOptions}
                       // canEditPaymentMethods={canEditPaymentMethods}
                     />
                   ) : (

@@ -151,6 +151,7 @@ interface PackageUserTableProps {
     id: string,
     updates: { paymentMethod?: string; status?: UserStatus }
   ) => void;
+  availablePaymentMethodOptions: { id: number; name: string }[];
 }
 
 // ---------------------------------------------------------------------
@@ -247,6 +248,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
   onEdit,
   disabled,
   onUserUpdate,
+  availablePaymentMethodOptions,
 }) => {
   console.log("disabled", disabled);
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -348,7 +350,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                         ? "Credit Card"
                         : user.paymentMethod
                     }
-                    options={paymentMethodOptions
+                    options={availablePaymentMethodOptions
                       .filter((o) => o.name !== "Credit Card")
                       .map((o) => ({
                         value: normalizePaymentMethod(o.name),
@@ -356,7 +358,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                       }))}
                     onSave={(newVal) => updatePaymentMethod(user._id, newVal)}
                     display={displayPayment}
-                    disabled={disabled}
+                    // disabled={disabled}
                   />
                 </TableCell>
 
@@ -367,7 +369,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                     options={statusOptions}
                     onSave={(newVal) => updateStatus(user._id, newVal)}
                     display={(val) => <StatusBadge status={val} />}
-                    disabled={disabled}
+                    // disabled={disabled}
                   />
                 </TableCell>
                 <TableCell className="text-center">
