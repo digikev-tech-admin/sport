@@ -18,7 +18,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
-import { Loader2 } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -26,12 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { updateOrder } from "@/api/services";
+import { getOrdersByUserId, updateOrder } from "@/api/services";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export const paymentMethodOptions = [
   { id: 1, name: "Cash" },
   { id: 2, name: "Card" },
-  { id: 3, name: "Auto Debit (Monthly Direct Debit)" },
+  { id: 3, name: "Monthly Mandate" },
   { id: 4, name: "Credit Card" },
 ] as const;
 
@@ -49,7 +51,8 @@ type UserStatus =
   | "paid"
   | "failed"
   | "refunded"
-  | "expired";
+  | "expired"
+  | "cancelled";
 
 const statusOptions: { value: UserStatus; label: string }[] = [
   { value: "booked", label: "Booked" },
@@ -59,6 +62,7 @@ const statusOptions: { value: UserStatus; label: string }[] = [
   { value: "failed", label: "Failed" },
   { value: "refunded", label: "Refunded" },
   { value: "expired", label: "Expired" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 const getStatusStyles = (
@@ -100,6 +104,11 @@ const getStatusStyles = (
         className: "bg-gray-100 text-gray-800 border border-gray-200",
         label: "Expired",
       };
+    case "cancelled":
+      return {
+        className: "bg-gray-100 text-gray-800 border border-gray-200",
+        label: "Cancelled",
+      };
     default:
       return {
         className: "bg-gray-100 text-gray-800 border border-gray-200",
@@ -122,6 +131,7 @@ const StatusBadge: React.FC<{ status: UserStatus }> = ({ status }) => {
 interface PackageUserTableProps {
   users: Array<{
     id: string;
+    userId: string;
     _id: string;
     name: string;
     email: string;
@@ -136,7 +146,6 @@ interface PackageUserTableProps {
     paymentMethod: string;
   }>;
   onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
   disabled: boolean;
   onUserUpdate?: (
     id: string,
@@ -152,6 +161,7 @@ type EditableCellProps<T extends string> = {
   options: { value: T; label: string }[];
   onSave: (newVal: T) => Promise<void>;
   display?: (val: T) => React.ReactNode;
+  disabled?: boolean;
 };
 
 function EditableCell<T extends string>({
@@ -159,6 +169,7 @@ function EditableCell<T extends string>({
   options,
   onSave,
   display,
+  disabled = false,
 }: EditableCellProps<T>) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [localVal, setLocalVal] = React.useState(value);
@@ -191,11 +202,16 @@ function EditableCell<T extends string>({
 
   const rendered = display ? display(localVal) : localVal;
 
+  if (disabled) {
+    return <div className="cursor-not-allowed">{rendered}</div>;
+  }
+
   if (!isOpen) {
     return (
       <div
         className="cursor-pointer hover:underline"
         onClick={(e) => {
+          if (disabled) return;
           e.stopPropagation();
           setIsOpen(true);
         }}
@@ -229,10 +245,10 @@ function EditableCell<T extends string>({
 const PackageUserTable: React.FC<PackageUserTableProps> = ({
   users,
   onEdit,
-  onDelete,
   disabled,
   onUserUpdate,
 }) => {
+  console.log("disabled", disabled);
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(users.length / itemsPerPage);
@@ -252,6 +268,15 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
     onUserUpdate?.(id, { status });
   };
 
+  const handleViewOrder = async (userId: string) => {
+    try {
+      const response = await getOrdersByUserId(userId);
+      console.log("Order Data:", response);
+    } catch (error) {
+      console.error("Error fetching order data:", error);
+    }
+  };
+  
   if (users.length === 0) {
     return (
       <div className="text-center py-6 text-sm text-gray-500">
@@ -269,14 +294,14 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
             <TableHead className="font-bold">Name</TableHead>
             <TableHead className="font-bold">Profile Name</TableHead>
             <TableHead className="font-bold">Email</TableHead>
-            <TableHead className="font-bold">Phone</TableHead>
+            {/* <TableHead className="font-bold">Phone</TableHead>
             <TableHead className="font-bold">Level</TableHead>
-            <TableHead className="font-bold">Age Group</TableHead>
+            <TableHead className="font-bold">Age Group</TableHead> */}
             <TableHead className="font-bold">Amount</TableHead>
             <TableHead className="font-bold">Base Price</TableHead>
             <TableHead className="font-bold !min-w-[150px]">Payment Method</TableHead>
             <TableHead className="font-bold">Status</TableHead>
-            {/* <TableHead className="text-center font-bold">Actions</TableHead> */}
+            <TableHead className="text-center font-bold">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -296,6 +321,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                 </TableCell>
 
                 <TableCell>
+                  <Link href={`/users/${user.userId}`} >
                   <div className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={user.avatar} />
@@ -303,13 +329,14 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                     </Avatar>
                     {user.name}
                   </div>
+                  </Link>
                 </TableCell>
 
                 <TableCell>{user.profileName}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phone}</TableCell>
+                {/* <TableCell>{user.phone}</TableCell>
                 <TableCell className="capitalize">{user.level}</TableCell>
-                <TableCell className="capitalize">{user.ageGroup}</TableCell>
+                <TableCell className="capitalize">{user.ageGroup}</TableCell> */}
                 <TableCell>{user.price}</TableCell>
                 <TableCell>{user.basePrice}</TableCell>
 
@@ -321,10 +348,6 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                         ? "Credit Card"
                         : user.paymentMethod
                     }
-                    // options={paymentMethodOptions.map((o) => ({
-                    //   value: normalizePaymentMethod(o.name),
-                    //   label: o.name,
-                    // }))}
                     options={paymentMethodOptions
                       .filter((o) => o.name !== "Credit Card")
                       .map((o) => ({
@@ -333,6 +356,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                       }))}
                     onSave={(newVal) => updatePaymentMethod(user._id, newVal)}
                     display={displayPayment}
+                    disabled={disabled}
                   />
                 </TableCell>
 
@@ -343,7 +367,17 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                     options={statusOptions}
                     onSave={(newVal) => updateStatus(user._id, newVal)}
                     display={(val) => <StatusBadge status={val} />}
+                    disabled={disabled}
                   />
+                </TableCell>
+                <TableCell className="text-center">
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewOrder(user.userId)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             );

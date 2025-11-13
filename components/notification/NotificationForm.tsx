@@ -37,6 +37,8 @@ interface User {
   fcmToken: string | null;
 }
 
+type DeliveryMethod = "app" | "email" | "sms";
+
 interface NotificationFormData {
   title: string;
   message: string;
@@ -45,7 +47,7 @@ interface NotificationFormData {
   frequency?: string;
   startDateTime?: string;
   expireDateTime?: string;
-  deliveryMethod: "app" | "email" | "both";
+  deliveryMethod: DeliveryMethod[];
   //   link?: string;
   //   metadata: Record<string, any>;
 }
@@ -74,6 +76,7 @@ const NotificationForm = () => {
   const [selectedLocations, setSelectedLocations] = useState("all");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState("");
 
   // Handle filter changes and make API calls
   useEffect(() => {
@@ -198,7 +201,7 @@ const NotificationForm = () => {
     frequency: "",
     startDateTime: "",
     expireDateTime: "",
-    deliveryMethod: "app",
+    deliveryMethod: ["app"],
     // link: '',
     // metadata: {}
   });
@@ -269,7 +272,7 @@ const NotificationForm = () => {
     }
 
     // Validate delivery method
-    if (!formData.deliveryMethod) {
+    if (!formData.deliveryMethod || formData.deliveryMethod.length === 0) {
       toast.error("Please select a delivery method");
       return;
     }
@@ -326,6 +329,9 @@ const NotificationForm = () => {
             // For optional fields, only include if they have meaningful values
             if (key === "frequency" || key === "startDateTime" || key === "expireDateTime") {
               return value && value.trim() !== "";
+            }
+            if (key === "deliveryMethod") {
+              return Array.isArray(value) && value.length > 0;
             }
           return false;
         })
@@ -386,8 +392,34 @@ const NotificationForm = () => {
 
   // Get users with valid FCM tokens
   const displayUsers = isFiltered ? filteredUsers : users;
-  const usersWithTokens = displayUsers.filter((user) => user.fcmToken);
-  const usersWithoutTokens = displayUsers.filter((user) => !user.fcmToken);
+  const normalizedSearch = userSearchTerm.trim().toLowerCase();
+  const usersMatchingSearch = normalizedSearch
+    ? displayUsers.filter((user) => {
+        const name = user.name?.toLowerCase() || "";
+        const email = user.email?.toLowerCase() || "";
+        return (
+          name.includes(normalizedSearch) || email.includes(normalizedSearch)
+        );
+      })
+    : displayUsers;
+  const usersWithTokens = usersMatchingSearch.filter((user) => user.fcmToken);
+  const usersWithoutTokens = usersMatchingSearch.filter(
+    (user) => !user.fcmToken
+  );
+
+  const handleDeliveryMethodChange = (method: DeliveryMethod) => {
+    setFormData((prev) => {
+      const exists = prev.deliveryMethod.includes(method);
+      const updated = exists
+        ? prev.deliveryMethod.filter((item) => item !== method)
+        : [...prev.deliveryMethod, method];
+
+      return {
+        ...prev,
+        deliveryMethod: updated,
+      };
+    });
+  };
 
   return (
     <div className="flex items-center justify-center py-4">
@@ -395,6 +427,41 @@ const NotificationForm = () => {
         onSubmit={handleSubmit}
         className="w-full max-w-5xl bg-white rounded-xl border p-2 sm:p-4 xl:p-8 space-y-6"
       >
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-gray-700">
+            Delivery Method
+          </label>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={formData.deliveryMethod.includes("app")}
+                onChange={() => handleDeliveryMethodChange("app")}
+                className="rounded border-gray-300 text-[#742193] focus:ring-[#742193]"
+              />
+              <span>App</span>
+            </label>
+            <label className="flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={formData.deliveryMethod.includes("email")}
+                onChange={() => handleDeliveryMethodChange("email")}
+                className="rounded border-gray-300 text-[#742193] focus:ring-[#742193]"
+              />
+              <span>Email</span>
+            </label>
+            <label className="flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={formData.deliveryMethod.includes("sms")}
+                onChange={() => handleDeliveryMethodChange("sms")}
+                className="rounded border-gray-300 text-[#742193] focus:ring-[#742193]"
+              />
+              <span>SMS</span>
+            </label>
+          </div>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">
             Notification Title
@@ -427,47 +494,25 @@ const NotificationForm = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700">
-              Notification Type
-            </label>
-            <Select
-              value={formData.notificationType}
-              onValueChange={(value: "system" | "reminder" | "marketing") =>
-                setFormData((prev) => ({ ...prev, notificationType: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select notification type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="system">System</SelectItem>
-                <SelectItem value="reminder">Reminder</SelectItem>
-                {/* <SelectItem value="marketing">Marketing</SelectItem> */}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700">
-              Delivery Method
-            </label>
-            <Select
-              value={formData.deliveryMethod}
-              onValueChange={(value: "app" | "email" | "both") =>
-                setFormData((prev) => ({ ...prev, deliveryMethod: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select delivery method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="app">App Only</SelectItem>
-                <SelectItem value="email">Email Only</SelectItem>
-                <SelectItem value="both">Both App & Email</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-gray-700">
+            Notification Type
+          </label>
+          <Select
+            value={formData.notificationType}
+            onValueChange={(value: "system" | "reminder" | "marketing") =>
+              setFormData((prev) => ({ ...prev, notificationType: value }))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select notification type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="system">System</SelectItem>
+              <SelectItem value="reminder">Reminder</SelectItem>
+              {/* <SelectItem value="marketing">Marketing</SelectItem> */}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Conditional fields for Reminder notification type */}
@@ -589,7 +634,18 @@ const NotificationForm = () => {
             </div>
           <div className="space-y-4">
             {/* Responsive Filter Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
+              <div className="w-full">
+                <label className="text-[#742193] font-semibold text-sm ">
+                  Search Users
+                </label>
+                <Input
+                  value={userSearchTerm}
+                  onChange={(event) => setUserSearchTerm(event.target.value)}
+                  placeholder="Search by name or email"
+                  className=" border-[#742193] focus:ring-[#742193] w-full min-w-[120px]"
+                />
+              </div>
               <div className="w-full">
                 <CategoryFilter
                   title="Packages"
@@ -628,7 +684,7 @@ const NotificationForm = () => {
           </div>
 
           <div className="border rounded-lg p-4 max-h-60 overflow-y-auto">
-            {displayUsers?.length === 0 ? (
+            {usersMatchingSearch?.length === 0 ? (
               <p className="text-gray-500 text-sm">
                 {isFiltered
                   ? "No users found for selected filters"

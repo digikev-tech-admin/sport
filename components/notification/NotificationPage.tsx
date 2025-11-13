@@ -25,6 +25,8 @@ interface User {
   isActive: boolean;
 }
 
+type DeliveryMethod = "app" | "email" | "sms";
+
 interface Notification {
   _id: string;
   title: string;
@@ -33,7 +35,7 @@ interface Notification {
   userIds: string[];
   link?: string;
   createdAt: string;
-  deliveryMethod: "app" | "email" | "both";
+  deliveryMethod: DeliveryMethod[] | DeliveryMethod;
 }
 
 const NotificationPage = ({ id }: { id: string }) => {
@@ -282,7 +284,30 @@ const NotificationPage = ({ id }: { id: string }) => {
             <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
                 <span className="text-gray-600">Method:</span>
-                <span className="text-sm font-semibold">{notification?.deliveryMethod === "both" ? "Both App & Email" : notification?.deliveryMethod === "app" ? "App Only" : "Email Only"}</span>
+                <span className="text-sm font-semibold">
+                  {Array.isArray(notification?.deliveryMethod)
+                    ? (notification?.deliveryMethod as DeliveryMethod[])
+                        .map((method) => {
+                          switch (method) {
+                            case "app":
+                              return "App";
+                            case "email":
+                              return "Email";
+                            case "sms":
+                              return "SMS";
+                            default:
+                              return method;
+                          }
+                        })
+                        .join(", ")
+                    : notification?.deliveryMethod === "app"
+                    ? "App"
+                    : notification?.deliveryMethod === "email"
+                    ? "Email"
+                    : notification?.deliveryMethod === "sms"
+                    ? "SMS"
+                    : "—"}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Type:</span>

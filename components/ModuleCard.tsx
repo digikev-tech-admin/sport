@@ -84,10 +84,10 @@ const EventCard = ({ module, onDelete }: EventCardProps) => {
         </div>
         <div className="flex flex-col 2xl:flex-row 2xl:items-center gap-1 2xl:gap-4 text-gray-500 text-[15px]">
           <span className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" /> {formatDateTimeForPackage(module.toDate)} - {formatDateTimeForPackage(module.fromDate)}
+            <Calendar className="w-4 h-4" />{formatDateTimeForPackage(module.fromDate)} - {formatDateTimeForPackage(module.toDate)}
           </span>
           <span className="flex items-center gap-1">
-            <Clock className="w-4 h-4" /> {formatTime(module.toDate)} - {formatTime(module.fromDate)}
+            <Clock className="w-4 h-4" /> {formatTime(module.fromDate)} - {formatTime(module.toDate)}
           </span>
           <span className="flex items-center gap-1">
             <span><MapPin className="w-4 h-4" /></span> 

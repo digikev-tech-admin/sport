@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,7 +34,6 @@ import Image from "next/image";
 import PackageUserTable from "./PackageUserTable";
 import { getUsersByPackageId } from "@/api/notification";
 import { MultiSelect } from "../Coache/ClubMultiSelect";
-import { format } from "date-fns";
 
 const PackageForm = ({
   id,
@@ -74,13 +73,14 @@ const PackageForm = ({
 
   const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>({});
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
-  const [paymentDueDate, setPaymentDueDate] = useState("");
+  // const [paymentDueDate, setPaymentDueDate] = useState("");
   const [filterPaymentOptions, setFilterPaymentOptions] = useState<string[]>(
     []
   );
   // Payment method options
-
+  
   const today = new Date().toISOString().slice(0, 10);
+  const [sortOption, setSortOption] = useState("default");
 
   const calculateDurationInMonths = (startISO: string, endISO: string) => {
     const start = new Date(startISO);
@@ -91,6 +91,14 @@ const PackageForm = ({
     const monthsDecimal = diffDays / 30; // approx months with decimals
     return monthsDecimal.toFixed(1);
   };
+  const sessionDurationInMonths = useMemo(() => {
+    if (!sessionDates[0] || !sessionDates[1]) return null;
+    const diff = calculateDurationInMonths(sessionDates[0], sessionDates[1]);
+    const numericDiff = parseFloat(diff);
+    return Number.isNaN(numericDiff) ? null : numericDiff;
+  }, [sessionDates]);
+  
+  const canEditPaymentMethods = (sessionDurationInMonths === null || sessionDurationInMonths > 2);
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartDate = e.target.value;
@@ -180,16 +188,17 @@ const PackageForm = ({
           ]);
           setWeeklySchedule(res?.weeklySchedule);
           setPaymentMethods(res?.paymentMethods || []);
-          setPaymentDueDate(
-            res?.paymentDueDate
-              ? format(new Date(res.paymentDueDate), "yyyy-MM-dd'T'HH:mm")
-              : ""
-          );
+          // setPaymentDueDate(
+          //   res?.paymentDueDate
+          //     ? format(new Date(res.paymentDueDate), "yyyy-MM-dd'T'HH:mm")
+          //     : ""
+          // );
           const packageUsers = await getUsersByPackageId(id);
           console.log("Package Users Response:", packageUsers);
           const users = packageUsers?.map((item: any, index: number) => ({
             _id: item._id,
             id: index + 1,
+            userId: item.userId?._id,
             date: item?.createdAt,
             name: item.userId.name || "N/A",
             email: item.userId.email || "N/A",
@@ -251,7 +260,7 @@ const PackageForm = ({
       weeklySchedule,
       image: profileImage || "https://github.com/shadcn.png",
       paymentMethods: paymentMethods,
-      paymentDueDate: paymentDueDate,
+      // paymentDueDate: paymentDueDate,
     };
     // console.log("Package Data:", packageData);
 
@@ -306,6 +315,48 @@ const PackageForm = ({
     );
   };
 
+  const sortUsers = (list: any[]) => {
+    const sortable = [...list];
+
+    const getNumber = (value: string | number | null | undefined) => {
+      if (typeof value === "number") return value;
+      if (!value) return 0;
+      const numeric = parseFloat(String(value).replace(/[^\d.-]/g, ""));
+      return Number.isNaN(numeric) ? 0 : numeric;
+    };
+
+    switch (sortOption) {
+      case "name-asc":
+        return sortable.sort((a, b) =>
+          (a.name || "").localeCompare(b.name || "", undefined, {
+            sensitivity: "base",
+          })
+        );
+      case "name-desc":
+        return sortable.sort((a, b) =>
+          (b.name || "").localeCompare(a.name || "", undefined, {
+            sensitivity: "base",
+          })
+        );
+      case "date-newest":
+        return sortable.sort(
+          (a, b) =>
+            new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+        );
+      case "date-oldest":
+        return sortable.sort(
+          (a, b) =>
+            new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()
+        );
+      case "amount-low-high":
+        return sortable.sort((a, b) => getNumber(a.price) - getNumber(b.price));
+      case "amount-high-low":
+        return sortable.sort((a, b) => getNumber(b.price) - getNumber(a.price));
+      default:
+        return sortable;
+    }
+  };
+
   useEffect(() => {
     const uniquePaymentMethods = Array.from(
       new Set(users.map((u: any) => u.paymentMethod))
@@ -318,10 +369,10 @@ const PackageForm = ({
     if (!filterPayment) {
       setFilterPayment("all");
     }
-  }, [users]);
+  }, [users, filterPayment]);
 
   const getFilteredUsers = () => {
-    return users
+    const filtered = users
       .filter((u) => u.name?.toLowerCase().includes(filterName.toLowerCase()))
       .filter((u) =>
         filterPayment && filterPayment !== "all"
@@ -334,6 +385,8 @@ const PackageForm = ({
           ? new Date(u.date).toISOString().slice(0, 10) === filterDate
           : true
       );
+
+    return sortUsers(filtered);
   };
 
   return (
@@ -629,14 +682,22 @@ const PackageForm = ({
                 onChange={setPaymentMethods}
                 placeholder="Select payment methods"
                 searchPlaceholder="Search payment methods..."
-                disabled={!isEditing}
+                disabled={!canEditPaymentMethods}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Select one or more payment methods that will be accepted for
-                this package
+                Select one or more payment methods that will be accepted for this
+                package
               </p>
+              {isEditing &&
+                sessionDurationInMonths !== null &&
+                sessionDurationInMonths <= 2 && (
+                  <p className="text-xs text-orange-500 mt-1">
+                    Payment methods can be updated only when the session duration is
+                    longer than 2 months.
+                  </p>
+                )}
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">
                 Payment due date
               </label>
@@ -651,7 +712,7 @@ const PackageForm = ({
               <p className="text-xs text-gray-500 mt-1">
                 Users must complete payment before this deadline
               </p>
-            </div>
+            </div> */}
           </div>
 
           {id && !isEditing && (
@@ -661,7 +722,7 @@ const PackageForm = ({
               </h1>
 
               {/* Filter Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:sm:grid-cols-4  gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
                 {/* Filter by Name */}
                 <div className="space-y-1">
                   <label className="text-xs font-semibold">
@@ -708,6 +769,23 @@ const PackageForm = ({
                     onChange={(e) => setFilterDate(e.target.value)}
                   />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold">Sort Users</label>
+                  <Select value={sortOption} onValueChange={setSortOption}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choose order" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">All</SelectItem>
+                      <SelectItem value="name-asc">Name (A → Z)</SelectItem>
+                      <SelectItem value="name-desc">Name (Z → A)</SelectItem>
+                      <SelectItem value="date-newest">Join Date (Newest)</SelectItem>
+                      <SelectItem value="date-oldest">Join Date (Oldest)</SelectItem>
+                      <SelectItem value="amount-low-high">Amount (Low → High)</SelectItem>
+                      <SelectItem value="amount-high-low">Amount (High → Low)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button
                   type="button"
                   variant="secondary"
@@ -716,6 +794,7 @@ const PackageForm = ({
                     setFilterName("");
                     setFilterPayment("all");
                     setFilterDate("");
+                    setSortOption("default");
                   }}
                 >
                   Reset Filters
@@ -733,8 +812,7 @@ const PackageForm = ({
                   <PackageUserTable
                     users={getFilteredUsers()}
                     onEdit={(id) => console.log(`Edit user ${id}`)}
-                    onDelete={(id) => console.log(`Delete user ${id}`)}
-                    disabled={!isEditing}
+                    disabled={!canEditPaymentMethods}
                     onUserUpdate={handleUserUpdate}
                   />
                 </div>

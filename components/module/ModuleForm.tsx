@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -77,13 +77,23 @@ const EventForm = ({
   const [showLiveEventWarning, setShowLiveEventWarning] = useState(false);
   const [hasCheckedLiveStatus, setHasCheckedLiveStatus] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
-  const [paymentDueDate, setPaymentDueDate] = useState("");
+  // const [paymentDueDate, setPaymentDueDate] = useState("");
   const [filterName, setFilterName] = useState("");
   const [filterPayment, setFilterPayment] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterPaymentOptions, setFilterPaymentOptions] = useState<string[]>(
     []
   );
+  const [sortOption, setSortOption] = useState("default");
+  const calculateDurationInMonths = (startISO: string, endISO: string) => {
+    const start = new Date(startISO);
+    const end = new Date(endISO);
+    const diffMs = end.getTime() - start.getTime();
+    if (Number.isNaN(diffMs) || diffMs <= 0) return "";
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const monthsDecimal = diffDays / 30;
+    return monthsDecimal.toFixed(1);
+  };
 
   const calculateDurationInMinutes = (fromISO: string, toISO: string) => {
     const start = new Date(fromISO);
@@ -93,6 +103,14 @@ const EventForm = ({
     const minutes = Math.ceil(diffMs / (1000 * 60));
     return minutes.toString();
   };
+  const sessionDurationInMonths = useMemo(() => {
+    if (!fromDate || !toDate) return null;
+    const diff = calculateDurationInMonths(fromDate, toDate);
+    const numericDiff = parseFloat(diff);
+    return Number.isNaN(numericDiff) ? null : numericDiff;
+  }, [fromDate, toDate]);
+  const canEditPaymentMethods =
+    sessionDurationInMonths === null || sessionDurationInMonths > 2;
   const handleAddSpecialization = () => {
     if (
       newSpecialization.trim() &&
@@ -213,17 +231,18 @@ const EventForm = ({
           setPhoto(event?.image);
           setSpecializations(event?.tags);
           setPaymentMethods(event?.paymentMethods || []);
-          setPaymentDueDate(
-            event?.paymentDueDate
-              ? format(new Date(event.paymentDueDate), "yyyy-MM-dd'T'HH:mm")
-              : ""
-          );
+          // setPaymentDueDate(
+          //   event?.paymentDueDate
+          //     ? format(new Date(event.paymentDueDate), "yyyy-MM-dd'T'HH:mm")
+          //     : ""
+          // );
 
           const eventUsers = await getUsersByEventId(id);
           console.log("Event Users Response:", eventUsers);
           const users = eventUsers?.map((item: any, index: number) => ({
             _id: item._id,
             id: index + 1,
+            userId: item.userId._id,
             date: item?.createdAt,
             name: item.userId.name || "N/A",
             email: item.userId.email || "N/A",
@@ -334,7 +353,7 @@ const EventForm = ({
       ticketCost: parseInt(ticketCost),
       capacity: parseInt(capacity),
       tags: specializations,
-      paymentDueDate: paymentDueDate,
+      // paymentDueDate: paymentDueDate,
       paymentMethods: paymentMethods,
     };
 
@@ -368,6 +387,48 @@ const EventForm = ({
     );
   };
 
+  const sortUsers = (users: any[]) => {
+    const sortable = [...users];
+
+    const getNumber = (value: string | number | null | undefined) => {
+      if (typeof value === "number") return value;
+      if (!value) return 0;
+      const numeric = parseFloat(String(value).replace(/[^\d.-]/g, ""));
+      return Number.isNaN(numeric) ? 0 : numeric;
+    };
+
+    switch (sortOption) {
+      case "name-asc":
+        return sortable.sort((a, b) =>
+          (a.name || "").localeCompare(b.name || "", undefined, {
+            sensitivity: "base",
+          })
+        );
+      case "name-desc":
+        return sortable.sort((a, b) =>
+          (b.name || "").localeCompare(a.name || "", undefined, {
+            sensitivity: "base",
+          })
+        );
+      case "date-newest":
+        return sortable.sort(
+          (a, b) =>
+            new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+        );
+      case "date-oldest":
+        return sortable.sort(
+          (a, b) =>
+            new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()
+        );
+      case "amount-low-high":
+        return sortable.sort((a, b) => getNumber(a.price) - getNumber(b.price));
+      case "amount-high-low":
+        return sortable.sort((a, b) => getNumber(b.price) - getNumber(a.price));
+      default:
+        return sortable;
+    }
+  };
+
   // console.log({ dates: toDate, fromDate });
 
   useEffect(() => {
@@ -382,23 +443,24 @@ const EventForm = ({
     if (!filterPayment) {
       setFilterPayment("all");
     }
-  }, [eventUsers]);
+  }, [eventUsers, filterPayment]);
   
 
   const getFilteredUsers = () => {
-    return eventUsers
+    const filtered = eventUsers
       .filter((u) => u.name?.toLowerCase().includes(filterName.toLowerCase()))
       .filter((u) =>
         filterPayment && filterPayment !== "all"
           ? u.paymentMethod === filterPayment
           : true
       )
-
       .filter((u) =>
         filterDate
           ? new Date(u.date).toISOString().slice(0, 10) === filterDate
           : true
       );
+
+    return sortUsers(filtered);
   };
 
   return (
@@ -726,7 +788,7 @@ const EventForm = ({
                   this event
                 </p>
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-700">
                   Payment due date
                 </label>
@@ -741,7 +803,7 @@ const EventForm = ({
                 <p className="text-xs text-gray-500 mt-1">
                   Users must complete payment before this deadline
                 </p>
-              </div>
+              </div> */}
             </div>
 
             {id && !isEditing && (
@@ -751,7 +813,7 @@ const EventForm = ({
                 </h1>
 
                 {/* Filter Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:sm:grid-cols-4  gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
                   {/* Filter by Name */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold">
@@ -798,6 +860,25 @@ const EventForm = ({
                       onChange={(e) => setFilterDate(e.target.value)}
                     />
                   </div>
+
+                  {/* Sort Users */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold">Sort Users</label>
+                    <Select value={sortOption} onValueChange={setSortOption}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose order" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">All</SelectItem>
+                        <SelectItem value="name-asc">Name (A → Z)</SelectItem>
+                        <SelectItem value="name-desc">Name (Z → A)</SelectItem>
+                        <SelectItem value="date-newest">Join Date (Newest)</SelectItem>
+                        <SelectItem value="date-oldest">Join Date (Oldest)</SelectItem>
+                        <SelectItem value="amount-low-high">Amount (Low → High)</SelectItem>
+                        <SelectItem value="amount-high-low">Amount (High → Low)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Button
                     type="button"
                     variant="secondary"
@@ -806,6 +887,7 @@ const EventForm = ({
                       setFilterName("");
                       setFilterPayment("all");
                       setFilterDate("");
+                      setSortOption("default");
                     }}
                   >
                     Reset Filters
@@ -818,9 +900,9 @@ const EventForm = ({
                     <PackageUserTable
                       users={getFilteredUsers()}
                       onEdit={(id) => console.log(`Edit user ${id}`)}
-                      onDelete={(id) => console.log(`Delete user ${id}`)}
-                      disabled={!isEditing}
+                      disabled={!canEditPaymentMethods}
                       onUserUpdate={handleUserUpdate}
+                      // canEditPaymentMethods={canEditPaymentMethods}
                     />
                   ) : (
                     <div className="mt-2">
