@@ -160,7 +160,7 @@ const Page = () => {
           <UserTable
             users={paginatedUsers}
             onDelete={handleDelete}
-            usersType="user"
+            usersType="users"
             startIndex={startIndex}
           />
         )}

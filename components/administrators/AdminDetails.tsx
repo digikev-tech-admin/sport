@@ -182,7 +182,7 @@ const AdminDetails = ({ id }: { id: string }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="dob" className="text-[#2E2E2E] font-bold">Date of Birth</Label>
             <Input
@@ -232,7 +232,7 @@ const AdminDetails = ({ id }: { id: string }) => {
               </Button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* <div>
           <Label htmlFor="level" className="text-[#2E2E2E] font-bold">Subscription Level</Label>
