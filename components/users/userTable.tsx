@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 interface UserTableProps {
   users: IUser[];
   onDelete: (id: string) => void;
-  usersType: 'user' | 'administrator';
+  usersType: 'users' | 'administrator';
   startIndex?: number;
 }
 
@@ -48,9 +48,10 @@ const UserTable = ({ users, onDelete, usersType, startIndex = 0 }: UserTableProp
            
             <TableHead className="font-bold">Email</TableHead>
             <TableHead className="font-bold">Phone</TableHead>
-            <TableHead className="font-bold">Gender</TableHead>
-            <TableHead className="font-bold">Status</TableHead>
+            <TableHead className="font-bold">Role</TableHead>
+            {usersType === 'users' && <TableHead className="font-bold">Gender</TableHead>}
             <TableHead className="font-bold">Join Date</TableHead>
+            <TableHead className="font-bold">Status</TableHead>
             <TableHead className="text-center font-bold">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -75,13 +76,15 @@ const UserTable = ({ users, onDelete, usersType, startIndex = 0 }: UserTableProp
                 <TableCell className="capitalize">
                 {user?.phone || 'N/A'}
                 </TableCell>
-                <TableCell className="capitalize">{user?.gender || 'N/A'  }</TableCell>
+                <TableCell className="capitalize">{user?.role || 'N/A'  }</TableCell>
+                {usersType === 'users' && <TableCell className="capitalize">{user?.gender || 'N/A'  }</TableCell>}
+              
+              <TableCell>{new Date(user?.createdAt).toLocaleDateString()}</TableCell>
               <TableCell>
                 <span className={`px-2 py-1 rounded-full text-xs ${user?.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                   {user?.isActive ? 'Active' : 'Inactive'}
                 </span>
               </TableCell>
-              <TableCell>{new Date(user?.createdAt).toLocaleDateString()}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-center gap-2">
                   <Button

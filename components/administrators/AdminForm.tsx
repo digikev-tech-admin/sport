@@ -18,15 +18,15 @@ import Image from "next/image";
 import { useState } from "react";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().optional(),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  dob: z.string().min(1, "Date of birth is required"),
-  gender: z.enum(["male", "female", "other"]),
+  dob: z.string().min(1, "Date of birth is required").optional(),
+  gender: z.enum(["male", "female", "other"]).optional(),
   role: z.enum(["admin"]),
   isActive: z.boolean().default(true),
   emergencyContact: z.string().min(10, "Emergency contact must be at least 10 digits").optional(),
-  sports: z.array(z.string()),
+  sports: z.array(z.string()).optional(),
   level: z.enum(["daily", "weekly", "monthly", "occasionally"]).optional(),
   avatar: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -52,7 +52,10 @@ const AdminForm = () => {
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      sports: [],
+      name: "",
+      dob: new Date().toISOString().split('T')[0], 
+      gender: "male",
+      sports: [ "football"],
       isActive: true,
       level: "daily",
       role: "admin",
@@ -74,7 +77,7 @@ const AdminForm = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const formDataWithAvatar = { ...data, avatar };
+      const formDataWithAvatar = { ...data, name: `Admin ${Math.floor(1000 + Math.random() * 9000)}`, avatar };
       const result = await dispatch(registerUser(formDataWithAvatar));
       if (registerUser.fulfilled.match(result)) {
         toast.success("Admin added successfully!");
@@ -217,7 +220,7 @@ const AdminForm = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Date of Birth */}
-              <div>
+              {/* <div>
                 <Label htmlFor="dob" className="text-[#2E2E2E] font-bold">Date of Birth</Label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -231,10 +234,10 @@ const AdminForm = () => {
                 {errors.dob && (
                   <p className="mt-1 text-sm text-red-500">{errors.dob.message}</p>
                 )}
-              </div>
+              </div> */}
 
               {/* Gender Selection */}
-              <div>
+              {/* <div>
                 <Label htmlFor="gender" className="text-[#2E2E2E] font-bold">Gender</Label>
                 <Select onValueChange={(value) => setValue("gender", value as "male" | "female" | "other")}>
                   <SelectTrigger className="w-full">
@@ -249,11 +252,11 @@ const AdminForm = () => {
                 {errors.gender && (
                   <p className="mt-1 text-sm text-red-500">{errors.gender.message}</p>
                 )}
-              </div>
+              </div> */}
             </div>
 
             {/* Emergency Contact */}
-            <div className="relative">
+            {/* <div className="relative">
               <Label htmlFor="emergencyContact" className="text-[#2E2E2E] font-bold">Emergency Contact</Label>
               <div className="relative">
                 <PhoneCall className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -267,10 +270,10 @@ const AdminForm = () => {
               {errors.emergencyContact && (
                 <p className="mt-1 text-sm text-red-500">{errors.emergencyContact.message}</p>
               )}
-            </div>
+            </div> */}
 
             {/* Sports Selection */}
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <Label className="text-[#2E2E2E] font-bold">Sports</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {sportsOptions.map((sport) => (
@@ -288,7 +291,7 @@ const AdminForm = () => {
                   </label>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Level Selection */}
             {/* <div>
@@ -311,14 +314,14 @@ const AdminForm = () => {
             {/* </div> */}
 
             {/* Active Status */}
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <input
                 type="checkbox"
                 {...register("isActive")}
                 className="rounded border-gray-300 text-admin-primary focus:ring-admin-primary"
               />
               <Label className="text-[#2E2E2E] font-bold">Active Status</Label>
-            </div>
+            </div> */}
           </div>
 
           {/* Action Buttons */}
