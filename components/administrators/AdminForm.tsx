@@ -17,15 +17,24 @@ import { ReCloudinary } from "../cloudinary";
 import Image from "next/image";
 import { useState } from "react";
 
+const emptyStringToUndefined = (val: unknown) =>
+  typeof val === "string" && val.trim() === "" ? undefined : val;
+
 const formSchema = z.object({
   name: z.string().optional(),
   email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  phone: z.preprocess(
+    emptyStringToUndefined,
+    z.string().min(10, "Phone number must be at least 10 digits").optional()
+  ),
   dob: z.string().min(1, "Date of birth is required").optional(),
   gender: z.enum(["male", "female", "other"]).optional(),
   role: z.enum(["admin"]),
   isActive: z.boolean().default(true),
-  emergencyContact: z.string().min(10, "Emergency contact must be at least 10 digits").optional(),
+  emergencyContact: z.preprocess(
+    emptyStringToUndefined,
+    z.string().min(10, "Emergency contact must be at least 10 digits").optional()
+  ),
   sports: z.array(z.string()).optional(),
   level: z.enum(["daily", "weekly", "monthly", "occasionally"]).optional(),
   avatar: z.string().optional(),
@@ -77,7 +86,8 @@ const AdminForm = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const formDataWithAvatar = { ...data, name: `Admin ${Math.floor(1000 + Math.random() * 9000)}`, avatar };
+      // const formDataWithAvatar = { ...data, name: `Admin ${Math.floor(1000 + Math.random() * 9000)}`, avatar };
+      const formDataWithAvatar = { ...data, avatar };
       const result = await dispatch(registerUser(formDataWithAvatar));
       if (registerUser.fulfilled.match(result)) {
         toast.success("Admin added successfully!");
