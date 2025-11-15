@@ -69,7 +69,7 @@ const UserTable = ({ users, onDelete, usersType, startIndex = 0 }: UserTableProp
                 </div>
               </TableCell>
              
-              <TableCell className="capitalize">
+              <TableCell >
                 {user?.email || 'N/A'}
              
                 </TableCell>

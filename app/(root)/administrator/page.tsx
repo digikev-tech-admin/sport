@@ -64,9 +64,12 @@ const Page = () => {
         .filter((user) => {
           // Only show users with admin role
           const isAdmin = user.role === "admin";
-          const matchesSearch = user.name
-            ?.toLowerCase() 
-            .includes(search?.toLowerCase() ?? "");
+          const normalizedSearch = search?.toLowerCase().trim() ?? "";
+          const matchesSearch =
+            normalizedSearch.length === 0 ||
+            [user.name, user.email, user.phone]
+              .map((field) => field?.toLowerCase() ?? "")
+              .some((value) => value.includes(normalizedSearch));
           const matchesCategory =
             category === "All" || user.level === category?.toLowerCase();
           return isAdmin && matchesSearch && matchesCategory;
@@ -145,7 +148,7 @@ const Page = () => {
         />
 
         <div className="grid gap-4 md:grid-cols-2 mb-6 ">
-          <SearchBar value={search} onChange={setSearch} />
+          <SearchBar value={search} onChange={setSearch} placeholder="Search by name, email, phone..." />
           {/* <CategoryFilter
             value={category}
             onChange={setCategory}
