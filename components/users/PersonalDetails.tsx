@@ -46,6 +46,7 @@ const PersonalDetails = ({ id }: { id?: string }) => {
 
   useEffect(()=>{
     const fetchProfiles = async () => {
+      if(!id) return;
       try {
           const profiles = await getProfilesByUserId(id ?? '');
           console.log('profiles:', profiles);
@@ -72,7 +73,7 @@ const PersonalDetails = ({ id }: { id?: string }) => {
   }, [user?.avatar, id]);
 
   useEffect(() => {
-    if (user  ) {
+    if (id && user) {
       setFormData({
         name: user?.name ?? "",
         email: user?.email ?? "",
@@ -87,7 +88,7 @@ const PersonalDetails = ({ id }: { id?: string }) => {
       });
       setLoaded(false)
     }
-  }, [user]);
+  }, [user, id]);
 
   useEffect(() => {
     if (id) {
@@ -152,13 +153,16 @@ const PersonalDetails = ({ id }: { id?: string }) => {
   };
 
   if (loaded) return <span>Loading....</span>
+  if(!id){
+
+  }
   return (
     <div className="bg-white p-2 sm:p-6 rounded-lg shadow-sm ">
       <div className="space-y-6">
         <div className="flex items-start gap-6">
           <div className=" ">
             <Image
-              src={image ?? "https://github.com/shadcn.png"}
+              src={image || "https://github.com/shadcn.png"}
               alt="Profile"
               className="w-28 h-28 rounded-3xl object-cover mt-7 "
               width={112}
@@ -168,7 +172,7 @@ const PersonalDetails = ({ id }: { id?: string }) => {
             <div className="flex gap-2 mt-3">
               <ReCloudinary 
                 id="profilePic"
-                initialUrl={image ?? "https://github.com/shadcn.png"}
+                initialUrl={image || "https://github.com/shadcn.png"}
                 onSuccess={(res) => {
                   const imgUrl = res.url;
                   setImage(imgUrl);
@@ -313,7 +317,7 @@ const PersonalDetails = ({ id }: { id?: string }) => {
       </div>
 
       {/* Profiles Section */}
-      <div className="mt-8">
+      { id && <div className="mt-8">
         <h3 className="text-lg font-semibold text-[#2E2E2E]">Profiles</h3>
         {profiles.length > 0 ? (
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -332,6 +336,7 @@ const PersonalDetails = ({ id }: { id?: string }) => {
           <p className="mt-4 text-sm text-[#6B6B6B]">No profiles linked to this user yet.</p>
         )}
       </div>
+      }
 
       <div className="flex space-x-4  mt-5">
         <Button
