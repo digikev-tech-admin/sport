@@ -66,7 +66,7 @@ export const deleteNotification = async (id: string) => {
 
 export const getUsersByCoachId = async (coachId: string) => {
     try {
-        const response = await axiosInstance.get(`/getUserByOrder/coach/${coachId}`);
+        const response = await axiosInstance.get(`/orders/coach/${coachId}`);
         return response?.data?.data;
     } catch (error: any) {
         throw error.response?.data?.error || "Fetching users by coach id failed"; 
@@ -75,7 +75,7 @@ export const getUsersByCoachId = async (coachId: string) => {
 
 export const getUsersByEventId = async (eventId: string) => {
     try {
-        const response = await axiosInstance.get(`/getUserByOrder/event/${eventId}`);
+        const response = await axiosInstance.get(`/orders/event/${eventId}`);
         return response?.data?.data;
     } catch (error: any) {
         throw error.response?.data?.error || "Fetching users by event id failed"; 
@@ -94,7 +94,7 @@ export const getUsersByLocationId = async (locationId: string) => {
 
 export const getUsersByPackageId = async (packageId: string) => {
     try {
-        const response = await axiosInstance.get(`/getUserByOrder/package/${packageId}`);
+        const response = await axiosInstance.get(`/orders/package/${packageId}`);
         return response?.data?.data;
     } catch (error: any) {
         throw error.response?.data?.error || "Fetching users by package id failed"; 

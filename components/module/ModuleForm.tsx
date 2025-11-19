@@ -914,7 +914,6 @@ const EventForm = ({
                   {eventUsers.length > 0 ? (
                     <PackageUserTable
                       users={getFilteredUsers()}
-                      onEdit={(id) => console.log(`Edit user ${id}`)}
                       disabled={!canEditPaymentMethods}
                       onUserUpdate={handleUserUpdate}
                       availablePaymentMethodOptions={availablePaymentMethodOptions}
