@@ -827,7 +827,6 @@ const PackageForm = ({
                 <div className="mt-2">
                   <PackageUserTable
                     users={getFilteredUsers()}
-                    onEdit={(id) => console.log(`Edit user ${id}`)}
                     disabled={!canEditPaymentMethods}
                     availablePaymentMethodOptions={availablePaymentMethodOptions}
                     onUserUpdate={handleUserUpdate}

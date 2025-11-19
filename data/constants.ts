@@ -320,3 +320,153 @@ export const formatPaymentLabel = (value: string) => {
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
+
+
+export const paymentMethodOptions1 = [
+  { id: 1, name: "Cash" },
+  { id: 2, name: "Card" },
+  { id: 3, name: "Monthly Mandate" },
+  { id: 4, name: "Credit Card" },
+] as const;
+
+export const normalizePaymentMethod = (str: string): string => {
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, "_") // replace spaces with _
+    .replace(/[()]/g, ""); // ← REMOVE PARENTHESIS
+};
+
+export type UserStatus =
+  | "booked"
+  | "pending"
+  | "reserved"
+  | "paid"
+  | "failed"
+  | "refunded"
+  | "expired"
+  | "cancelled";
+
+export const statusOptions: { value: UserStatus; label: string }[] = [
+  { value: "booked", label: "Booked" },
+  { value: "pending", label: "Pending" },
+  { value: "reserved", label: "Reserved" },
+  { value: "paid", label: "Paid" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
+  { value: "expired", label: "Expired" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+export const getStatusStyles = (
+  status: UserStatus
+): { className: string; label: string } => {
+  switch (status) {
+    case "booked":
+      return {
+        className: "bg-blue-100 text-blue-800 border border-blue-200",
+        label: "Booked",
+      };
+    case "pending":
+      return {
+        className: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+        label: "Pending",
+      };
+    case "reserved":
+      return {
+        className: "bg-green-100 text-green-800 border border-green-200",
+        label: "Reserved",
+      };
+    case "paid":
+      return {
+        className: "bg-green-100 text-green-800 border border-green-200",
+        label: "Paid",
+      };
+    case "failed":
+      return {
+        className: "bg-red-100 text-red-800 border border-red-200",
+        label: "Failed",
+      };
+    case "refunded":
+      return {
+        className: "bg-orange-100 text-orange-800 border border-orange-200",
+        label: "Refunded",
+      };
+    case "expired":
+      return {
+        className: "bg-gray-100 text-gray-800 border border-gray-200",
+        label: "Expired",
+      };
+    case "cancelled":
+      return {
+        className: "bg-gray-100 text-gray-800 border border-gray-200",
+        label: "Cancelled",
+      };
+    default:
+      return {
+        className: "bg-gray-100 text-gray-800 border border-gray-200",
+        label: status,
+      };
+  }
+};
+
+
+
+export type OrderDetail = {
+  _id: string;
+  orderUuid?: string;
+  amount?: number;
+  isRecurring?: boolean;
+  mandateType?: string;
+  recurringAmount?: number;
+  nextPaymentDate?: string;
+  cost?: number;
+  discountFee?: number;
+  taxes?: number;
+  platformFee?: number;
+  paymentMethod?: string;
+  stripePaymentStatus?: string;
+  status?: UserStatus;
+  bookedUntil?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  paymentDetails?: Record<string, string | null>;
+  packageId?: {
+    ageGroup?: string;
+    level?: string;
+    description?: string;
+    title?: string;
+    price?: {
+      base?: number;
+      tax?: number;
+      discount?: number;
+    };
+  };
+  profileId?: {
+    name?: string;
+    relation?: string;
+  };
+  eventId?: {
+    title?: string;
+    ticketCost?: number;
+  };
+  invoiceHistory?: Array<{
+    _id: string;
+    message: string;
+    createdAt: string;
+    transactionId?: string | null;
+    paymentMethodAtSend?: string | null;
+    collectionMethod?: string | null;
+  }>;
+};
+
+export const formatDate = (value?: string | null) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+};
+
+export const formatNumber = (value?: number | null) => {
+  if (typeof value !== "number") return "-";
+  return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+};

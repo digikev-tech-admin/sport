@@ -29,93 +29,24 @@ import {
 import { getOrdersByUserId, updateOrder } from "@/api/services";
 import { Button } from "../ui/button";
 import Link from "next/link";
-
-export const paymentMethodOptions = [
-  { id: 1, name: "Cash" },
-  { id: 2, name: "Card" },
-  { id: 3, name: "Monthly Mandate" },
-  { id: 4, name: "Credit Card" },
-] as const;
-
-const normalizePaymentMethod = (str: string): string => {
-  return str
-    .toLowerCase()
-    .replace(/\s+/g, "_") // replace spaces with _
-    .replace(/[()]/g, ""); // ← REMOVE PARENTHESIS
-};
-
-type UserStatus =
-  | "booked"
-  | "pending"
-  | "reserved"
-  | "paid"
-  | "failed"
-  | "refunded"
-  | "expired"
-  | "cancelled";
-
-const statusOptions: { value: UserStatus; label: string }[] = [
-  { value: "booked", label: "Booked" },
-  { value: "pending", label: "Pending" },
-  { value: "reserved", label: "Reserved" },
-  { value: "paid", label: "Paid" },
-  { value: "failed", label: "Failed" },
-  { value: "refunded", label: "Refunded" },
-  { value: "expired", label: "Expired" },
-  { value: "cancelled", label: "Cancelled" },
-];
-
-const getStatusStyles = (
-  status: UserStatus
-): { className: string; label: string } => {
-  switch (status) {
-    case "booked":
-      return {
-        className: "bg-blue-100 text-blue-800 border border-blue-200",
-        label: "Booked",
-      };
-    case "pending":
-      return {
-        className: "bg-yellow-100 text-yellow-800 border border-yellow-200",
-        label: "Pending",
-      };
-    case "reserved":
-      return {
-        className: "bg-green-100 text-green-800 border border-green-200",
-        label: "Reserved",
-      };
-    case "paid":
-      return {
-        className: "bg-green-100 text-green-800 border border-green-200",
-        label: "Paid",
-      };
-    case "failed":
-      return {
-        className: "bg-red-100 text-red-800 border border-red-200",
-        label: "Failed",
-      };
-    case "refunded":
-      return {
-        className: "bg-orange-100 text-orange-800 border border-orange-200",
-        label: "Refunded",
-      };
-    case "expired":
-      return {
-        className: "bg-gray-100 text-gray-800 border border-gray-200",
-        label: "Expired",
-      };
-    case "cancelled":
-      return {
-        className: "bg-gray-100 text-gray-800 border border-gray-200",
-        label: "Cancelled",
-      };
-    default:
-      return {
-        className: "bg-gray-100 text-gray-800 border border-gray-200",
-        label: status,
-      };
-  }
-};
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  formatDate,
+  formatNumber,
+  getStatusStyles,
+  normalizePaymentMethod,
+  OrderDetail,
+  paymentMethodOptions1,
+  statusOptions,
+  UserStatus,
+} from "@/data/constants";
+import Loader from "../shared/Loader";
 
 const StatusBadge: React.FC<{ status: UserStatus }> = ({ status }) => {
   const statusConfig = getStatusStyles(status);
@@ -145,7 +76,6 @@ interface PackageUserTableProps {
     basePrice: string;
     paymentMethod: string;
   }>;
-  onEdit: (id: string) => void;
   disabled: boolean;
   onUserUpdate?: (
     id: string,
@@ -245,7 +175,6 @@ function EditableCell<T extends string>({
 
 const PackageUserTable: React.FC<PackageUserTableProps> = ({
   users,
-  onEdit,
   disabled,
   onUserUpdate,
   availablePaymentMethodOptions,
@@ -259,6 +188,17 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  const [orderModalOpen, setOrderModalOpen] = React.useState(false);
+  const [orderModalLoading, setOrderModalLoading] = React.useState(false);
+  const [orderModalError, setOrderModalError] = React.useState<string | null>(
+    null
+  );
+  const [orderDetails, setOrderDetails] = React.useState<OrderDetail[]>([]);
+  const [selectedUserInfo, setSelectedUserInfo] = React.useState<{
+    name: string;
+    email: string;
+    profileName: string;
+  } | null>(null);
 
   const updatePaymentMethod = async (id: string, method: string) => {
     await updateOrder(id, { paymentMethod: method });
@@ -270,15 +210,44 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
     onUserUpdate?.(id, { status });
   };
 
-  const handleViewOrder = async (userId: string) => {
+  const handleViewOrder = async (
+    user: PackageUserTableProps["users"][number]
+  ) => {
+    setOrderModalOpen(true);
+    setOrderModalLoading(true);
+    setOrderModalError(null);
+    setSelectedUserInfo({
+      name: user.name,
+      email: user.email,
+      profileName: user.profileName,
+    });
+
     try {
-      const response = await getOrdersByUserId(userId);
-      console.log("Order Data:", response);
+      const response = await getOrdersByUserId(user.userId);
+      console.log("response", response);
+      setOrderDetails(response ?? []);
     } catch (error) {
-      console.error("Error fetching order data:", error);
+      setOrderDetails([]);
+      setOrderModalError(
+        typeof error === "string"
+          ? error
+          : "Failed to fetch order details. Please try again."
+      );
+    } finally {
+      setOrderModalLoading(false);
     }
   };
-  
+
+  const handleModalChange = (open: boolean) => {
+    setOrderModalOpen(open);
+    if (!open) {
+      setOrderModalError(null);
+      setOrderDetails([]);
+      setSelectedUserInfo(null);
+      setOrderModalLoading(false);
+    }
+  };
+
   if (users.length === 0) {
     return (
       <div className="text-center py-6 text-sm text-gray-500">
@@ -292,7 +261,9 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
       <Table>
         <TableHeader className="bg-[#7421931A]">
           <TableRow>
-            <TableHead className="!min-w-[70px] font-bold px-2">Sr. No.</TableHead>
+            <TableHead className="!min-w-[70px] font-bold px-2">
+              Sr. No.
+            </TableHead>
             <TableHead className="font-bold">Name</TableHead>
             <TableHead className="font-bold">Profile Name</TableHead>
             <TableHead className="font-bold">Email</TableHead>
@@ -301,7 +272,9 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
             <TableHead className="font-bold">Age Group</TableHead> */}
             <TableHead className="font-bold">Amount</TableHead>
             <TableHead className="font-bold">Base Price</TableHead>
-            <TableHead className="font-bold !min-w-[150px]">Payment Method</TableHead>
+            <TableHead className="font-bold !min-w-[150px]">
+              Payment Method
+            </TableHead>
             <TableHead className="font-bold">Status</TableHead>
             <TableHead className="text-center font-bold">Actions</TableHead>
           </TableRow>
@@ -310,7 +283,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
         <TableBody>
           {paginatedUsers.map((user, idx) => {
             const displayPayment = () => {
-              const opt = paymentMethodOptions.find(
+              const opt = paymentMethodOptions1.find(
                 (o) => normalizePaymentMethod(o.name) === user.paymentMethod
               );
               return opt?.name ?? user.paymentMethod;
@@ -323,14 +296,14 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                 </TableCell>
 
                 <TableCell>
-                  <Link href={`/users/${user.userId}`} >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={user.avatar} />
-                      <AvatarFallback>{user.name[0] || "U"}</AvatarFallback>
-                    </Avatar>
-                    {user.name}
-                  </div>
+                  <Link href={`/users/${user.userId}`}>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={user.avatar} />
+                        <AvatarFallback>{user.name[0] || "U"}</AvatarFallback>
+                      </Avatar>
+                      {user.name}
+                    </div>
                   </Link>
                 </TableCell>
 
@@ -373,10 +346,11 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
                   />
                 </TableCell>
                 <TableCell className="text-center">
-                  <Button 
+                  <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleViewOrder(user.userId)}
+                    type="button"
+                    onClick={() => handleViewOrder(user)}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
@@ -385,52 +359,7 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
             );
           })}
         </TableBody>
-        {/* <TableBody>
-          {paginatedUsers.map((user, idx) => (
-            <TableRow key={user._id || user.id}>
-              <TableCell>{idx + 1}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback>{user.name}</AvatarFallback>
-
-                  </Avatar>
-                  {user.name}
-                </div>
-              </TableCell>
-              <TableCell>{user.profileName}</TableCell>
-               <TableCell>{user.email}</TableCell> 
-              <TableCell>{user.phone}</TableCell>
-              <TableCell className="capitalize">{user.level}</TableCell>
-              <TableCell className="capitalize">{user.ageGroup}</TableCell>
-              <TableCell>{user.price}</TableCell>
-              <TableCell>{user.basePrice}</TableCell>
-              <TableCell>{user.paymentMethod =="credit_card" ? "Credit Card" : user.paymentMethod}</TableCell>
-              <TableCell>
-                <StatusBadge status={user.status} />
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(user._id)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(user._id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody> */}
+       
       </Table>
       <Pagination className="mt-4">
         <PaginationPrevious
@@ -454,6 +383,319 @@ const PackageUserTable: React.FC<PackageUserTableProps> = ({
           }
         />
       </Pagination>
+      <Dialog open={orderModalOpen} onOpenChange={handleModalChange}>
+        <DialogContent className="!max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Order details</DialogTitle>
+            <DialogDescription>
+              {selectedUserInfo ? (
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium text-gray-900">
+                    {selectedUserInfo.name}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {selectedUserInfo.email} • {selectedUserInfo.profileName}
+                  </span>
+                </div>
+              ) : (
+                "Detailed order lifecycle and invoices"
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {orderModalLoading && (
+             <Loader />
+            )}
+            {orderModalError && !orderModalLoading && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                {orderModalError}
+              </div>
+            )}
+            {!orderModalLoading &&
+              !orderModalError &&
+              (orderDetails.length === 0 ? (
+                <div className="text-sm text-gray-500">
+                  No orders found for this user.
+                </div>
+              ) : (
+                orderDetails.map((order, index) => (
+                  <div
+                    key={order._id}
+                    className={`space-y-4 rounded-2xl border p-4 ${
+                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <p className="p-2 bg-green-100 rounded-full text-center w-8 h-8 flex items-center justify-center">
+                            {index + 1}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-wide text-gray-500">
+                            Order UUID
+                          </p>
+                          <p className="font-semibold">{order.orderUuid}</p>
+                          <p className="text-xs text-gray-500">
+                            Created: {formatDate(order.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      {order.status && (
+                        <StatusBadge status={order.status as UserStatus} />
+                      )}
+                    </div>
+
+                    <div className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          {" "}
+                          Total Amount Paid (Platform Fee + Cost + Discount)
+                        </p>
+                        <p className="font-medium">
+                          {formatNumber(order.amount)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-gray-500"> Cost</p>
+                        <p className="font-medium">
+                          {formatNumber(order.cost)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">Taxes</p>
+                        <p className="font-medium">
+                          {formatNumber(order.taxes)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          Platform Fee
+                        </p>
+                        <p className="font-medium">
+                          {formatNumber(order.platformFee)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          Payment Method
+                        </p>
+                        <p className="font-medium capitalize">
+                          {order.paymentMethod ?? "-"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          Stripe Status
+                        </p>
+                        <p className="font-medium capitalize">
+                          {order.stripePaymentStatus ?? "N/A"}
+                        </p>
+                      </div>
+                      {order.isRecurring && (
+                        <>
+                          <div>
+                            <p className="text-xs uppercase text-gray-500">
+                              Mandate Type
+                            </p>
+                            <p className="font-medium capitalize">
+                              {order.mandateType ?? "-"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase text-gray-500">
+                              Recurring Amount
+                            </p>
+                            <p className="font-medium">
+                              {formatNumber(order.recurringAmount)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase text-gray-500">
+                              Next Payment Date
+                            </p>
+                            <p className="font-medium">
+                              {formatDate(order.nextPaymentDate)}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          Booked Until
+                        </p>
+                        <p className="font-medium">
+                          {formatDate(order.bookedUntil)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {order.packageId && (
+                      <div className="rounded-xl bg-gray-50 p-3 text-sm">
+                        <p className="text-xs uppercase text-gray-500">
+                          Package details
+                        </p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <div>
+                            <p className="text-xs text-gray-500">Title</p>
+                            <p className="font-medium">
+                              {order.packageId.title ?? "-"}
+                            </p>
+                          </div>
+                          {/* <div>
+                            <p className="text-xs text-gray-500">Age group</p>
+                            <p className="font-medium">
+                              {order.packageId.ageGroup ?? "-"}
+                            </p>
+                          </div> */}
+                          {/* <div>
+                            <p className="text-xs text-gray-500">Level</p>
+                            <p className="font-medium">
+                              {order.packageId.level ?? "-"}
+                            </p>
+                          </div> */}
+                          <div>
+                            <p className="text-xs text-gray-500">Base Price</p>
+                            <p className="font-medium">
+                              {formatNumber(order.packageId.price?.base)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Tax</p>
+                            <p className="font-medium">
+                              {formatNumber(order.packageId.price?.tax)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Discount</p>
+                            <p className="font-medium">
+                              {formatNumber(order.packageId.price?.discount)}
+                            </p>
+                          </div>
+                        </div>
+                        {/* {order.packageId.description && (
+                          <p className="mt-2 text-xs text-gray-500">
+                            {order.packageId.description}
+                          </p>
+                        )} */}
+                      </div>
+                    )}
+                    {order.profileId && (
+                      <div className="rounded-xl bg-gray-50 p-3 text-sm">
+                        <p className="text-xs uppercase text-gray-500">
+                          Profile details
+                        </p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <div>
+                            <p className="text-xs text-gray-500">name</p>
+                            <p className="font-medium">
+                              {order.profileId.name ?? "-"}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-xs text-gray-500">relation</p>
+                            <p className="font-medium">
+                              {order.profileId.relation ?? "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {order.eventId && (
+                      <div className="rounded-xl bg-gray-50 p-3 text-sm">
+                        <p className="text-xs uppercase text-gray-500">
+                          Event details
+                        </p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <div>
+                            <p className="text-xs text-gray-500">Title</p>
+                            <p className="font-medium">
+                              {order.eventId.title ?? "-"}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-xs text-gray-500">Ticket Cost</p>
+                            <p className="font-medium">
+                              {formatNumber(order.eventId.ticketCost)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* {order.paymentDetails && (
+                      <div className="rounded-xl border border-dashed p-3 text-sm">
+                        <p className="text-xs uppercase text-gray-500">
+                          Payment details
+                        </p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          {Object.entries(order.paymentDetails).map(
+                            ([key, value]) => (
+                              <div key={key}>
+                                <p className="text-[11px] uppercase text-gray-500">
+                                  {key.replace(/([A-Z])/g, " $1").trim()}
+                                </p>
+                                <p className="font-medium text-gray-900">
+                                  {value ?? "-"}
+                                </p>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )} */}
+
+                    {order.invoiceHistory?.length ? (
+                      <div className="space-y-2">
+                        <p className="text-xs uppercase text-gray-500">
+                          Invoice history
+                        </p>
+                        <div className="space-y-2">
+                          {order.invoiceHistory.map((invoice) => (
+                            <div
+                              key={invoice._id}
+                              className="rounded-xl bg-gray-50 p-3 text-xs"
+                            >
+                              <p className="font-medium text-gray-900">
+                                {invoice.message}
+                              </p>
+                              <div className="mt-1 flex flex-wrap gap-4 text-gray-600">
+                                {invoice.transactionId && (
+                                  <span>
+                                    Txn:{" "}
+                                    <span className="font-semibold text-gray-800">
+                                      {invoice.transactionId}
+                                    </span>
+                                  </span>
+                                )}
+                                {invoice.paymentMethodAtSend && (
+                                  <span>
+                                    Method: {invoice.paymentMethodAtSend}
+                                  </span>
+                                )}
+                                {invoice.collectionMethod && (
+                                  <span>
+                                    Collection: {invoice.collectionMethod}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-[11px] text-gray-500">
+                                {formatDate(invoice.createdAt)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ))
+              ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
