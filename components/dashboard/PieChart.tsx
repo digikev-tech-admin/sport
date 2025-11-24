@@ -58,7 +58,7 @@ const AdminPieChart = ({ data }: { data: any }) => {
 
   const chartData = processSportsData(data);
 
-  console.log({ data, chartData });
+  // console.log({ data, chartData });
 
   return (
     <div className="pt-7">

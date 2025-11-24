@@ -47,3 +47,28 @@ export const getOrdersByUserId = async (userId: string) => {
         throw error.response?.data?.error || "Fetching order by user id failed"; 
     }
 };
+
+type RevenueQueryParams = Record<string, string | number | undefined | null>;
+
+const buildQueryString = (params: RevenueQueryParams = {}) => {
+    const query = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            query.append(key, String(value));
+        }
+    });
+
+    const serialized = query.toString();
+    return serialized ? `?${serialized}` : "";
+};
+
+export const getRevenueData = async (queryParams?: RevenueQueryParams) => {
+    try {
+        const queryString = buildQueryString(queryParams);
+        const response = await axiosInstance.get(`/dashboard/revenue${queryString}`);
+        return response?.data;
+    } catch (error: any) {
+        throw error.response?.data?.error || "Fetching revenue data failed"; 
+    }
+};

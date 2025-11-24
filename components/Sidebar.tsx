@@ -33,7 +33,7 @@ const navItems = [
   { icon: Box, label: "Coaches", href: "/coaches" },
   { icon: MapPin, label: "Location", href: "/location" },
   { icon: Users, label: "Users", href: "/users" },
-  { icon: PieChart, label: "Analytics", href: "/analytics" },
+  // { icon: PieChart, label: "Analytics", href: "/analytics" },
   { icon: ShieldPlus, label: "Administrator", href: "/administrator" },
   { icon: CreditCard, label: "Plan & Billing", href: "/plan-billing" },
   { icon: Ticket, label: "Promotions", href: "/promotion" },
