@@ -183,7 +183,7 @@ export default function Page() {
             <h2 className="font-bold text-xl">Total Users : {totalUsers}</h2>
           </div>
           <motion.div className="flex justify-center items-center">
-            <UserPieChart userLastLogin={userLastLogin} />
+            {/* <UserPieChart userLastLogin={userLastLogin} /> */}
           </motion.div>
         </MotionCard>
 
