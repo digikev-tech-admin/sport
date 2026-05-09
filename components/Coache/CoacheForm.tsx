@@ -101,6 +101,14 @@ const CoacheForm = ({
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [videoLink, setVideoLink] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [email, setEmail] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [studentsCount, setStudentsCount] = useState("");
+  const [averageRating, setAverageRating] = useState("");
+  const [fees, setFees] = useState<Array<{ duration: string; price: string }>>(
+    []
+  );
 
   const handleAddSpecialization = () => {
     if (
@@ -114,6 +122,25 @@ const CoacheForm = ({
 
   const handleDeleteSpecialization = (index: number) => {
     setSpecializations(specializations.filter((_, i) => i !== index));
+  };
+
+  const handleAddFee = () => {
+    setFees([...fees, { duration: "", price: "" }]);
+  };
+
+  const handleUpdateFee = (
+    index: number,
+    key: "duration" | "price",
+    value: string
+  ) => {
+    const cleaned = value.replace(/[^0-9.]/g, "");
+    setFees(
+      fees.map((fee, i) => (i === index ? { ...fee, [key]: cleaned } : fee))
+    );
+  };
+
+  const handleDeleteFee = (index: number) => {
+    setFees(fees.filter((_, i) => i !== index));
   };
 
   // const handleAddCertificate = () => {
@@ -193,18 +220,54 @@ const CoacheForm = ({
             name: `${item?.sport} - ${item?.locationId?.address}, ${item?.locationId?.city}, ${item?.locationId?.state}`,
           }));
 
+          const stats =
+            typeof response.stats === "string"
+              ? (() => {
+                  try {
+                    return JSON.parse(response.stats);
+                  } catch {
+                    return {};
+                  }
+                })()
+              : response.stats || {};
+
           setName(response.name);
           setPhoneNumber(response.phoneNumber || "");
           setEmergencyContact(response.emergencyContact || "");
           setProfileImage(response.image || null);
-          setBio(response.aboutMe);
+          setBio(response.aboutMe || "");
           setClubs(formattedLocations);
-          setSports(response.sports);
-          setExperience(response.stats.yearsOfExperience.toString());
-          setCertificates(response.stats.certifications);
-          setSpecializations(response.stats.specializations);
+          setSports(response.sports || []);
+          setExperience(
+            stats.yearsOfExperience != null
+              ? stats.yearsOfExperience.toString()
+              : ""
+          );
+          setCertificates(stats.certifications || []);
+          setSpecializations(stats.specializations || []);
           setSelectedPackages(formattedPackages);
           setVideoLink(response.videoLink || "");
+          setTagline(response.tagline || "");
+          setEmail(response.email || "");
+          setWhatsapp(response.whatsapp || "");
+          setStudentsCount(
+            response.studentsCount != null
+              ? response.studentsCount.toString()
+              : ""
+          );
+          setAverageRating(
+            response.averageRating != null
+              ? response.averageRating.toString()
+              : ""
+          );
+          setFees(
+            Array.isArray(response.fees)
+              ? response.fees.map((f: any) => ({
+                  duration: f.duration?.toString() || "",
+                  price: f.price?.toString() || "",
+                }))
+              : []
+          );
           // Handle packages if they exist in the response
           // if (response.packageIds && response.packageIds.length > 0) {
           //   const selectedPkgs = response.packageIds.map((pkgId: string) => {
@@ -250,6 +313,9 @@ const CoacheForm = ({
     }
     const coachData = {
       name,
+      tagline,
+      email,
+      whatsapp,
       phoneNumber,
       emergencyContact,
       locationIds: clubs.map((club) => club.id),
@@ -258,6 +324,14 @@ const CoacheForm = ({
       aboutMe: bio,
       image: profileImage || "https://github.com/shadcn.png",
       videoLink,
+      studentsCount: parseInt(studentsCount) || 0,
+      averageRating: parseFloat(averageRating) || 0,
+      fees: fees
+        .filter((f) => f.duration && f.price)
+        .map((f) => ({
+          duration: parseInt(f.duration),
+          price: parseFloat(f.price),
+        })),
       stats: {
         yearsOfExperience: parseInt(experience) || 0,
         certifications: certificates.map((cert) => ({
@@ -282,6 +356,9 @@ const CoacheForm = ({
         toast.success("Coach created successfully");
         router.push("/coaches");
         setName("");
+        setTagline("");
+        setEmail("");
+        setWhatsapp("");
         setPhoneNumber("");
         setEmergencyContact("");
         setProfileImage(null);
@@ -289,6 +366,9 @@ const CoacheForm = ({
         setClubs([]);
         setSports([]);
         setExperience("");
+        setStudentsCount("");
+        setAverageRating("");
+        setFees([]);
         setCertificationText("");
         setCertificationFile(null);
         setCertificateName("");
@@ -379,6 +459,21 @@ const CoacheForm = ({
                     disabled={!isEditing}
                   />
                 </div>
+                <div className="space-y-2 col-span-2">
+                  <label className="text-sm font-bold text-gray-700">
+                    Tagline
+                  </label>
+                  <Input
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    placeholder="Short punch line shown on coach hero"
+                    maxLength={80}
+                    disabled={!isEditing}
+                  />
+                  <p className="text-xs text-gray-500">
+                    {tagline.length}/80 characters
+                  </p>
+                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700">
                     Phone Number
@@ -398,6 +493,18 @@ const CoacheForm = ({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700">
+                    Email
+                  </label>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="coach@example.com"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">
                     Emergency Contact
                   </label>
                   <Input
@@ -413,6 +520,22 @@ const CoacheForm = ({
                     pattern="[0-9]*"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">
+                    WhatsApp
+                  </label>
+                  <Input
+                    type="text"
+                    value={whatsapp}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setWhatsapp(value);
+                    }}
+                    placeholder="Optional — falls back to Phone Number"
+                    disabled={!isEditing}
+                    pattern="[0-9]*"
+                  />
+                </div>
                 <div className="col-span-2">
                   <label className="text-sm font-bold text-gray-700">
                     Experience (years)
@@ -424,6 +547,34 @@ const CoacheForm = ({
                     placeholder="Years of experience"
                     min={0}
                     required
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">
+                    Students Count
+                  </label>
+                  <Input
+                    type="number"
+                    value={studentsCount}
+                    onChange={(e) => setStudentsCount(e.target.value)}
+                    placeholder="Total students taught"
+                    min={0}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">
+                    Average Rating
+                  </label>
+                  <Input
+                    type="number"
+                    value={averageRating}
+                    onChange={(e) => setAverageRating(e.target.value)}
+                    placeholder="0.0 — 5.0"
+                    min={0}
+                    max={5}
+                    step={0.1}
                     disabled={!isEditing}
                   />
                 </div>
@@ -525,6 +676,72 @@ const CoacheForm = ({
                     Add
                   </Button>
                 </div>
+              </div>
+              <div className="col-span-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Coaching Fees
+                </label>
+                <p className="text-xs text-gray-500 mt-1 mb-2">
+                  Add one row per fee tier — duration in minutes, price in £.
+                </p>
+                {fees.length > 0 && (
+                  <div className="flex gap-2 items-center mb-1">
+                    <p className="flex-1 text-xs font-semibold text-gray-600">
+                      Duration (mins)
+                    </p>
+                    <p className="flex-1 text-xs font-semibold text-gray-600">
+                      Price (£)
+                    </p>
+                    <div className="w-10" />
+                  </div>
+                )}
+                <div className="space-y-2 mb-2">
+                  {fees.map((fee, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Input
+                        type="number"
+                        value={fee.duration}
+                        onChange={(e) =>
+                          handleUpdateFee(index, "duration", e.target.value)
+                        }
+                        placeholder="e.g. 60"
+                        min={1}
+                        disabled={!isEditing}
+                        className="flex-1"
+                      />
+                      <Input
+                        type="number"
+                        value={fee.price}
+                        onChange={(e) =>
+                          handleUpdateFee(index, "price", e.target.value)
+                        }
+                        placeholder="e.g. 30"
+                        min={0}
+                        step={0.01}
+                        disabled={!isEditing}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="border border-[#c858ba] bg-[#7421931A] text-sm text-[#742193] p-1 rounded-lg"
+                        onClick={() => handleDeleteFee(index)}
+                        disabled={!isEditing}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleAddFee}
+                  className="commonDarkBG text-white hover:bg-[#581770]"
+                  disabled={!isEditing}
+                >
+                  + Add Fee Tier
+                </Button>
               </div>
               <div className="col-span-2">
                 <label className="text-sm font-bold text-gray-700">
@@ -665,11 +882,17 @@ const CoacheForm = ({
                     return;
                   }
                   setName("");
+                  setTagline("");
+                  setEmail("");
+                  setWhatsapp("");
                   setProfileImage(null);
                   setBio("");
                   setClubs([]);
                   setSports([]);
                   setExperience("");
+                  setStudentsCount("");
+                  setAverageRating("");
+                  setFees([]);
                   setCertificationText("");
                   setCertificationFile(null);
                   setCertificateName("");
