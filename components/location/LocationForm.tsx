@@ -35,6 +35,33 @@ const locationSchema = z.object({
   zipCode: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
+  rating: z.number().min(0).max(5).optional(),
+  phone: z.string().optional(),
+});
+
+const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+type DayKey = (typeof WEEKDAYS)[number];
+
+type SportRow = {
+  name: string;
+  courts: string;
+  meta: string;
+  price: string;
+  priceUnit: string;
+};
+
+type DayHours = { open: string; close: string; closed: boolean };
+
+const EMPTY_DAY: DayHours = { open: "", close: "", closed: false };
+
+const buildEmptyHours = (): Record<DayKey, DayHours> => ({
+  mon: { ...EMPTY_DAY },
+  tue: { ...EMPTY_DAY },
+  wed: { ...EMPTY_DAY },
+  thu: { ...EMPTY_DAY },
+  fri: { ...EMPTY_DAY },
+  sat: { ...EMPTY_DAY },
+  sun: { ...EMPTY_DAY },
 });
 
 type LocationFormValues = z.infer<typeof locationSchema>;
@@ -72,6 +99,9 @@ const LocationForm = ({
   const [events, setEvents] = useState<Event[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [formData, setFormData] = useState<FormData>({ photo: "" });
+  const [sports, setSports] = useState<SportRow[]>([]);
+  const [openingHours, setOpeningHours] =
+    useState<Record<DayKey, DayHours>>(buildEmptyHours());
   const {
     register,
     handleSubmit,
@@ -146,6 +176,44 @@ const LocationForm = ({
     setValue("facilities", updatedFacilities); // Update form value
   };
 
+  const handleAddSport = () => {
+    setSports([
+      ...sports,
+      { name: "", courts: "", meta: "", price: "", priceUnit: "per hour" },
+    ]);
+  };
+
+  const handleUpdateSport = (
+    index: number,
+    key: keyof SportRow,
+    value: string
+  ) => {
+    let cleaned = value;
+    if (key === "courts") {
+      cleaned = value.replace(/[^0-9]/g, "");
+    } else if (key === "price") {
+      cleaned = value.replace(/[^0-9.]/g, "");
+    }
+    setSports(
+      sports.map((s, i) => (i === index ? { ...s, [key]: cleaned } : s))
+    );
+  };
+
+  const handleDeleteSport = (index: number) => {
+    setSports(sports.filter((_, i) => i !== index));
+  };
+
+  const updateDay = <K extends keyof DayHours>(
+    day: DayKey,
+    key: K,
+    value: DayHours[K]
+  ) => {
+    setOpeningHours({
+      ...openingHours,
+      [day]: { ...openingHours[day], [key]: value },
+    });
+  };
+
   useEffect(() => {
     // Initialize form with default facilities
     setValue("facilities", facilities);
@@ -176,6 +244,48 @@ const LocationForm = ({
         if (location.facilities && location.facilities.length > 0) {
           setFacilities(location.facilities);
           setValue("facilities", location.facilities);
+        }
+
+        if (location.rating !== undefined) {
+          setValue("rating", Number(location.rating));
+        }
+        setValue("phone", location.phone ?? "");
+
+        const rawSports = location.sports;
+        let sportsArr: unknown = rawSports;
+        if (typeof sportsArr === "string") {
+          try { sportsArr = JSON.parse(sportsArr); } catch { sportsArr = []; }
+        }
+        if (Array.isArray(sportsArr)) {
+          setSports(
+            sportsArr.map((s: any) => ({
+              name: s?.name ?? "",
+              courts: s?.courts !== undefined ? String(s.courts) : "",
+              meta: s?.meta ?? "",
+              price: s?.price !== undefined ? String(s.price) : "",
+              priceUnit: s?.priceUnit ?? "per hour",
+            }))
+          );
+        }
+
+        const rawHours = location.openingHours;
+        let hoursObj: any = rawHours;
+        if (typeof hoursObj === "string") {
+          try { hoursObj = JSON.parse(hoursObj); } catch { hoursObj = {}; }
+        }
+        if (typeof hoursObj === "object" && hoursObj !== null) {
+          const next = buildEmptyHours();
+          for (const day of WEEKDAYS) {
+            const v = hoursObj[day];
+            if (v && typeof v === "object") {
+              next[day] = {
+                open: v.open ?? "",
+                close: v.close ?? "",
+                closed: Boolean(v.closed),
+              };
+            }
+          }
+          setOpeningHours(next);
         }
       } catch (error) {
         console.error("Error fetching location:", error);
@@ -239,7 +349,17 @@ const LocationForm = ({
         ...data,
         image: formData.photo,
         facilities: facilities,
-        locationImageUrl, // Add the static map URL to submission
+        locationImageUrl,
+        sports: sports
+          .filter((s) => s.name.trim().length > 0)
+          .map((s) => ({
+            name: s.name.trim(),
+            courts: parseInt(s.courts) || 1,
+            meta: s.meta.trim(),
+            price: parseFloat(s.price) || 0,
+            priceUnit: s.priceUnit || "per hour",
+          })),
+        openingHours,
       };
 
       // console.log("Submitting data:", submitData);
@@ -398,6 +518,49 @@ const LocationForm = ({
             </div>
 
             <div className="space-y-2 col-span-2">
+              <label htmlFor="rating" className="block mb-1">
+                Rating
+              </label>
+              <input
+                id="rating"
+                type="number"
+                {...register("rating", { valueAsNumber: true })}
+                className="w-full p-2 border rounded"
+                placeholder="0.0 — 5.0"
+                min={0}
+                max={5}
+                step={0.1}
+                disabled={!isEditing}
+              />
+              <p className="text-xs text-gray-500">
+                Marketing rating 0.0–5.0. Manual entry until reviews system ships.
+              </p>
+              {errors.rating && (
+                <p className="text-red-500 text-sm">{errors.rating.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <label htmlFor="phone" className="block mb-1">
+                Phone
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                {...register("phone")}
+                className="w-full p-2 border rounded"
+                placeholder="e.g. 01883 712 167"
+                disabled={!isEditing}
+              />
+              <p className="text-xs text-gray-500">
+                Drives the &quot;Call the club&quot; button in the mobile app. Leave empty to hide the button.
+              </p>
+              {errors.phone && (
+                <p className="text-red-500 text-sm">{errors.phone.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2 col-span-2">
               <label htmlFor="about" className="block mb-1">
                 About
               </label>
@@ -471,7 +634,138 @@ const LocationForm = ({
             )}
           </div>
         </div>
-        
+
+        <div className="col-span-2">
+          <label className="text-sm font-bold text-gray-700">
+            Sports & Courts
+          </label>
+          <p className="text-xs text-gray-500 mt-1 mb-2">
+            One row per sport offered at this location. Pricing is per-hour court rental.
+          </p>
+
+          {sports.length > 0 && (
+            <div className="flex gap-2 items-center mb-1">
+              <p className="flex-1 text-xs font-semibold text-gray-600">Sport</p>
+              <p className="w-20 text-xs font-semibold text-gray-600">Courts</p>
+              <p className="flex-1 text-xs font-semibold text-gray-600">
+                Meta (optional)
+              </p>
+              <p className="w-24 text-xs font-semibold text-gray-600">Price (£)</p>
+              <div className="w-10" />
+            </div>
+          )}
+
+          <div className="space-y-2 mb-2">
+            {sports.map((sport, index) => (
+              <div key={index} className="flex gap-2 items-center">
+                <Input
+                  type="text"
+                  value={sport.name}
+                  onChange={(e) =>
+                    handleUpdateSport(index, "name", e.target.value)
+                  }
+                  placeholder="e.g. Squash"
+                  disabled={!isEditing}
+                  className="flex-1"
+                />
+                <Input
+                  type="number"
+                  value={sport.courts}
+                  onChange={(e) =>
+                    handleUpdateSport(index, "courts", e.target.value)
+                  }
+                  placeholder="4"
+                  min={1}
+                  disabled={!isEditing}
+                  className="w-20"
+                />
+                <Input
+                  type="text"
+                  value={sport.meta}
+                  onChange={(e) =>
+                    handleUpdateSport(index, "meta", e.target.value)
+                  }
+                  placeholder="Glass-back available"
+                  disabled={!isEditing}
+                  className="flex-1"
+                />
+                <Input
+                  type="number"
+                  value={sport.price}
+                  onChange={(e) =>
+                    handleUpdateSport(index, "price", e.target.value)
+                  }
+                  placeholder="18"
+                  min={0}
+                  step={0.01}
+                  disabled={!isEditing}
+                  className="w-24"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="border border-[#c858ba] bg-[#7421931A] text-sm text-[#742193] p-1 rounded-lg"
+                  onClick={() => handleDeleteSport(index)}
+                  disabled={!isEditing}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            type="button"
+            onClick={handleAddSport}
+            className="commonDarkBG text-white hover:bg-[#581770]"
+            disabled={!isEditing}
+          >
+            + Add Sport
+          </Button>
+        </div>
+
+        <div className="col-span-2">
+          <label className="text-sm font-bold text-gray-700">Opening Hours</label>
+          <p className="text-xs text-gray-500 mt-1 mb-3">
+            Enter times in 24-hour format (e.g. 07:00, 22:00). Check &quot;Closed&quot; for off days.
+          </p>
+
+          <div className="space-y-2">
+            {WEEKDAYS.map((day) => (
+              <div key={day} className="flex gap-2 items-center">
+                <span className="w-12 text-sm font-semibold uppercase text-gray-700">
+                  {day}
+                </span>
+                <Input
+                  type="time"
+                  value={openingHours[day].open}
+                  onChange={(e) => updateDay(day, "open", e.target.value)}
+                  disabled={!isEditing || openingHours[day].closed}
+                  className="flex-1"
+                />
+                <span className="text-gray-400">—</span>
+                <Input
+                  type="time"
+                  value={openingHours[day].close}
+                  onChange={(e) => updateDay(day, "close", e.target.value)}
+                  disabled={!isEditing || openingHours[day].closed}
+                  className="flex-1"
+                />
+                <label className="flex items-center gap-1 text-xs text-gray-700 cursor-pointer select-none w-20">
+                  <input
+                    type="checkbox"
+                    checked={openingHours[day].closed}
+                    onChange={(e) => updateDay(day, "closed", e.target.checked)}
+                    disabled={!isEditing}
+                  />
+                  Closed
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div>
           <label htmlFor="address1" className="block mb-1">
             Address
@@ -751,6 +1045,8 @@ const LocationForm = ({
                 return;
               }
               setFormData({ photo: "" });
+              setSports([]);
+              setOpeningHours(buildEmptyHours());
               reset();
               router.push("/location");
             }}
